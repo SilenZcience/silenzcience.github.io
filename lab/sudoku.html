@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·08 — Sudoku — Silas Kraume</title>
+<meta name="description" content="A self-contained Sudoku game with backtracking puzzle generation. Classic 9×9 grid, note mode, and difficulty levels.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<style>
+.sdk-board-wrap{position:relative;width:min(100%,420px);aspect-ratio:1;margin-inline:auto;align-self:flex-start}
+.sdk-board{--bs:420px;width:100%;height:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);border:2px solid var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.sdk-c{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  min-width:0;min-height:0;overflow:hidden;
+  border:.5px solid var(--sdk-border,#3a3a38);cursor:pointer;
+  transition:background .12s;
+}
+.sdk-c .val{pointer-events:none;font-size:calc(var(--bs)/13.5);line-height:1}
+.sdk-c:hover{filter:brightness(1.1)}
+.sdk-c.rb{border-right:2px solid var(--ink)}
+.sdk-c.bb{border-bottom:2px solid var(--ink)}
+.sdk-c.given{color:var(--ink);font-weight:600}
+.sdk-c.user{color:var(--accent);font-weight:400}
+.sdk-c.error{color:#ff5252;text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#ff5252}
+.sdk-c.error .val{color:#ff5252}
+.sdk-c.sel{background:rgba(188,156,98,.22)}
+.sdk-c.hl{background:rgba(188,156,98,.09)}
+.sdk-c.hl-n{background:rgba(188,156,98,.16)}
+.sdk-c .notes{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:100%;height:100%;pointer-events:none;position:absolute;inset:0;padding:1px}
+.sdk-c .notes span{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/40);color:var(--faint);line-height:1}
+.sdk-row{display:flex;justify-content:center;gap:8px;padding:12px 0;flex-wrap:wrap;align-items:stretch}
+.sdk-np{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;width:min(100%,420px);margin-inline:auto;margin-top:clamp(28px,4vh,40px)}
+.sdk-nb{
+  aspect-ratio:1;border:1px solid var(--line-2);background:var(--bg-3);
+  font-family:var(--font-mono);font-size:1.1rem;color:var(--ink);
+  cursor:pointer;display:grid;place-items:center;
+  transition:border-color .15s,background .15s,opacity .15s;padding:0;
+}
+.sdk-nb:hover{border-color:var(--accent)}
+.sdk-nb.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.sdk-nb.depleted{opacity:.25;pointer-events:none}
+.sdk-ctrl{display:flex;justify-content:center;gap:8px;padding:14px 0 0;flex-wrap:wrap}
+.sdk-ctrl .ctrl{min-width:0;white-space:nowrap}
+.sdk-ctrl .ctrl.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.sdk-diff{display:flex;justify-content:center;gap:6px;padding:14px 0 0;flex-wrap:wrap}
+.sdk-diff .ctrl{min-width:0;white-space:nowrap;font-size:.78rem}
+.sdk-diff .ctrl.on{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.sdk-over{position:absolute;inset:0;background:rgba(20,20,19,.92);display:flex;align-items:center;justify-content:center;z-index:5;opacity:0;pointer-events:none;transition:opacity .3s}
+.sdk-over.show{opacity:1;pointer-events:auto}
+.sdk-over-inner{text-align:center}
+.sdk-over h2{font-family:var(--font-display);font-size:1.6rem;color:var(--accent);margin:0 0 6px}
+.sdk-over p{color:var(--faint);font-size:.88rem;margin:0}
+@media(max-width:599px){.sdk-board-wrap{width:min(100%,360px)}.sdk-board{--bs:360px}}
+</style>
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 08 / Sudoku</p>
+  <h1 class="doc-title" data-reveal>Orig. Number Place.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·08</dd></div>
+    <div><dt>Genre</dt><dd>Combinatorial logic</dd></div>
+    <div><dt>Interface</dt><dd>Pointer &middot; Touch</dd></div>
+    <div><dt>Engine</dt><dd>Backtrack &middot; Verify</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage">
+        <div class="sdk-board-wrap">
+          <div class="sdk-board" id="board" role="grid" aria-label="Sudoku board"></div>
+          <div class="sdk-over" id="overlay">
+            <div class="sdk-over-inner">
+              <h2 id="ovMsg">Puzzle solved!</h2>
+              <p id="ovSub"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Every puzzle has exactly one solution.</figcaption>
+  </figure>
+
+  <div class="sdk-np" id="numpad" aria-label="Number input" data-reveal></div>
+
+  <div class="sdk-ctrl" data-reveal>
+    <button class="ctrl" type="button" id="noteBtn">Note</button>
+    <button class="ctrl" type="button" id="eraseBtn">Erase</button>
+    <button class="ctrl" type="button" id="undoBtn">Undo</button>
+    <button class="ctrl" type="button" id="helpBtn" aria-pressed="false">Help</button>
+    <button class="ctrl" type="button" id="newBtn">New Game</button>
+  </div>
+
+  <div class="sdk-diff" id="diffRow" data-reveal>
+    <button class="ctrl" type="button" data-diff="easy">Easy</button>
+    <button class="ctrl on" type="button" data-diff="medium">Medium</button>
+    <button class="ctrl" type="button" data-diff="hard">Hard</button>
+    <button class="ctrl" type="button" data-diff="evil">Expert</button>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Time</span><b id="timerStat">0:00</b></div>
+    <div class="stat"><span class="mono-label">Mistakes</span><b id="mistakesStat">0</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">Solving a puzzle.</h2>
+    <p class="prose-p">A new puzzle starts empty. Each cell tries values 1–9, but only accepts one that violates no row, column, or 3×3 box rule. When a cell runs out of options it backtracks to the previous choice and tries a different path. That simple bruteforce pass alone fills an entire valid grid in no time.</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">Generating a puzzle.</h2>
+    <p class="prose-p">A playable board is carved out of the solved grid by removing numbers one by one given that the puzzle still has only one solution without that number. The difficulty setting simply adjusts how many numbers are left. 'Easy' keeps 45, 'Medium' keeps 35 and 'Hard' keeps 28, whereas 'Expert' tries to leave less than 24.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 08</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="chess.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Chess</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+    <a class="pg pg-next" href="minesweeper.html">
+      <span class="pg-label mono-label">Next unit →</span>
+      <span class="pg-title">Minesweeper</span>
+    </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 08 of <span data-lab-total>08</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+
+  function shuffle(a) {
+    var b = a.slice(), i, j, t;
+    for (i = b.length - 1; i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      t = b[i]; b[i] = b[j]; b[j] = t;
+    }
+    return b;
+  }
+
+  function numArray() { return [1,2,3,4,5,6,7,8,9]; }
+
+  // Is placing n at (r,c) legal against the current board state?
+  function safe(b, r, c, n) {
+    var i, j, br = r - r % 3, bc = c - c % 3;
+    for (i = 0; i < 9; i++) {
+      if (b[r][i] === n || b[i][c] === n) return false;
+    }
+    for (i = 0; i < 3; i++)
+      for (j = 0; j < 3; j++)
+        if (b[br + i][bc + j] === n) return false;
+    return true;
+  }
+
+  var _it;
+  // Backtracking solve that writes a random valid solution into b.
+  function fillGrid(b) {
+    var r, c, i, n, nums;
+    for (r = 0; r < 9; r++)
+      for (c = 0; c < 9; c++)
+        if (b[r][c] === 0) {
+          nums = shuffle(numArray());
+          for (i = 0; i < 9; i++) {
+            n = nums[i];
+            _it++;
+            if (_it > 2e7) throw new Error("timeout");
+            if (safe(b, r, c, n)) {
+              b[r][c] = n;
+              if (fillGrid(b)) return true;
+              b[r][c] = 0;
+            }
+          }
+          return false;
+        }
+    return true;
+  }
+
+  // Backtracking solver that stops once `limit` solutions are found; used to
+  // certify that a generated puzzle has exactly one unique solution.
+  function countSolutions(b, limit) {
+    var count = { v: 0 };
+    solveCount(b, count, limit || 2);
+    return count.v;
+  }
+
+  function solveCount(b, count, limit) {
+    var r, c, i, n;
+    for (r = 0; r < 9; r++)
+      for (c = 0; c < 9; c++)
+        if (b[r][c] === 0) {
+          for (n = 1; n <= 9; n++) {
+            if (safe(b, r, c, n)) {
+              b[r][c] = n;
+              solveCount(b, count, limit);
+              b[r][c] = 0;
+              if (count.v >= limit) return;
+            }
+          }
+          return;
+        }
+    count.v++;
+  }
+
+  // One greedy carve over a freshly filled grid: remove cells one at a time
+  // (random order) keeping each removal only if the puzzle stays uniquely
+  // solvable. Returns the carve's result, or null if filling the grid timed out.
+  // A single pass typically stalls around 56–57 removals; 58+ needs luck. This
+  // is the fundamental unit of work for both the synchronous fallback and the
+  // background worker.
+  function singlePass(holes) {
+    var b, r, c, i, ri, ci, val, prov, removed = 0;
+    _it = 0;
+    b = [[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0]];
+    try { fillGrid(b); } catch (e) { return null; }
+    var sol = b.map(function (row) { return row.slice(); });
+    var puzzle = b.map(function (row) { return row.slice(); });
+    var cells = [];
+    for (r = 0; r < 9; r++)
+      for (c = 0; c < 9; c++) cells.push([r, c]);
+    cells = shuffle(cells);
+    for (i = 0; i < cells.length && removed < holes; i++) {
+      ri = cells[i][0]; ci = cells[i][1];
+      val = puzzle[ri][ci];
+      puzzle[ri][ci] = 0;
+      prov = puzzle.map(function (row) { return row.slice(); });
+      if (countSolutions(prov, 2) === 1) {
+        removed++;
+      } else {
+        puzzle[ri][ci] = val;
+      }
+    }
+    return { puzzle: puzzle, solution: sol, removed: removed };
+  }
+
+  // Carve `holes` random cells out of a filled grid, re-checking uniqueness
+  // after each removal so the puzzle always has exactly one solution.
+  //
+  // Runs up to `cap` single passes and returns the best (most cells removed)
+  // uniquely-solvable result. Low cap on the main thread = fast fallback; the
+  // background worker instead streams every single pass's result via its own loop.
+  function generate(holes, cap) {
+    var best = null, bestRemoved = -1;
+    cap = cap || 5;
+    var attempts = 0, r;
+    while (attempts < cap) {
+      attempts++;
+      r = singlePass(holes);
+      if (!r) continue;
+      if (r.removed >= holes) return r;
+      if (r.removed > bestRemoved) {
+        bestRemoved = r.removed;
+        best = r;
+      }
+    }
+    return best;
+  }
+
+  // Difficulty = how many clues are removed (economy: fewer holes, easier).
+  var DIFF = { easy: 36, medium: 46, hard: 53, evil: 60};
+
+  var G = {
+    board: null, solution: null, given: null, notes: null,
+    sel: -1, noteMode: false, help: false, mistakes: 0, won: false,
+    difficulty: "medium", time: 0, timer: null
+  };
+
+  var boardEl = document.getElementById("board");
+  var numpadEl = document.getElementById("numpad");
+  var noteBtn = document.getElementById("noteBtn");
+  var eraseBtn = document.getElementById("eraseBtn");
+  var undoBtn = document.getElementById("undoBtn");
+  var helpBtn = document.getElementById("helpBtn");
+  var newBtn = document.getElementById("newBtn");
+  var timerStat = document.getElementById("timerStat");
+  var mistakesStat = document.getElementById("mistakesStat");
+  var overlay = document.getElementById("overlay");
+  var ovMsg = document.getElementById("ovMsg");
+  var ovSub = document.getElementById("ovSub");
+  var diffRow = document.getElementById("diffRow");
+
+  var cells = [];
+  (function buildBoard() {
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < 81; i++) {
+      var r = Math.floor(i / 9), c = i % 9;
+      var el = document.createElement("div");
+      el.className = "sdk-c";
+      if (c === 2 || c === 5) el.classList.add("rb");
+      if (r === 2 || r === 5) el.classList.add("bb");
+      el.dataset.idx = String(i);
+      el.setAttribute("role", "gridcell");
+      var valSpan = document.createElement("span");
+      valSpan.className = "val";
+      var notesDiv = document.createElement("div");
+      notesDiv.className = "notes";
+      for (var n = 0; n < 9; n++) {
+        var ns = document.createElement("span");
+        notesDiv.appendChild(ns);
+      }
+      el.appendChild(valSpan);
+      el.appendChild(notesDiv);
+      frag.appendChild(el);
+      cells.push(el);
+    }
+    boardEl.appendChild(frag);
+  })();
+
+  var numBtns = [];
+  (function buildNumpad() {
+    var frag = document.createDocumentFragment();
+    for (var n = 1; n <= 9; n++) {
+      var btn = document.createElement("button");
+      btn.className = "sdk-nb";
+      btn.type = "button";
+      btn.textContent = String(n);
+      btn.dataset.num = String(n);
+      btn.setAttribute("aria-label", "Place " + n);
+      frag.appendChild(btn);
+      numBtns.push(btn);
+    }
+    numpadEl.appendChild(frag);
+  })();
+
+  function render() {
+    if (!G.board) return;
+    var selR = G.sel >= 0 ? Math.floor(G.sel / 9) : -1;
+    var selC = G.sel >= 0 ? G.sel % 9 : -1;
+    var selVal = G.sel >= 0 ? G.board[selR][selC] : 0;
+    var counts = [0,0,0,0,0,0,0,0,0,0];
+
+    for (var i = 0; i < 81; i++) {
+      var r = Math.floor(i / 9), c = i % 9;
+      var el = cells[i];
+      var val = G.board[r][c];
+      var isGiven = G.given[r][c];
+      var cls = "sdk-c";
+      if (c === 2 || c === 5) cls += " rb";
+      if (r === 2 || r === 5) cls += " bb";
+      if (isGiven) cls += " given";
+      else cls += " user";
+      if (i === G.sel) cls += " sel";
+      if (selVal && val === selVal && i !== G.sel) cls += " hl";
+      if (selVal && val === 0 && G.notes[r][c][selVal - 1]) cls += " hl-n";
+      var err = G.help && !isGiven && val !== 0 && val !== G.solution[r][c];
+      if (err) cls += " error";
+      el.className = cls;
+
+      var vSpan = el.children[0];
+      var nDiv = el.children[1];
+      if (val) {
+        vSpan.textContent = String(val);
+        nDiv.style.display = "none";
+        counts[val]++;
+      } else {
+        vSpan.textContent = "";
+        var hasNotes = false;
+        for (var ni = 0; ni < 9; ni++) {
+          nDiv.children[ni].textContent = G.notes[r][c][ni] ? String(ni + 1) : "";
+          if (G.notes[r][c][ni]) hasNotes = true;
+        }
+        nDiv.style.display = hasNotes ? "" : "none";
+      }
+    }
+
+    for (var n = 0; n < 9; n++) {
+      numBtns[n].classList.toggle("depleted", counts[n + 1] >= 9);
+    }
+  }
+
+  function formatTime(s) {
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    return m + ":" + (sec < 10 ? "0" : "") + sec;
+  }
+
+  function updHud() {
+    timerStat.textContent = formatTime(G.time);
+    mistakesStat.textContent = String(G.mistakes);
+  }
+
+  var undoStack = [];
+
+  // Enter a number (or toggle a pencil mark in note mode) on the selected cell.
+  // Real entries are counted as mistakes when they differ from the solution.
+  function placeNumber(num) {
+    if (G.won || G.sel < 0) return;
+    var r = Math.floor(G.sel / 9), c = G.sel % 9;
+    if (G.given[r][c]) return;
+
+    if (G.noteMode) {
+      var old = G.notes[r][c].slice();
+      G.notes[r][c][num - 1] = !G.notes[r][c][num - 1];
+      var oldVal = G.board[r][c];
+      G.board[r][c] = 0;
+      undoStack.push({ i: G.sel, v: oldVal, n: old, nv: G.notes[r][c].slice() });
+      render();
+      return;
+    }
+
+    var oldVal = G.board[r][c];
+    var oldNotes = G.notes[r][c].slice();
+    if (oldVal === num) return;
+    if (!G.started) startTimer();
+    G.board[r][c] = num;
+    G.notes[r][c] = [0,0,0,0,0,0,0,0,0];
+    undoStack.push({ i: G.sel, v: oldVal, n: oldNotes, nv: [0,0,0,0,0,0,0,0,0] });
+
+    if (num !== G.solution[r][c]) {
+      G.mistakes++;
+    }
+
+    render();
+    updHud();
+    checkWin();
+  }
+
+  function eraseCell() {
+    if (G.won || G.sel < 0) return;
+    var r = Math.floor(G.sel / 9), c = G.sel % 9;
+    if (G.given[r][c]) return;
+    var oldVal = G.board[r][c];
+    var oldNotes = G.notes[r][c].slice();
+    if (oldVal === 0 && oldNotes.every(function (v) { return v === 0; })) return;
+    G.board[r][c] = 0;
+    G.notes[r][c] = [0,0,0,0,0,0,0,0,0];
+    undoStack.push({ i: G.sel, v: oldVal, n: oldNotes, nv: [0,0,0,0,0,0,0,0,0] });
+    render();
+  }
+
+  function undo() {
+    if (G.won || !undoStack.length) return;
+    var m = undoStack.pop();
+    var r = Math.floor(m.i / 9), c = m.i % 9;
+    G.board[r][c] = m.v;
+    G.notes[r][c] = m.n;
+    render();
+  }
+
+  // Stop the clock on a full correct board.
+  function checkWin() {
+    for (var r = 0; r < 9; r++)
+      for (var c = 0; c < 9; c++)
+        if (G.board[r][c] !== G.solution[r][c]) return;
+    G.won = true;
+    clearInterval(G.timer);
+    ovMsg.textContent = "Puzzle solved!";
+    ovSub.textContent = "Time: " + formatTime(G.time) + " — Mistakes: " + G.mistakes;
+    overlay.classList.add("show");
+  }
+
+  function toggleNote() {
+    G.noteMode = !G.noteMode;
+    noteBtn.classList.toggle("on", G.noteMode);
+  }
+
+  // Help mode: mark any mistakes red so the player can fix them.
+  function setHelp(on) {
+    G.help = on;
+    helpBtn.classList.toggle("on", on);
+    helpBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    render();
+  }
+
+  // Counts up 0:00 format once the player makes their first real entry.
+  function startTimer() {
+    if (G.started) return;
+    G.started = true;
+    clearInterval(G.timer);
+    G.time = 0;
+    updHud();
+    G.timer = setInterval(function () {
+      if (!G.won) { G.time++; updHud(); }
+    }, 1000);
+  }
+
+  function newGame(diff) {
+    G.difficulty = diff || G.difficulty;
+    G.won = false;
+    G.sel = -1;
+    G.noteMode = false;
+    G.mistakes = 0;
+    G.started = false;
+    G.time = 0;
+    clearInterval(G.timer);
+    G.notes = [];
+    for (var r = 0; r < 9; r++) {
+      G.notes[r] = [];
+      for (var c = 0; c < 9; c++) G.notes[r][c] = [0,0,0,0,0,0,0,0,0];
+    }
+    undoStack = [];
+    overlay.classList.remove("show");
+    noteBtn.classList.remove("on");
+    setHelp(false);
+
+    var result = takePuzzle(G.difficulty);
+    G.solution = result.solution;
+    G.board = result.puzzle.map(function (row) { return row.slice(); });
+    G.given = G.puzzle = result.puzzle.map(function (row) {
+      return row.map(function (v) { return v !== 0; });
+    });
+
+    diffRow.querySelectorAll("[data-diff]").forEach(function (b) {
+      b.classList.toggle("on", b.dataset.diff === G.difficulty);
+    });
+
+    render();
+    updHud();
+  }
+
+  boardEl.addEventListener("pointerdown", function (e) {
+    var tgt = e.target.closest ? e.target.closest(".sdk-c") : null;
+    if (!tgt) { G.sel = -1; render(); return; }
+    var idx = parseInt(tgt.dataset.idx, 10);
+    if (isNaN(idx)) return;
+    G.sel = idx;
+    render();
+  });
+
+  numpadEl.addEventListener("pointerdown", function (e) {
+    var btn = e.target.closest ? e.target.closest("[data-num]") : null;
+    if (!btn) return;
+    var num = parseInt(btn.dataset.num, 10);
+    if (num >= 1 && num <= 9) placeNumber(num);
+  });
+
+  noteBtn.addEventListener("click", toggleNote);
+  eraseBtn.addEventListener("click", eraseCell);
+  undoBtn.addEventListener("click", undo);
+  newBtn.addEventListener("click", function () { newGame(); });
+
+  diffRow.addEventListener("pointerdown", function (e) {
+    var btn = e.target.closest ? e.target.closest("[data-diff]") : null;
+    if (!btn) return;
+    newGame(btn.dataset.diff);
+  });
+
+  helpBtn.addEventListener("click", function () {
+    setHelp(!G.help);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var k = e.key;
+    if (k >= "1" && k <= "9") { placeNumber(parseInt(k, 10)); return; }
+    if (k === "0" || k === "Backspace" || k === "Delete") { eraseCell(); return; }
+    if (k === "n" || k === "N") { toggleNote(); return; }
+    if (k === "z" && (e.ctrlKey || e.metaKey)) { undo(); e.preventDefault(); return; }
+    if (k === "ArrowUp" && G.sel >= 9) { G.sel -= 9; render(); e.preventDefault(); }
+    else if (k === "ArrowDown" && G.sel < 72) { G.sel += 9; render(); e.preventDefault(); }
+    else if (k === "ArrowLeft" && G.sel > 0) { G.sel--; render(); e.preventDefault(); }
+    else if (k === "ArrowRight" && G.sel < 80) { G.sel++; render(); e.preventDefault(); }
+  });
+
+  // ---------- background evil-puzzle pool ----------
+  // Generating genuinely hard evil puzzles is slow and unpredictable — a single
+  // carve pass usually stalls at 56–57, and 58+ only appears with luck. So a
+  // pool of Web Workers grinds continuously on a separate thread and *streams*
+  // every result that is harder than the user's floor (removed ≥ EVIL_FLOOR, i.e.
+  // 23 hints or fewer). Each pass keeps removing cells until it physically can't
+  // any more, so it reports 58s, 59s, 60s and, on a lucky grid, even fewer hints.
+  // The cache fills with the hardest found, and "new game" serves the hardest
+  // available instantly — without ever blocking the UI (workers are off-thread).
+  var EVIL_AS_MANY = 81;           // carve until nothing more can be removed
+  var EVIL_FLOOR = 58;             // only cache results harder than 24 hints
+  var EVIL_KEEP = 5;               // best puzzles to hold, hardest first
+  var POOL = 3;
+
+  var evilCache = [];              // [{puzzle, solution, removed}] sorted desc
+
+  function workerSource() {
+    // Ship the existing solver functions verbatim (single source of truth) plus
+    // a self-running loop: keep carving single passes and post any result that
+    // clears the difficulty floor, so the main thread gets a steady stream. The
+    // main thread tells this worker to stop once the cache is full (see
+    // insertEvil), terminating itself so it stops burning CPU.
+    return "var _it, running=true;\n"
+      + shuffle.toString() + "\n"
+      + numArray.toString() + "\n"
+      + safe.toString() + "\n"
+      + fillGrid.toString() + "\n"
+      + countSolutions.toString() + "\n"
+      + solveCount.toString() + "\n"
+      + singlePass.toString() + "\n"
+      + "var target, floor;\n"
+      + "self.onmessage=function(e){"
+      + "  if(e.data==='stop'){ running=false; self.close(); return; }"
+      + "  target=e.data.holes; floor=e.data.floor; grind();"
+      + "};\n"
+      + "function grind(){"
+      + "  if(!running) return;"
+      + "  var r=singlePass(target);"
+      + "  if(r && r.removed>=floor) self.postMessage({puzzle:r.puzzle, solution:r.solution, removed:r.removed});"
+      + "  setTimeout(grind, 0);"
+      + "}\n";
+  }
+
+  // Stop every running pool worker so they no longer burn CPU in the background.
+  function stopPool() {
+    if (!window.__sdkPool) return;
+    console.log("[Sudoku] Stopping evil-puzzle pool (" + window.__sdkPool.length + " workers) — cache of " + EVIL_KEEP + " hard puzzles is full.");
+    window.__sdkPool.forEach(function (w) {
+      try { w.postMessage("stop"); } catch (e) {}
+    });
+    window.__sdkPool = null;
+  }
+
+  // Insert a streamed puzzle into the cache, keeping only the hardest EVIL_KEEP.
+  // Once the cache is full, no more puzzles are needed, so shut the pool down
+  // instead of grinding on forever for marginally harder boards.
+  function insertEvil(res) {
+    if (!evilCache || window.__sdkPool === null) return;
+    var i = 0;
+    while (i < evilCache.length && evilCache[i].removed >= res.removed) i++;
+    evilCache.splice(i, 0, res);
+    if (evilCache.length > EVIL_KEEP) evilCache.length = EVIL_KEEP;
+    console.log("[Sudoku] Evicting " + res.removed + " cells (" + (81 - res.removed) + " hints) — evil cache now at " + evilCache.length + "/" + EVIL_KEEP + ".");
+    if (evilCache.length >= EVIL_KEEP) stopPool();
+  }
+
+  function startPool() {
+    if (!window.Worker || window.__sdkPool) return;
+    window.__sdkPool = [];
+    var src, i;
+    try { src = workerSource(); } catch (e) { console.warn("[Sudoku] Building worker source failed: " + e); return; }
+    for (i = 0; i < POOL; i++) {
+      if (!window.Worker) return;
+      var w;
+      try { w = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" }))); }
+      catch (e) { console.warn("[Sudoku] Creating worker failed: " + e); return; }
+      w.onmessage = function (ev) { insertEvil(ev.data); };
+      w.postMessage({ holes: EVIL_AS_MANY, floor: EVIL_FLOOR });
+      window.__sdkPool.push(w);
+    }
+    console.log("[Sudoku] Started evil-puzzle pool with " + POOL + " workers (cache cap " + EVIL_KEEP + ", floor " + EVIL_FLOOR + " hints).");
+  }
+
+  // Serve the hardest cached evil puzzle instantly. If the pool has not yet
+  // produced anything (early game), fall back to one fast synchronous carve
+  // targeting 57 removals (24 hints): that stop point is quick to reach, not the
+  // slow tail past 58+ that the worker keeps chasing in the background.
+  function takePuzzle(diff) {
+    var d = diff || G.difficulty;
+    var result;
+    if (d === "evil") {
+      if (evilCache.length) {
+        var served = evilCache.shift();
+        console.log("[Sudoku] Serving cached evil puzzle (" + served.removed + " cells removed) — " + evilCache.length + "/" + EVIL_KEEP + " left in cache.");
+        if (evilCache.length === 1) {
+          // Cache is about to run out mid-session; restart the pool so the next
+          // evil game still has puzzles ready without blocking the UI.
+          console.log("[Sudoku] Evil cache nearly empty — restarting pool to refill.");
+          setTimeout(startPool, 0);
+        }
+        return served;
+      }
+      console.log("[Sudoku] No cached evil puzzle — generating one synchronously.");
+      result = singlePass(57);
+      if (result) return result;
+      return generate(57, 5);
+    }
+    return generate(DIFF[d]);
+  }
+
+  // Start the pool on idle so it never competes with the first painted frame.
+  function idle(fn) {
+    if ("requestIdleCallback" in window) requestIdleCallback(fn, { timeout: 2500 });
+    else setTimeout(fn, 100);
+  }
+  idle(startPool);
+
+  newGame("medium");
+
+})();
+</script>
+</body>
+</html>

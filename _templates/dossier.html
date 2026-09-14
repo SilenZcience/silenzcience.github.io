@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+  ============ DOSSIER TEMPLATE ============
+  How to add a new project file:
+    1. Copy this file to  dossiers/<slug>.html  and fill every {{PLACEHOLDER}}.
+    2. index.html — add an <li> row to the .files list, renumber fr-no.
+    3. Neighbors — update the pager prev/next links of the adjacent dossiers.
+    4. Counts — "Project NN of MM" in every dossier's mini-foot (incl. this one).
+  Sections marked with [EDIT] are per-project prose; everything else is chrome.
+  ==========================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROJECT {{NO}} — {{NAME}} — Silas Kraume</title>
+<meta name="description" content="{{ONE_LINE_SUMMARY}}. {{KEYWORD_TAGS}}.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <!-- [EDIT] crumbs: Archive / Project {{NO}} / Language · Domain -->
+  <p class="crumbs mono-label" data-decode>Archive / Project {{NO}} / {{LANG}} · {{DOMAIN}}</p>
+  <h1 class="doc-title" data-reveal>{{DISPLAY_TITLE}}</h1>
+
+  <!-- [EDIT] meta table: 5 rows, keep dt short -->
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Project</dt><dd>{{NAME}}</dd></div>
+    <div><dt>Language</dt><dd>{{LANG}}</dd></div>
+    <div><dt>License</dt><dd>{{LICENSE}}</dd></div>
+    <div><dt>Release</dt><dd class="num">{{VERSION}} — {{DATE}}</dd></div>
+    <div><dt>Status</dt><dd>{{STATUS}}</dd></div>
+  </dl>
+
+  <div class="prose">
+
+    <!-- [EDIT] lede: 1–2 sentences, what it is + the interesting constraint -->
+    <p class="lede" data-reveal>{{LEDE_PARAGRAPH}}</p>
+
+    <!-- Observation blocks: repeat as needed (001, 002, ...) -->
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 001</span>
+      <h2 class="obs-h">{{OBSERVATION_HEADLINE}}</h2>
+      <p class="prose-p">{{OBSERVATION_BODY}}</p>
+    </section>
+
+    <!-- Optional figure. Reuse .term for terminal output; see life.html
+         for the .stage-wrap/.stage canvas pattern if you need a live demo. -->
+    <figure class="fig" data-reveal>
+      <pre class="term"><u>{{TERMINAL_OR_ASCII_FIGURE}}</u></pre>
+      <figcaption class="fig-cap">Fig. 01 — {{FIGURE_CAPTION}}</figcaption>
+    </figure>
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 002</span>
+      <h2 class="obs-h">{{OBSERVATION_HEADLINE}}</h2>
+      <p class="prose-p">{{OBSERVATION_BODY}}</p>
+    </section>
+
+    <!-- Optional pull quote -->
+    <blockquote class="pull" data-reveal>
+      “{{QUOTE}}”
+      <cite>{{QUOTE_SOURCE}}</cite>
+    </blockquote>
+
+    <p class="endfile mono-label" data-reveal>■ End of Project File {{NO}}</p>
+
+    <!-- [EDIT] pager: link real neighbors; middle slot stays as-is -->
+    <nav class="pager" aria-label="Project navigation" data-reveal>
+      <a class="pg" href="{{PREV_SLUG}}.html">
+        <span class="pg-label mono-label">← Previous project</span>
+        <span class="pg-title">{{PREV_TITLE}}</span>
+      </a>
+      <a class="pg" href="../index.html#work">
+        <span class="pg-label mono-label">↑ The index</span>
+        <span class="pg-title">Projects on record</span>
+      </a>
+      <a class="pg pg-next" href="{{NEXT_SLUG}}.html">
+        <span class="pg-label mono-label">Next project →</span>
+        <span class="pg-title">{{NEXT_TITLE}}</span>
+      </a>
+    </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Project {{NO}} of <span data-dossier-total>{{TOTAL}}</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+</body>
+</html>

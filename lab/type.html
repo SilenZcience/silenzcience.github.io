@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·05 — Typing Velocity — Silas Kraume</title>
+<meta name="description" content="A minimal typing speed test in vanilla JavaScript. Thirty words, live WPM, no excuses.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<style>
+.stream{
+  position:relative;
+  font-family:var(--font-mono);font-size:clamp(1rem,2.6vw,1.35rem);
+  line-height:2.15;letter-spacing:.02em;color:var(--faint);
+  height:6.45em;overflow:hidden;scroll-behavior:smooth;
+}
+.stream span{white-space:pre-wrap}
+.t-cur{color:var(--ink);border-bottom:2px solid var(--accent)}
+.t-ok{color:var(--soft)}
+.t-bad{color:var(--accent);background:var(--accent-soft)}
+</style>
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 05 / Typing Velocity</p>
+  <h1 class="doc-title" data-reveal>Type it like you mean it.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·05</dd></div>
+    <div><dt>Genre</dt><dd>Skill measurement</dd></div>
+    <div><dt>Interface</dt><dd>Keyboard</dd></div>
+    <div><dt>Engine</dt><dd>Vanilla JS</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage" style="display:block;padding-inline:clamp(20px,4vw,40px)">
+        <p class="stream" id="stream"></p>
+        <div class="overlay hide" id="overlay" style="padding:0">
+          <div>
+            <p class="overlay-msg" id="ovMsg">— WPM.</p>
+            <span class="overlay-sub" id="ovSub"></span>
+          </div>
+        </div>
+      </div>
+      <input id="capture" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Typing input"
+             style="position:absolute;opacity:0;pointer-events:none;left:-9999px">
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Just start typing. The clock runs on your first keystroke.</figcaption>
+  </figure>
+
+  <div class="ctrl-row" data-reveal>
+    <button class="ctrl" type="button" id="newBtn">↻ New set</button>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Speed</span><b id="wpmStat">—</b></div>
+    <div class="stat"><span class="mono-label">Accuracy</span><b id="accStat">—</b></div>
+    <div class="stat"><span class="mono-label">Time</span><b id="timeStat">0s</b></div>
+    <div class="stat"><span class="mono-label">Progress</span><b id="progStat">0%</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">No backspace. No mercy.</h2>
+    <p class="prose-p">Errors stay on the record exactly where they happened. They are highlighted, counted and unfixable. Accuracy measured this way means something.<br>My AI told me: "Accuracy with a delete key is just slow perfectionism".</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">WPM the honest way.</h2>
+    <p class="prose-p">Gross characters divided by five, per elapsed minute is the standard measure since the era of manual typewriters. The timer starts on your first keystroke and stops at the last character.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 05</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="sand.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Falling Sand</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+      <a class="pg pg-next" href="sequencer.html">
+        <span class="pg-label mono-label">Next unit →</span>
+        <span class="pg-title">Drum Sequencer</span>
+      </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 05 of <span data-lab-total>08</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+var WORDS = [
+
+    // Programming
+    "syntax","parser","token","lambda","function","variable","object","class","method",
+    "interface","recursion","loop","array","module","import","export","const","yield",
+    "await","async","promise","closure","struct","enum","macro","literal","operator",
+    "pointer","runtime","binary","compile",
+
+    // Algorithms & Data Structures
+    "algorithm","search","sort","tree","graph","node","edge","vertex","trie","queue",
+    "stack","heap","list","deque","bucket","record","set","map","hash","vector","matrix",
+    "index","tuple","branch","greedy","dynamic","flow","cut","path","cycle","proof",
+
+    // Systems
+    "kernel","process","thread","daemon","buffer","cache","memory","register","driver",
+    "device","kernel","signal","interrupt","syscall","mutex","atomic","deadlock","lock",
+    "page","inode","mount","volume","shell","terminal","console","cursor",
+
+    // Architecture
+    "cpu","gpu","core","bus","clock","cycle","bit","byte","word","opcode","assembly",
+    "logic","microcode","pipeline","firmware","machine","binary",
+
+    // Networking
+    "network","packet","socket","router","switch","gateway","domain","subnet","route",
+    "tcp","udp","http","https","ssh","dns","dhcp","icmp","tls","port","proxy","tunnel",
+    "bridge","stream","header","payload","latency","bandwidth","handshake","client","server",
+
+    // Web
+    "html","css","javascript","browser","frontend","backend","cookie","session","route",
+    "api","rest","json","xml","webhook","origin","render","dom","element","script",
+    "style","request","response",
+
+    // Databases
+    "database","table","column","row","query","schema","index","join","select","insert",
+    "update","delete","transaction","commit","rollback","replica","shard","backup",
+    "restore","cache","view","trigger","ledger","audit","archive",
+
+    // Security & Crypto
+    "cipher","encrypt","decrypt","secret","key","hash","salt","nonce","sign","cert",
+    "auth","access","secure","attack","exploit","malware","trojan","phishing","spoof",
+    "inject","threat","proxy","sandbox","redact",
+
+    // Distributed Systems & Cloud
+    "cluster","worker","leader","follower","consensus","quorum","replica","heartbeat",
+    "failover","scaling","service","cloud","storage","compute","deploy","docker",
+    "container","serverless","broker","message","event","queue","region","zone",
+
+    // Dev Tools
+    "git","repo","branch","commit","merge","rebase","diff","patch","build","release",
+    "version","debug","test","lint","format","trace","log","metric","monitor","deploy",
+    "pipeline","config","staging","production",
+
+    // AI & Machine Learning
+    "model","train","dataset","feature","label","tensor","gradient","neural","layer",
+    "neuron","loss","epoch","batch","learn","classify","cluster","transformer","attention",
+    "tokenizer","weight","bias","predict","sample",
+
+    // Theory
+    "automaton","grammar","language","symbol","state","transition","finite","regular",
+    "compute","turing","machine","decidable","halting","reduction","theorem","lemma",
+    "invariant","complexity","heuristic",
+
+    // Math & Physics
+    "vector","matrix","scalar","graph","probability","entropy","signal","noise","frequency",
+    "spectrum","waveform","gravity","inertia","momentum","quantum","photon","neutron"
+];
+
+  var COUNT = 30;
+  var streamEl = document.getElementById("stream");
+  var capture = document.getElementById("capture");
+  var overlay = document.getElementById("overlay");
+  var ovMsg = document.getElementById("ovMsg");
+  var ovSub = document.getElementById("ovSub");
+  var newBtn = document.getElementById("newBtn");
+  var wpmStat = document.getElementById("wpmStat");
+  var accStat = document.getElementById("accStat");
+  var timeStat = document.getElementById("timeStat");
+  var progStat = document.getElementById("progStat");
+
+  var target = "", spans = [], pos = 0, startedAt = 0, finished = true;
+  var correct = 0, wrong = 0, ticker = null;
+
+  // Randomly shuffle the word pool (Fisher–Yates take of COUNT).
+  function pickWords() {
+    var pool = WORDS.slice(), out = [];
+    for (var i = 0; i < COUNT; i++) {
+      var j = i + Math.floor(Math.random() * (pool.length - i));
+      var t = pool[j]; pool[j] = pool[i]; pool[i] = t;
+      out.push(t);
+    }
+    return out.join(" ");
+  }
+
+  function render() {
+    streamEl.innerHTML = "";
+    spans = [];
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < target.length; i++) {
+      var s = document.createElement("span");
+      s.textContent = target[i];
+      frag.appendChild(s);
+      spans.push(s);
+    }
+    streamEl.appendChild(frag);
+    streamEl.scrollTop = 0;
+    mark();
+  }
+
+  function mark() {
+    for (var i = 0; i < spans.length; i++) {
+      spans[i].className = i < pos ? (spans[i].dataset.ok ? "t-ok" : "t-bad") : "";
+    }
+    var cur = spans[Math.min(pos, spans.length - 1)];
+    if (pos < spans.length) cur.className = "t-cur";
+    var done = Math.min(pos, spans.length);
+    progStat.textContent = Math.round(done / spans.length * 100) + "%";
+    var lineH = parseFloat(getComputedStyle(streamEl).lineHeight) || cur.offsetHeight || 1;
+    var box = streamEl.clientHeight;
+    streamEl.scrollTop = Math.max(0, cur.offsetTop - (box - lineH) / 2);
+  }
+
+  function elapsed() { return (Date.now() - startedAt) / 1000; }
+
+  // WPM = (correct chars / 5) per elapsed minute; standard "gross" measure.
+  function liveStats() {
+    if (!startedAt || finished) return;
+    var sec = Math.max(1, Math.round(elapsed()));
+    var mins = elapsed() / 60;
+    wpmStat.textContent = String(Math.round((correct / 5) / mins));
+    accStat.textContent = Math.round(correct / Math.max(1, correct + wrong) * 100) + "%";
+    timeStat.textContent = sec + "s";
+  }
+
+  function finish() {
+    finished = true;
+    clearInterval(ticker);
+    var sec = Math.round(elapsed());
+    var wpm = Math.round((correct / 5) / (sec / 60));
+    var acc = Math.round(correct / Math.max(1, correct + wrong) * 100);
+    ovMsg.textContent = wpm + " WPM.";
+    ovSub.textContent = acc + "% accuracy · " + sec + "s — new set to go again";
+    wpmStat.textContent = String(wpm);
+    accStat.textContent = acc + "%";
+    timeStat.textContent = sec + "s";
+    overlay.classList.remove("hide");
+  }
+
+  function reset(newText) {
+    if (newText || !target) target = pickWords();
+    pos = 0; correct = 0; wrong = 0; startedAt = 0; finished = false;
+    render();
+    overlay.classList.add("hide");
+    wpmStat.textContent = "—"; accStat.textContent = "—"; timeStat.textContent = "0s";
+    clearInterval(ticker);
+    if (!matchMedia("(pointer: coarse)").matches) capture.focus();
+  }
+
+  // Hidden input swallows keystrokes so the page can't be scrolled by them.
+  capture.addEventListener("input", function () {
+    var ch = capture.value;
+    capture.value = "";
+    if (!ch || finished) return;
+    for (var k = 0; k < ch.length; k++) step(ch[k]);
+  });
+
+  // Clock starts on first real keystroke; errors stay on record (no backspace).
+  function step(ch) {
+    if (!startedAt) {
+      startedAt = Date.now();
+      ticker = setInterval(liveStats, 500);
+    }
+    if (pos >= target.length) return;
+    var expect = target[pos];
+    spans[pos].dataset.ok = ch === expect ? "1" : "";
+    if (ch === expect) correct++; else wrong++;
+    pos++;
+    if (pos >= target.length) { mark(); finish(); return; }
+    mark();
+    liveStats();
+  }
+
+  addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.tagName === "BUTTON") return;
+    if (e.key === "Enter" && finished) { reset(true); return; }
+    if (e.key.length === 1 || e.key === "Backspace") {
+      e.preventDefault();
+      if (e.key === "Backspace") return;
+      if (finished) return;
+      step(e.key);
+    }
+  });
+  document.querySelector(".stage").addEventListener("click", function () { capture.focus(); });
+
+  newBtn.addEventListener("click", function () { reset(true); });
+
+  reset(true);
+})();
+</script>
+</body>
+</html>

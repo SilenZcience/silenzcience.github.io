@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·06 — Drum Sequencer — Silas Kraume</title>
+<meta name="description" content="A 32-step drum sequencer in pure WebAudio. Six synthesized voices, zero samples, endless groove.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<style>
+.seq{
+  display:grid;gap:3px;width:100%;max-width:800px;margin-inline:auto;
+  grid-template-columns:minmax(58px,auto) repeat(32,1fr);
+}
+.seq-label{
+  display:flex;align-items:center;justify-content:flex-end;
+  padding-right:10px;white-space:nowrap;
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);
+}
+.sc{
+  aspect-ratio:1;border:1px solid var(--line-2);background:var(--bg-3);
+  cursor:pointer;padding:0;min-width:0;
+  transition:background var(--t),border-color var(--t);
+}
+.sc:hover{background:var(--bg-2)}
+.sc.on{background:var(--accent);border-color:var(--accent)}
+.sc.ph{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.sc.on.ph{filter:brightness(1.4)}
+@media (max-width:599px){
+  .stage-wrap{overflow-x:auto;overscroll-behavior-x:contain}
+  .seq{grid-template-columns:minmax(40px,auto) repeat(32,minmax(11px,1fr));gap:2px;width:max-content;min-width:100%}
+  .seq-label{font-size:8px;padding-right:5px}
+}
+</style>
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 06 / Drum Sequencer</p>
+  <h1 class="doc-title" data-reveal>The beat conveyor.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·06</dd></div>
+    <div><dt>Genre</dt><dd>Sequencer</dd></div>
+    <div><dt>Interface</dt><dd>Pointer · Touch</dd></div>
+    <div><dt>Engine</dt><dd>WebAudio · synth</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage" style="display:block;padding-inline:clamp(14px,2.5vw,26px)">
+        <div class="seq" id="grid"></div>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Thirty-two steps, six voices.</figcaption>
+  </figure>
+
+  <div class="ctrl-row" data-reveal>
+    <button class="ctrl" type="button" id="toggleBtn">▶ Play</button>
+    <button class="ctrl" type="button" id="randBtn">⚄ Randomize</button>
+    <button class="ctrl" type="button" id="clearBtn">↺ Clear</button>
+  </div>
+
+  <div class="ctrl-row" data-reveal style="--rd:60ms;margin-top:10px">
+    <label class="dim-label" for="bpm">Tempo
+      <input type="range" id="bpm" min="60" max="180" value="112"><b id="bpmVal" style="color:var(--ink)">112</b>
+    </label>
+    <label class="dim-label" for="vol">Volume
+      <input type="range" id="vol" min="0" max="100" value="80"><b id="volVal" style="color:var(--ink)">80</b>
+    </label>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Tempo</span><b id="tempoStat">112 BPM</b></div>
+    <div class="stat"><span class="mono-label">Step</span><b id="stepStat">—/32</b></div>
+    <div class="stat"><span class="mono-label">Density</span><b id="densStat">0%</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">How it works.</h2>
+    <p class="prose-p">The grid is a 6×32 list of on/off switches. A small timing loop runs constantly and, roughly a tenth of a second before each step is due, tells the audio to play whatever cells are switched on. Playing ahead like that keeps the beat steady even if the webpage goes slow.</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">Voices, hand-built.</h2>
+    <p class="prose-p">Every instrument is synthesized from scratch. The kick is a sine wave that drops pitch fast. The snare layers white noise on top of a triangle tone. The tom is a sine that slides down, lower and slower than the kick. Hats are sharp bursts of filtered noise, and the clap fires three quick noise spikes. Six sounds from one noise buffer, no audio files needed.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 06</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="type.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Typing Velocity</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+      <a class="pg pg-next" href="chess.html">
+        <span class="pg-label mono-label">Next unit →</span>
+        <span class="pg-title">Chess</span>
+      </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 06 of <span data-lab-total>08</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+  var STEPS = 32;
+  var VOICES = ["Kick", "Snare", "Clap", "Hat ·C", "Hat ·O", "Tom"];
+  var gridEl = document.getElementById("grid");
+  var toggleBtn = document.getElementById("toggleBtn");
+  var randBtn = document.getElementById("randBtn");
+  var clearBtn = document.getElementById("clearBtn");
+  var bpmEl = document.getElementById("bpm");
+  var bpmVal = document.getElementById("bpmVal");
+  var volEl = document.getElementById("vol");
+  var volVal = document.getElementById("volVal");
+  var tempoStat = document.getElementById("tempoStat");
+  var stepStat = document.getElementById("stepStat");
+  var densStat = document.getElementById("densStat");
+
+  var pattern = [];
+  for (var r = 0; r < VOICES.length; r++) {
+    pattern.push(new Array(STEPS).fill(false));
+  }
+
+  var ctx = null, master = null, noiseBuf = null;
+  var playing = false, currentStep = 0, nextTime = 0, timer = null;
+  var bpm = 112, vol = 80;
+  var drawQueue = [], prevCol = -1;
+
+  // Sixteenth-note duration for 4/4 at the current BPM.
+  function stepDur() { return 60 / bpm / 4; }
+
+  // Lazily create the AudioContext (needs a user gesture to start) plus a
+  // shared noise buffer and a compressor on the master bus.
+  function ensureAudio() {
+    if (!ctx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      var comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -12;
+      comp.ratio.value = 6;
+      master = ctx.createGain();
+      master.gain.value = vol / 100 * .9;
+      master.connect(comp);
+      comp.connect(ctx.destination);
+      noiseBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 1.2), ctx.sampleRate);
+      var d = noiseBuf.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === "suspended") ctx.resume();
+  }
+
+  // Noise-burst voice: filtered noise into a gain envelope (hats, snare, clap).
+  function noiseHit(t, type, freq, q, peak, dur, pulses) {
+    var src = ctx.createBufferSource();
+    src.buffer = noiseBuf;
+    var f = ctx.createBiquadFilter();
+    f.type = type;
+    f.frequency.value = freq;
+    if (q) f.Q.value = q;
+    var g = ctx.createGain();
+    if (pulses && pulses.length) {
+      for (var k = 0; k < pulses.length; k++) {
+        g.gain.setValueAtTime(peak, t + pulses[k]);
+        g.gain.exponentialRampToValueAtTime(.12, t + pulses[k] + .009);
+      }
+      g.gain.setValueAtTime(peak, t + pulses[pulses.length - 1] + .01);
+      g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    } else {
+      g.gain.setValueAtTime(peak, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + dur);
+    }
+    src.connect(f);
+    f.connect(g);
+    g.connect(master);
+    src.start(t);
+    src.stop(t + dur + .03);
+  }
+
+  // Tonal voice: oscillator with optional pitch drop (kick, tom, snare body).
+  function tone(t, type, f0, f1, pDur, peak, gDur) {
+    var o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.setValueAtTime(f0, t);
+    if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + pDur);
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(peak, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + gDur);
+    o.connect(g);
+    g.connect(master);
+    o.start(t);
+    o.stop(t + gDur + .03);
+  }
+
+  function playVoice(row, t) {
+    if (row === 0) tone(t, "sine", 165, 48, .13, 1, .34);
+    else if (row === 1) {
+      noiseHit(t, "highpass", 1400, 0, .65, .17);
+      tone(t, "triangle", 196, 196, 0, .45, .11);
+    } else if (row === 2) noiseHit(t, "bandpass", 1150, 1.4, .9, .22, [0, .013, .027]);
+    else if (row === 3) noiseHit(t, "highpass", 7500, 0, .5, .055);
+    else if (row === 4) noiseHit(t, "highpass", 6600, 0, .42, .33);
+    else if (row === 5) tone(t, "sine", 150, 88, .16, .9, .28);
+  }
+
+  function scheduleStep(s, t) {
+    for (var r = 0; r < VOICES.length; r++) {
+      if (pattern[r][s]) playVoice(r, t);
+    }
+  }
+
+  // Lookahead scheduler: schedule notes ~120 ms ahead against the audio clock
+  // so playback stays tight even if the JS thread stalls. 25 ms polling tick.
+  function scheduler() {
+    while (nextTime < ctx.currentTime + .12) {
+      scheduleStep(currentStep, nextTime);
+      drawQueue.push({ step: currentStep, time: nextTime });
+      nextTime += stepDur();
+      currentStep = (currentStep + 1) % STEPS;
+    }
+  }
+
+  function setPlayhead(s) {
+    if (prevCol >= 0) {
+      var old = gridEl.querySelectorAll('[data-c="' + prevCol + '"]');
+      for (var i = 0; i < old.length; i++) old[i].classList.remove("ph");
+    }
+    var cur = gridEl.querySelectorAll('[data-c="' + s + '"]');
+    for (var j = 0; j < cur.length; j++) cur[j].classList.add("ph");
+    prevCol = s;
+    stepStat.textContent = (s + 1) + "/32";
+  }
+
+  function clearPlayhead() {
+    if (prevCol >= 0) {
+      var old = gridEl.querySelectorAll('[data-c="' + prevCol + '"]');
+      for (var i = 0; i < old.length; i++) old[i].classList.remove("ph");
+    }
+    stepStat.textContent = "—/32";
+  }
+
+  // rAF loop: move the playhead highlight as scheduled notes come due.
+  function frame() {
+    if (!playing) return;
+    var ct = ctx.currentTime;
+    while (drawQueue.length && drawQueue[0].time <= ct) {
+      setPlayhead(drawQueue.shift().step);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function start() {
+    ensureAudio();
+    playing = true;
+    nextTime = Math.max(nextTime, ctx.currentTime + .08);
+    timer = setInterval(scheduler, 25);
+    requestAnimationFrame(frame);
+    toggleBtn.textContent = "❚❚ Pause";
+    toggleBtn.classList.add("on");
+  }
+  function pause() {
+    playing = false;
+    clearInterval(timer);
+    drawQueue.length = 0;
+    clearPlayhead();
+    toggleBtn.textContent = "▶ Play";
+    toggleBtn.classList.remove("on");
+  }
+  toggleBtn.addEventListener("click", function () {
+    if (playing) pause(); else start();
+  });
+
+  function buildGrid() {
+    gridEl.innerHTML = "";
+    var frag = document.createDocumentFragment();
+    for (var r = 0; r < VOICES.length; r++) {
+      var lab = document.createElement("span");
+      lab.className = "seq-label";
+      lab.textContent = VOICES[r];
+      frag.appendChild(lab);
+      for (var c = 0; c < STEPS; c++) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "sc" + (pattern[r][c] ? " on" : "");
+        b.dataset.r = String(r);
+        b.dataset.c = String(c);
+        b.setAttribute("aria-label", VOICES[r] + " step " + (c + 1));
+        frag.appendChild(b);
+      }
+    }
+    gridEl.appendChild(frag);
+  }
+
+  function density() {
+    var hits = 0;
+    for (var r = 0; r < VOICES.length; r++) {
+      for (var c = 0; c < STEPS; c++) if (pattern[r][c]) hits++;
+    }
+    densStat.textContent = Math.round(hits / (VOICES.length * STEPS) * 100) + "%";
+  }
+
+  gridEl.addEventListener("click", function (e) {
+    var t = e.target.closest(".sc");
+    if (!t) return;
+    var r = Number(t.dataset.r), c = Number(t.dataset.c);
+    pattern[r][c] = !pattern[r][c];
+    t.classList.toggle("on", pattern[r][c]);
+    if (pattern[r][c]) {
+      ensureAudio();
+      playVoice(r, ctx.currentTime + .001);
+    }
+    density();
+  });
+
+  randBtn.addEventListener("click", function () {
+    var probs = [.3, .22, .14, .52, .1, .14];
+    for (var r = 0; r < VOICES.length; r++) {
+      for (var c = 0; c < STEPS; c++) {
+        pattern[r][c] = Math.random() < probs[r];
+      }
+    }
+    pattern[0][0] = true;
+    pattern[0][8] = true;
+    pattern[0][16] = true;
+    pattern[0][24] = true;
+    pattern[1][4] = true;
+    pattern[1][12] = true;
+    pattern[1][20] = true;
+    pattern[1][28] = true;
+    buildGrid();
+    density();
+  });
+  clearBtn.addEventListener("click", function () {
+    for (var r = 0; r < VOICES.length; r++) pattern[r].fill(false);
+    buildGrid();
+    density();
+  });
+
+  bpmEl.addEventListener("input", function () {
+    bpm = Number(bpmEl.value);
+    bpmVal.textContent = String(bpm);
+    tempoStat.textContent = bpm + " BPM";
+  });
+  volEl.addEventListener("input", function () {
+    vol = Number(volEl.value);
+    volVal.textContent = String(vol);
+    if (master) master.gain.value = vol / 100 * .9;
+  });
+
+  buildGrid();
+  density();
+})();
+</script>
+</body>
+</html>

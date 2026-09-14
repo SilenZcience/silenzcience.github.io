@@ -1,0 +1,242 @@
+<!doctype html>
+<!--
+  ============ LAB TEMPLATE ============
+  How to add a new laboratory unit:
+    1. Copy this file to  lab/<slug>.html  and fill every {{PLACEHOLDER}}.
+       The demo script below (canvas + loop + pointer paint) runs as-is —
+       replace the body of step()/draw() with your toy, keep the boilerplate.
+    2. _lab-panel.html — add a nav entry (LAB·{{NO}}) and bump "NN units".
+    3. Neighbors — update pager prev/next links of the adjacent lab pages.
+    4. Counts — "Lab Unit NN of MM" in every lab page's mini-foot.
+  Boilerplate already handled: theme-aware canvas colors, DPR scaling,
+  pause/run button, rAF loop with delta-time accumulator, pointer events.
+  ======================================
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·{{NO}} — {{NAME}} — Silas Kraume</title>
+<meta name="description" content="{{ONE_LINE_SUMMARY}}. Vanilla JavaScript and canvas, self-contained.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <!-- [EDIT] crumbs: Laboratory / Lab {{NO}} / {{NAME}} -->
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab {{NO}} / {{NAME}}</p>
+  <h1 class="doc-title" data-reveal>{{DISPLAY_TITLE}}</h1>
+
+  <!-- [EDIT] meta table -->
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·{{NO}}</dd></div>
+    <div><dt>Genre</dt><dd>{{GENRE}}</dd></div>
+    <div><dt>Interface</dt><dd>{{POINTER · TOUCH · KEYS}}</dd></div>
+    <div><dt>Engine</dt><dd>Vanilla JS · Canvas</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage">
+        <canvas id="cv" width="600" height="420" aria-label="{{CANVAS_ARIA_LABEL}}"></canvas>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — {{FIGURE_CAPTION}}</figcaption>
+  </figure>
+
+  <!-- [EDIT] controls: .ctrl buttons, .nin number inputs, range sliders;
+       wire them by id inside the script below. Remove what you don't need. -->
+  <div class="ctrl-row" data-reveal>
+    <button class="ctrl on" type="button" id="runBtn">❚❚ Pause</button>
+    <button class="ctrl" type="button" id="resetBtn">Reset</button>
+    <label class="mono-label" for="speed" style="display:inline-flex;align-items:center;gap:10px;color:var(--dim)">Speed
+      <input type="range" id="speed" min="1" max="60" value="30">
+    </label>
+  </div>
+
+  <!-- [EDIT] live read-outs; mirror ids in updHud() -->
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">{{STAT_1_LABEL}}</span><b id="stat1">0</b></div>
+    <div class="stat"><span class="mono-label">{{STAT_2_LABEL}}</span><b id="stat2">0</b></div>
+    <div class="stat"><span class="mono-label">Rate</span><b id="rateStat">30/s</b></div>
+  </div>
+
+  <!-- [EDIT] prose: repeat .obs blocks per build note -->
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">{{NOTE_HEADLINE}}</h2>
+    <p class="prose-p">{{NOTE_BODY}}</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File {{NO}}</p>
+
+  <!-- [EDIT] pager: link real neighbors; middle slot stays as-is -->
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="{{PREV_SLUG}}.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">{{PREV_TITLE}}</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+    <a class="pg pg-next" href="{{NEXT_SLUG}}.html">
+      <span class="pg-label mono-label">Next unit →</span>
+      <span class="pg-title">{{NEXT_TITLE}}</span>
+    </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit {{NO}} of <span data-lab-total>{{TOTAL}}</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- boilerplate (keep) ---------- */
+  var cv = document.getElementById("cv");
+  var ctx = cv.getContext("2d");
+  var runBtn = document.getElementById("runBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var speedEl = document.getElementById("speed");
+  var stat1 = document.getElementById("stat1");
+  var stat2 = document.getElementById("stat2");
+  var rateStat = document.getElementById("rateStat");
+
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  function fit() {
+    var W = 600, H = 420;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  fit();
+
+  var COL = { accent: "#BC9C62", field: "#1B1B19", grid: "rgba(237,235,230,.08)", frame: "rgba(237,235,230,.45)" };
+  function hexA(hex, a) {
+    hex = String(hex).replace("#", "");
+    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    var n = parseInt(hex, 16);
+    if (isNaN(n)) return "rgba(128,128,128," + a + ")";
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function refreshColors() {
+    var s = getComputedStyle(document.documentElement);
+    function v(name, fb) { var x = s.getPropertyValue(name).trim(); return x || fb; }
+    COL.accent = v("--accent", COL.accent);
+    COL.field = v("--bg-2", COL.field);
+    COL.grid = hexA(v("--ink", "#EDEBE6"), .09);
+    COL.frame = hexA(v("--ink", "#EDEBE6"), .45);
+  }
+  refreshColors();
+  addEventListener("silenz:theme", refreshColors);
+
+  /* ---------- your toy ([EDIT] everything below) ---------- */
+  var running = true, rate = 30, acc = 0, last = performance.now();
+  var ticks = 0;
+
+  // Demo state: one particle bouncing around; replace with your own.
+  var p = { x: 300, y: 210, vx: 120, vy: 90 };
+
+  function reset() {
+    ticks = 0;
+    p.x = 300; p.y = 210; p.vx = 120; p.vy = 90;
+    draw();
+  }
+
+  function step(dt) {
+    ticks++;
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.x < 8 || p.x > 592) p.vx = -p.vx;
+    if (p.y < 8 || p.y > 412) p.vy = -p.vy;
+  }
+
+  function draw() {
+    ctx.fillStyle = COL.field;
+    ctx.fillRect(0, 0, 600, 420);
+    ctx.strokeStyle = COL.frame;
+    ctx.strokeRect(.5, .5, 599, 419);
+    ctx.fillStyle = COL.accent;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function updHud() {
+    stat1.textContent = String(ticks);
+    stat2.textContent = Math.round(p.x) + "," + Math.round(p.y);
+    rateStat.textContent = rate + "/s";
+  }
+
+  runBtn.addEventListener("click", function () {
+    running = !running;
+    runBtn.textContent = running ? "❚❚ Pause" : "▶ Run";
+    runBtn.classList.toggle("on", running);
+    if (running) { last = performance.now(); acc = 0; requestAnimationFrame(loop); }
+  });
+  resetBtn.addEventListener("click", reset);
+  speedEl.addEventListener("input", function () { rate = Number(speedEl.value); updHud(); });
+
+  // Pointer painting stub — reads cursor position in canvas coordinates.
+  cv.addEventListener("pointerdown", function (e) {
+    var r = cv.getBoundingClientRect();
+    console.log("canvas coords:", Math.floor((e.clientX - r.left) / r.width * 600), Math.floor((e.clientY - r.top) / r.height * 420));
+  });
+
+  function loop(now) {
+    if (!running) return;
+    acc += now - last;
+    last = now;
+    var interval = 1000 / rate;
+    var guard = 0;
+    while (acc >= interval && guard++ < 4) {
+      acc -= interval;
+      step(interval / 1000);
+    }
+    if (acc > interval) acc = 0;
+    updHud();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

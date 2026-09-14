@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·03 — Game of Life — Silas Kraume</title>
+<meta name="description" content="Conway's Game of Life on a torus, in vanilla JavaScript and canvas. Draw cells, stamp patterns, adjust generations per second.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 03 / Game of Life</p>
+  <h1 class="doc-title" data-reveal>Life is turing complete.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·03</dd></div>
+    <div><dt>Genre</dt><dd>Cellular automaton</dd></div>
+    <div><dt>Interface</dt><dd>Pointer · Touch</dd></div>
+    <div><dt>Engine</dt><dd>Vanilla JS · Canvas</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage">
+        <canvas id="cv" width="600" height="420" aria-label="Game of Life grid"></canvas>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Conway's B3/S23 rules on a wrapped grid.</figcaption>
+  </figure>
+
+  <div class="ctrl-row" data-reveal>
+    <label class="dim-label">W<input class="nin" id="lc" type="number" min="8" max="512" value="50"></label>
+    <span class="mono-label" style="color:var(--faint)">×</span>
+    <label class="dim-label">H<input class="nin" id="lr" type="number" min="8" max="512" value="35"></label>
+  </div>
+
+  <div class="ctrl-row" data-reveal style="--rd:60ms;margin-top:10px">
+    <button class="ctrl on" type="button" id="runBtn">❚❚ Pause</button>
+    <button class="ctrl" type="button" id="stepBtn">Step</button>
+    <button class="ctrl" type="button" id="randBtn">Random</button>
+    <button class="ctrl" type="button" id="clearBtn">Clear</button>
+  </div>
+
+  <div class="ctrl-row" data-reveal style="margin-top:10px">
+    <span class="mono-label" style="color:var(--faint)">Stamp:</span>
+    <button class="ctrl" type="button" data-stamp="glider">Glider</button>
+    <button class="ctrl" type="button" data-stamp="rpent">R-pentomino</button>
+    <button class="ctrl" type="button" data-stamp="pulsar">Pulsar</button>
+    <label class="mono-label" for="speed" style="display:inline-flex;align-items:center;gap:10px;color:var(--dim)">Speed
+      <input type="range" id="speed" min="2" max="30" value="5">
+    </label>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Generation</span><b id="genStat">0</b></div>
+    <div class="stat"><span class="mono-label">Population</span><b id="popStat">0</b></div>
+    <div class="stat"><span class="mono-label">Rate</span><b id="rateStat">5/s</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">Four rules, infinite behavior.</h2>
+    <p class="prose-p">Every cell is alive or dead. Conway's <span class="hl">B</span><span class="hl">3</span>/<span class="hl">S</span><span class="hl">2</span><span class="hl">3</span> rule means that each generation, a dead cell with exactly <span class="hl">3</span> neighbours is <span class="hl">B</span>orn, a live cell with <span class="hl">2</span> or <span class="hl">3</span> neighbours <span class="hl">S</span>urvives, everything else dies. From those simple rules you get infinite complexity.</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">Draw your own experiments.</h2>
+    <p class="prose-p">The grid keeps running while you paint. Drag across cells to seed structure mid-simulation and watch the consequences propagate.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 03</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="snake.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Snake</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+      <a class="pg pg-next" href="sand.html">
+        <span class="pg-label mono-label">Next unit →</span>
+        <span class="pg-title">Falling Sand</span>
+      </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 03 of <span data-lab-total>08</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+  var CS = 12, COLS = 50, ROWS = 35;
+  var cv = document.getElementById("cv");
+  var ctx = cv.getContext("2d");
+  var lcIn = document.getElementById("lc");
+  var lrIn = document.getElementById("lr");
+  var runBtn = document.getElementById("runBtn");
+  var stepBtn = document.getElementById("stepBtn");
+  var randBtn = document.getElementById("randBtn");
+  var clearBtn = document.getElementById("clearBtn");
+  var speedEl = document.getElementById("speed");
+  var genStat = document.getElementById("genStat");
+  var popStat = document.getElementById("popStat");
+  var rateStat = document.getElementById("rateStat");
+
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+
+  var COL = { accent: "#BC9C62", field: "#1B1B19", grid: "rgba(237,235,230,.08)", frame: "rgba(237,235,230,.45)" };
+  function hexA(hex, a) {
+    hex = String(hex).replace("#", "");
+    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    var n = parseInt(hex, 16);
+    if (isNaN(n)) return "rgba(128,128,128," + a + ")";
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function refreshColors() {
+    var s = getComputedStyle(document.documentElement);
+    function v(name, fb) { var x = s.getPropertyValue(name).trim(); return x || fb; }
+    COL.accent = v("--accent", COL.accent);
+    COL.field = v("--bg-2", COL.field);
+    COL.grid = hexA(v("--ink", "#EDEBE6"), .09);
+    COL.frame = hexA(v("--ink", "#EDEBE6"), .45);
+  }
+  refreshColors();
+  addEventListener("silenz:theme", refreshColors);
+
+  function setupField(c, r) {
+    COLS = c; ROWS = r;
+    cv.width = COLS * CS * dpr;
+    cv.height = ROWS * CS * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    grid = new Uint8Array(COLS * ROWS);
+    nextBuf = new Uint8Array(COLS * ROWS);
+    gen = 0;
+  }
+
+  var grid = new Uint8Array(COLS * ROWS);
+  var nextBuf = new Uint8Array(COLS * ROWS);
+  var gen = 0, running = true, rate = 5, acc = 0, last = performance.now();
+  setupField(50, 35);
+
+  // Torus: wrap x/y around the grid edges.
+  function at(x, y) {
+    return grid[((y + ROWS) % ROWS) * COLS + ((x + COLS) % COLS)];
+  }
+  function popCount() {
+    var n = 0;
+    for (var i = 0; i < grid.length; i++) n += grid[i];
+    return n;
+  }
+
+  // Conway B3/S23: write next state into a scratch buffer, then swap.
+  function tickGen() {
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        var n =
+          at(x - 1, y - 1) + at(x, y - 1) + at(x + 1, y - 1) +
+          at(x - 1, y) + at(x + 1, y) +
+          at(x - 1, y + 1) + at(x, y + 1) + at(x + 1, y + 1);
+        var alive = at(x, y);
+        nextBuf[y * COLS + x] = alive ? (n === 2 || n === 3 ? 1 : 0) : (n === 3 ? 1 : 0);
+      }
+    }
+    var tmp = grid; grid = nextBuf; nextBuf = tmp;
+    gen++;
+  }
+
+  function draw() {
+    var W = COLS * CS, H = ROWS * CS;
+    ctx.fillStyle = COL.field;
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = COL.grid;
+    ctx.lineWidth = 1;
+    for (var gx = 1; gx < COLS; gx++) {
+      ctx.beginPath();
+      ctx.moveTo(gx * CS + .5, 0); ctx.lineTo(gx * CS + .5, H);
+      ctx.stroke();
+    }
+    for (var gy = 1; gy < ROWS; gy++) {
+      ctx.beginPath();
+      ctx.moveTo(0, gy * CS + .5); ctx.lineTo(W, gy * CS + .5);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = COL.frame;
+    ctx.strokeRect(.5, .5, W - 1, H - 1);
+    ctx.fillStyle = COL.accent;
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        if (grid[y * COLS + x]) ctx.fillRect(x * CS + 1, y * CS + 1, CS - 2, CS - 2);
+      }
+    }
+  }
+
+  function updHud() {
+    genStat.textContent = String(gen);
+    popStat.textContent = String(popCount());
+    rateStat.textContent = rate + "/s";
+  }
+
+  function randomize() {
+    for (var i = 0; i < grid.length; i++) grid[i] = Math.random() < .32 ? 1 : 0;
+    gen = 0;
+    updHud();
+    draw();
+  }
+
+  function clearAll() {
+    grid.fill(0);
+    gen = 0;
+    updHud();
+    draw();
+  }
+
+  // Seed a shape centred on the board; cells wrap around edges.
+  function stamp(cells) {
+    var ox = Math.floor(COLS / 2), oy = Math.floor(ROWS / 2);
+    cells.forEach(function (c) {
+      grid[(((oy + c[1]) % ROWS + ROWS) % ROWS) * COLS + (((ox + c[0]) % COLS + COLS) % COLS)] = 1;
+    });
+    updHud();
+    draw();
+  }
+
+  var STAMPS = {
+    glider: [[1, 0], [2, 1], [0, 2], [1, 2], [2, 2]],
+    rpent: [[1, 0], [2, 0], [0, 1], [1, 1], [1, 2]],
+    pulsar: (function () {
+      // Periodic oscillator; offsets re-centered on the origin below.
+      var q = [[2, 0], [3, 0], [4, 0], [8, 0], [9, 0], [10, 0],
+               [0, 2], [5, 2], [7, 2], [12, 2],
+               [0, 3], [5, 3], [7, 3], [12, 3],
+               [0, 4], [5, 4], [7, 4], [12, 4],
+               [2, 5], [3, 5], [4, 5], [8, 5], [9, 5], [10, 5],
+               [2, 7], [3, 7], [4, 7], [8, 7], [9, 7], [10, 7],
+               [0, 8], [5, 8], [7, 8], [12, 8],
+               [0, 9], [5, 9], [7, 9], [12, 9],
+               [0, 10], [5, 10], [7, 10], [12, 10],
+               [2, 12], [3, 12], [4, 12], [8, 12], [9, 12], [10, 12]];
+      return q.map(function (c) { return [c[0] - 6, c[1] - 6]; });
+    })()
+  };
+
+  runBtn.addEventListener("click", function () {
+    running = !running;
+    runBtn.textContent = running ? "❚❚ Pause" : "▶ Run";
+    runBtn.classList.toggle("on", running);
+    if (running) { last = performance.now(); acc = 0; requestAnimationFrame(loop); }
+  });
+  stepBtn.addEventListener("click", function () { tickGen(); updHud(); draw(); });
+  randBtn.addEventListener("click", randomize);
+  clearBtn.addEventListener("click", clearAll);
+
+  function clampInt(v, a, b) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) v = a;
+    return Math.max(a, Math.min(b, v));
+  }
+  function applyGrid() {
+    COLS = clampInt(lcIn.value, 10, 512);
+    ROWS = clampInt(lrIn.value, 8, 256);
+    lcIn.value = COLS;
+    lrIn.value = ROWS;
+    setupField(COLS, ROWS);
+    randomize();
+    updHud();
+    var row = lcIn.closest(".ctrl-row");
+    if (row && row.scrollIntoView) row.scrollIntoView({ block: "nearest", behavior: "instant" });
+  }
+  lcIn.addEventListener("change", applyGrid);
+  lrIn.addEventListener("change", applyGrid);
+
+  speedEl.addEventListener("input", function () {
+    rate = Number(speedEl.value);
+    updHud();
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-stamp]"), function (b) {
+    b.addEventListener("click", function () { stamp(STAMPS[b.dataset.stamp]); });
+  });
+
+  var painting = false;
+  function paintAt(e) {
+    var r = cv.getBoundingClientRect();
+    var x = Math.floor((e.clientX - r.left) / r.width * COLS);
+    var y = Math.floor((e.clientY - r.top) / r.height * ROWS);
+    if (x >= 0 && x < COLS && y >= 0 && y < ROWS) {
+      grid[y * COLS + x] = 1;
+      draw();
+      updHud();
+    }
+  }
+  cv.addEventListener("pointerdown", function (e) {
+    painting = true;
+    cv.setPointerCapture(e.pointerId);
+    paintAt(e);
+  });
+  cv.addEventListener("pointermove", function (e) { if (painting) paintAt(e); });
+  cv.addEventListener("pointerup", function () { painting = false; });
+
+  function loop(now) {
+    if (!running) return;
+    acc += now - last;
+    last = now;
+    var interval = 1000 / rate;
+    var guard = 0;
+    while (acc >= interval && guard++ < 4) {
+      acc -= interval;
+      tickGen();
+    }
+    if (acc > interval) acc = 0;
+    updHud();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  randomize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

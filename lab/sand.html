@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·04 — Falling Sand — Silas Kraume</title>
+<meta name="description" content="A falling-sand particle toy in vanilla JavaScript. Pour sand, stack stone, watch gravity do the rest.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 04 / Falling Sand</p>
+  <h1 class="doc-title" data-reveal>Sand, simulated.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·04</dd></div>
+    <div><dt>Genre</dt><dd>Particle simulation</dd></div>
+    <div><dt>Interface</dt><dd>Pointer · Touch</dd></div>
+    <div><dt>Engine</dt><dd>Vanilla JS · Canvas</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage">
+        <canvas id="cv" width="480" height="320" aria-label="Falling sand playfield"></canvas>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Drag anywhere to pour. Stone stays exactly where you leave it.</figcaption>
+  </figure>
+
+  <div class="ctrl-row" data-reveal>
+    <span class="mono-label" style="color:var(--faint)">Material</span>
+    <button class="ctrl on" type="button" data-mat="sand">Sand</button>
+    <button class="ctrl" type="button" data-mat="stone">Stone</button>
+    <button class="ctrl" type="button" data-mat="erase">Erase</button>
+    <button class="ctrl" type="button" id="resetBtn">↺ Reset</button>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Grains</span><b id="grainStat">0</b></div>
+    <div class="stat"><span class="mono-label">Grid</span><b id="gridStat">120×80</b></div>
+    <div class="stat"><span class="mono-label">Tick</span><b>60/s</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">How it works.</h2>
+    <p class="prose-p">On the 2D grid each cell is either empty, sand, or stone. Every frame, sand grains update bottom-up: a grain drops if the cell below is free, or slides diagonally if a side cell is open. No forces or collisions, just one conditional chain per cell that lets sand pile, flow, and avalanche.</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">Alternating sweep.</h2>
+    <p class="prose-p">Scanning cells strictly left-to-right would let grains lean towards one direction, building a subtle bias into every sandpile. So the simulation flips sweep direction every frame creating a perfectly balanced system; As all things should be.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 04</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="life.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Game of Life</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+    <a class="pg pg-next" href="type.html">
+      <span class="pg-label mono-label">Next unit →</span>
+      <span class="pg-title">Typing Velocity</span>
+    </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 04 of <span data-lab-total>08</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script>
+(function () {
+  "use strict";
+  var CELL = 4, GW = 120, GH = 80;
+  var cv = document.getElementById("cv");
+  var ctx = cv.getContext("2d");
+  var resetBtn = document.getElementById("resetBtn");
+  var grainStat = document.getElementById("grainStat");
+
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = GW * CELL * dpr;
+  cv.height = GH * CELL * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  var COL = { ink: "#EDEBE6", accent: "#BC9C62", soft: "#C8C6BF", field: "#1B1B19", frame: "rgba(237,235,230,.45)" };
+  function hexA(hex, a) {
+    hex = String(hex).replace("#", "");
+    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    var n = parseInt(hex, 16);
+    if (isNaN(n)) return "rgba(128,128,128," + a + ")";
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function refreshColors() {
+    var s = getComputedStyle(document.documentElement);
+    function v(name, fb) { var x = s.getPropertyValue(name).trim(); return x || fb; }
+    COL.ink = v("--ink", COL.ink);
+    COL.accent = v("--accent", COL.accent);
+    COL.soft = v("--soft", COL.soft);
+    COL.field = v("--bg-2", COL.field);
+    COL.frame = hexA(COL.ink, .45);
+    COL.sandDim = hexA(COL.accent, .55);
+  }
+  refreshColors();
+  addEventListener("silenz:theme", refreshColors);
+
+  var grid = new Uint8Array(GW * GH);
+  var shade = new Uint8Array(GW * GH);
+  var mat = "sand";
+  var EMPTY = 0, SAND = 1, STONE = 2;
+
+  function idx(x, y) { return y * GW + x; }
+
+  // One tick of gravity, bottom-up. Sweep direction flips every tick to cancel
+  // the left/right drift bias that a fixed scan order introduces. Sand only.
+  function step() {
+    var flip = Math.random() < .5;
+    for (var y = GH - 2; y >= 0; y--) {
+      for (var k = 0; k < GW; k++) {
+        var x = flip ? k : GW - 1 - k;
+        var i = idx(x, y);
+        if (grid[i] !== SAND) continue;
+        var below = idx(x, y + 1);
+        if (!grid[below]) {
+          grid[below] = SAND; shade[below] = shade[i];
+          grid[i] = EMPTY;
+          continue;
+        }
+        var dir = Math.random() < .5 ? -1 : 1;
+        var a = x + dir, b = x - dir;
+        if (a >= 0 && a < GW && !grid[idx(a, y + 1)] && !grid[idx(a, y)]) {
+          var j = idx(a, y + 1);
+          grid[j] = SAND; shade[j] = shade[i]; grid[i] = EMPTY;
+        } else if (b >= 0 && b < GW && !grid[idx(b, y + 1)] && !grid[idx(b, y)]) {
+          var j2 = idx(b, y + 1);
+          grid[j2] = SAND; shade[j2] = shade[i]; grid[i] = EMPTY;
+        }
+      }
+    }
+  }
+
+  function draw() {
+    ctx.fillStyle = COL.field;
+    ctx.fillRect(0, 0, GW * CELL, GH * CELL);
+    var grains = 0;
+    for (var y = 0; y < GH; y++) {
+      for (var x = 0; x < GW; x++) {
+        var i = idx(x, y);
+        if (!grid[i]) continue;
+        if (grid[i] === SAND) {
+          grains++;
+          ctx.fillStyle = shade[i] ? COL.accent : COL.sandDim;
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        } else {
+          ctx.fillStyle = COL.soft;
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        }
+      }
+    }
+    ctx.strokeStyle = COL.frame;
+    ctx.strokeRect(.5, .5, GW * CELL - 1, GH * CELL - 1);
+    grainStat.textContent = String(grains);
+  }
+
+  var painting = false;
+  // Pour a small brush of the selected material at the pointer (clamped to grid).
+  function pour(e) {
+    var r = cv.getBoundingClientRect();
+    var cx = Math.floor((e.clientX - r.left) / r.width * GW);
+    var cy = Math.floor((e.clientY - r.top) / r.height * GH);
+    var val = mat === "sand" ? SAND : mat === "stone" ? STONE : EMPTY;
+    for (var dy = -2; dy <= 2; dy++) {
+      for (var dx = -2; dx <= 2; dx++) {
+        if (dx * dx + dy * dy > 5) continue;
+        var x = cx + dx, y = cy + dy;
+        if (x < 0 || x >= GW || y < 0 || y >= GH) continue;
+        var i = idx(x, y);
+        if (val === SAND && grid[i]) continue;
+        grid[i] = val;
+        shade[i] = Math.random() < .4 ? 1 : 0;
+      }
+    }
+  }
+  cv.addEventListener("pointerdown", function (e) {
+    painting = true;
+    cv.setPointerCapture(e.pointerId);
+    pour(e);
+  });
+  cv.addEventListener("pointermove", function (e) { if (painting) pour(e); });
+  cv.addEventListener("pointerup", function () { painting = false; });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-mat]"), function (b) {
+    b.addEventListener("click", function () {
+      mat = b.dataset.mat;
+      Array.prototype.forEach.call(document.querySelectorAll("[data-mat]"), function (x) {
+        x.classList.toggle("on", x === b);
+      });
+    });
+  });
+  resetBtn.addEventListener("click", function () {
+    grid.fill(0); shade.fill(0);
+  });
+
+  function loop() {
+    step();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

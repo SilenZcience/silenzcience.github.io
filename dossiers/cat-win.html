@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROJECT 01 — cat_win — Silas Kraume</title>
+<meta name="description" content="cat_win — my longest-running project: an advanced text-processing and analytics CLI toolset in Python. How a Windows cat clone became a curses text editor, hex editor and diff viewer.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Archive / Project 01 / cat_win</p>
+  <h1 class="doc-title" data-reveal>The cat_win Toolset</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Project</dt><dd>cat_win</dd></div>
+    <div><dt>Language</dt><dd>Python/PyPy ≥ 3.6</dd></div>
+    <div><dt>License</dt><dd>MIT</dd></div>
+    <div><dt>Release</dt><dd class="num" data-release="SilenZcience/cat_win" data-release-date>v2.0.2 — 2026-08-22</dd></div>
+    <div><dt>Status</dt><dd class="meta-rest">Active</dd></div>
+  </dl>
+
+  <div class="prose">
+    <p class="lede" data-reveal>The cat_win project, for me, is the perfect excuse to learn something new. It is a project that I am using to explore new ideas, techniques and concepts while also creating a tool that is actually useful in various ways. It began as a simple cat clone for Windows (Powershell used to not have a native cat command) and over time grew into an overengineered text-processing and analytics toolset for the command line. It ships as two executables, <code>catw</code> as the classic cmd-utility and <code>cats</code> for working interactively inside a REPL. The development of cat_win stretches over many years and <a class="num link-hi" href="https://github.com/SilenZcience/cat_win/commits/main/" target="_blank" rel="noopener" data-commits="SilenZcience/cat_win">1,700</a> commits.</p>
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 001 - Origin</span>
+      <h2 class="obs-h">Everyone needs an origin story.</h2>
+      <p class="prose-p">The original idea behind this project was rather simple: read files, print them to standard output, and do it on a system nobody ever wrote a native cat for. It seemed like a small, trivial project maybe, but it set a milestone in learning to program in the first place. The original version was developed and published back in 2022 at <a class="link-sub" href="https://github.com/SilenZcience/Cat_For_Windows" target="_blank" rel="noopener">Cat_For_Windows</a> but existed as a local project I had been using long before that.</p>
+      <p class="prose-p">The command that can read a file should also be able to manipulate and transform it, and maybe even provide information about it. One feature lead to the next, and the project grew into an overengineered jumbled mess that long left the territory of clones and simple utilities. After multiple large refactors and partial rewrites the code base however is rather clean now in comparison to the previous versions. Today it is a toolkit for file inspection, text transformation, searching, filtering and encoding, as well as analysis and text processing, all in one place. It even contains a decent editor, hexeditor and my very own diffviewer.</p>
+    </section>
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 002 - The Tool</span>
+      <h2 class="obs-h">Content, components and capabilities.</h2>
+      <p class="prose-p">On a broad scale, cat_win provides a wide range of functionalities. It accepts files, standard input and URLs. Every line of output can be prefixed or suffixed with information like line numbering or line length. The output can be sorted or formatted, filtered and transformed. Some of these arguments accept Python-style slices like <code>[6:]</code> and <code>[::-1]</code>, so text can be cut and reversed line by line. Queries find literals or patterns (regex), while leaning into the functionality of the 'grep' tool. Summaries can be generated to provide information about wordcount, charcount or a simple overview of files and directories. Text can be explored in a pager style similar to the 'more' or 'less' tool. The own implementation of viewing attributes can be compared to 'libmagic' or the 'file' utility. Viewing the input in different interpretations is of course possible, as the tool supports a bin-/ and hexviewer as well as base64. Next to these cat_win includes many more features in an ever expanding landscape of utility. For in-depth technical documentation, refer to the <a class="link-sub" href="https://github.com/SilenZcience/cat_win/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener">DOCUMENTATION.md</a> file.</p>
+    </section>
+
+    <figure class="fig" data-reveal>
+      <pre class="term"><b>$</b> echo "Hello World :)" | catw - [6:] | catw - [::-1] -ln
+<u>1) [8] ): dlroW</u></pre>
+      <figcaption class="fig-cap">Fig. 01 — Slicing, reversal and line numbering composed through two catw stages.</figcaption>
+    </figure>
+
+    <section class="obs" data-reveal>
+      <p class="prose-p">The interactive sibling, <code>cats</code>, opens the same feature set as a live session inside a simple REPL. Instead of restarting the program for every input, it allows adjusting parameters on the fly. Especially useful for experimentation and quick calculations. The built-in desk calculator and number conversion to different numerical bases are one of many features predestined to be used inside the interactive environment of cat_win.</p>
+    </section>
+
+    <figure class="fig" data-reveal>
+      <pre class="term"><b>$</b> cats --eval --dec
+<b>&gt;&gt;&gt;</b> 0xF * 5
+<u>75 [Bin 0b01001011; Oct 0o113; Int8 75/75; Hex 0x4B; Utf8 K]</u>
+<b>&gt;&gt;&gt;</b> ...
+      </pre>
+      <figcaption class="fig-cap">Fig. 02 — The interactive mode evaluating any expression as decimal numbers.</figcaption>
+    </figure>
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 003 - Curses Applications</span>
+      <h2 class="obs-h">An editor no one uses.</h2>
+      <p class="prose-p">The text editor, opened with <code>-!, --edit</code>, is a full terminal application built on the curses library which loads files lazily, so large input opens quickly. Movement is implemented at every scale: character by character, word by word, page by page, and even supports using the mouse instead of keyboard.</p>
+      <p class="prose-p">Ordinary editing is only the beginning. There is syntax highlighting for many languages, with a manager to pick your own scheme. Find and replace works with literals or regular expressions. Undo and redo carry the full history of changes, and a context menu gathers the frequent actions. The editor can open a file manager to switch files quickly, and even supports loading a file's git history.</p>
+      <p class="prose-p">Everything you would expect from a simply basic text editor is present and functional. Additionally there are features that nobody strictly needs. It is me having fun and implementing things I find interesting to play with. The classic Unix 'fg' command to bring a background process to the foreground is simulated by allowing to save the entire viewstate of any curses application to disk and restore it even after restart.</p>
+      <br>
+      <h2 class="obs-h">A hexeditor no one wants.</h2>
+      <p class="prose-p">The hex editor, opened with <code>-#, --hexedit</code>, fundamentally works identical to the text editor. The file again loads lazily. You navigate the content byte for byte and type new values directly over the current one, insert new bytes to the left or right of the cursor, and delete whole chunks with a single key. Search accepts byte sequences, or switches to plain-text search when a human phrase is easier to remember.</p>
+      <p class="prose-p">The hexeditor has access to the same file manager to allow for easy navigation between files and git histories. Again mouse support is fully integrated as well. There are of course far better alternatives out there to use, but this one belongs to me and it gets the job done most of the time. It is not intended to become a fully fleshed out project by itself but rather a basic tool for the most common use cases.</p>
+      <br>
+      <h2 class="obs-h">A diff viewer no one asked for.</h2>
+      <p class="prose-p">The diff viewer, opened with <code>-?, --diff</code>, shows two files side by side and walks through their differences. Given a single file, it compares against the git history instead, which is a helpful mode for tracking changes over time. In combination with another command argument it is even possible to watch the same file for modifications over time while keeping the diff viewer open. In this case the tool will periodically scan for file changes and update the view accordingly.</p>
+      <p class="prose-p">The diff viewer allows to tune the similarity ratio manually at which lines are paired together. This simple feature is the main reason for implementing an own diff viewer in the first place as it is a functionality I miss in the most common diff tools. Oftentimes some differences intuitively belong together but are still not accepted by the default algorithms because they barely miss the similarity threshold. In cat_win you can simply adjust this threshold such that more complicated changes are easier to track.</p>
+    </section>
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 004 - Customization</span>
+      <h2 class="obs-h">Configuration instead of compromise.</h2>
+      <p class="prose-p">Nothing about cat_win has to stay the way I shipped it. The <code>--config</code> parameter opens a menu of the default settings the tool starts with, and <code>--cconfig</code> does the same for the color scheme. Every color that cat_win displays can be customized and there exists a vast amount of options to tailor the behaviour of any program component. From default file encoding to auto indentation inside the editor everything is customizable.</p>
+      <p class="prose-p">These configuration files live in the platform-standard config homes: AppData, XDG_CONFIG_HOME or Application Support. Using the installation path is not viable since the python package would fragment on uninstall using pip and this way the configuration survives an update. Flags exist to reset the whole configuration to defaults or remove the files completely, since it is massively annoying when programs leave behind traces on uninstallation.</p>
+    </section>
+
+    <!-- <div class="table-scroll" data-reveal>
+      <table>
+        <thead>
+          <tr><th scope="col">Area</th><th scope="col">Coverage</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Text transformation</td><td>Slicing, reversal, numbering, substitution, case &amp; whitespace tools</td></tr>
+          <tr><td>Search &amp; filtering</td><td>Literals, patterns, grep, line filtering, counting and analytics</td></tr>
+          <tr><td>Encoding &amp; decoding</td><td>Base64, base conversions and evaluation, in pipe and REPL modes</td></tr>
+          <tr><td>Inspection</td><td>Byte and hex views, checksums, file attributes, strings extraction</td></tr>
+          <tr><td>Curses applications</td><td>Text editor, hex editor, diff viewer, all with session resume</td></tr>
+          <tr><td>Distribution</td><td>PyPI package plus standalone binaries for Windows, Linux, macOS</td></tr>
+        </tbody>
+      </table>
+    </div> -->
+
+    <section class="obs" data-reveal>
+      <span class="obs-no mono-label">Observation 006 - Philosophy</span>
+      <h2 class="obs-h">Lightweight and compatible.</h2>
+      <p class="prose-p">The design goals of cat_win are simple: lightweight by using minimal dependencies and maximal compatibility to allow cross-platform use. The runtime requirement reaches back to Python and PyPy 3.6, old enough that the tool has to work hard to stay polite with it, and standalone executables for Windows, Linux and macOS are built with PyInstaller. You can use it on a machine that do not have any Python version installed.</p>
+      <p class="prose-p">The engine under all of it is deliberately small. The clipboard support is an optional extra, and the color patch for legacy Windows terminals is optional too. Everything else ships with the standard library. Sadly the curses library does not exist natively on Windows which is why the tool does depend on the windows-curses package when opening any of the curses applications on that platform. The rest of the tool does however keep working even when these dependencies are not available.</p>
+      <p class="prose-p">Keeping dependencies this small is more than a compatibility necessity. It is also an opportunity to learn about technologies from scratch, and to have fun implementing them from the ground up.<br>It is honest to say the project is a little overengineered at this point. Not everything strictly needs to exist or makes sense in the context of the project. But that has always been part of the point. Since it is primarily a toolkit from me for me, it is simply pragmatic to have all the features I need in one place. It also means that whenever a feature feels awkward, I am the first user to notice, because I am the user of every release. And being the owner of the tool I get to instantly adjust any annoyances I encounter.</p>
+      <br>
+      <h2 class="obs-h">AI notice.</h2>
+      <p class="prose-p">The cat_win project is, and will always remain, one hundred percent human written. cat_win dates back to an era before AI and like all of my projects from that time, and I do not intend to ever let an AI touch it. Handing it over would, in my eyes, ruin the idea behind a learning project. It would also taint the giant body of work I have built myself over the years. Every single line of code has been manually typed and reasoned about. The documentation and the changelog are no exception: entirely structured, designed and written by me. When future me reads this code, I want to know exactly who to blame for this shitpile.</p>
+    </section>
+
+    <blockquote class="pull" data-reveal>
+      “Not intended to exactly replicate existing tools, but to provide a cohesive toolkit for common tasks.”
+      <cite>README — Philosophy</cite>
+    </blockquote>
+
+    <p class="endfile mono-label" data-reveal>■ End of Project File 01</p>
+
+    <nav class="pager" aria-label="Project navigation" data-reveal>
+      <a class="pg" href="../index.html#work">
+        <span class="pg-label mono-label">↑ The index</span>
+        <span class="pg-title">Projects on record</span>
+      </a>
+      <a class="pg" href="https://github.com/SilenZcience/cat_win" target="_blank" rel="noopener">
+        <span class="pg-label mono-label"><svg class="icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg> Repository ↗</span>
+        <span class="pg-title">cat_win on GitHub</span>
+      </a>
+      <a class="pg pg-next" href="../index.html">
+        <span class="pg-label mono-label">Next project →</span>
+        <span class="pg-title">Awaiting new entries</span>
+      </a>
+    </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Project 01 of <span data-dossier-total>04</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+</body>
+</html>
