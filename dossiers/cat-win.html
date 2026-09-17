@@ -77,8 +77,7 @@
       <pre class="term"><b>$</b> cats --eval --dec
 <b>&gt;&gt;&gt;</b> 0xF * 5
 <u>75 [Bin 0b01001011; Oct 0o113; Int8 75/75; Hex 0x4B; Utf8 K]</u>
-<b>&gt;&gt;&gt;</b> ...
-      </pre>
+<b>&gt;&gt;&gt;</b> ...</pre>
       <figcaption class="fig-cap">Fig. 02 — The interactive mode evaluating any expression as decimal numbers.</figcaption>
     </figure>
 
@@ -126,6 +125,14 @@
       <h2 class="obs-h">Lightweight and compatible.</h2>
       <p class="prose-p">The design goals of cat_win are simple: lightweight by using minimal dependencies and maximal compatibility to allow cross-platform use. The runtime requirement reaches back to Python and PyPy 3.6, old enough that the tool has to work hard to stay polite with it, and standalone executables for Windows, Linux and macOS are built with PyInstaller. You can use it on a machine that do not have any Python version installed.</p>
       <p class="prose-p">The engine under all of it is deliberately small. The clipboard support is an optional extra, and the color patch for legacy Windows terminals is optional too. Everything else ships with the standard library. Sadly the curses library does not exist natively on Windows which is why the tool does depend on the windows-curses package when opening any of the curses applications on that platform. The rest of the tool does however keep working even when these dependencies are not available.</p>
+
+      <figure class="fig" data-reveal>
+        <pre class="term"><b>$</b> python -m pip install -U cat_win[clip]
+<u>Installing collected packages: cat_win</u>
+<u>Successfully installed cat_win</u></pre>
+        <figcaption class="fig-cap">Fig. 03 — The install command for cat_win with clipboard support.</figcaption>
+      </figure>
+
       <p class="prose-p">Keeping dependencies this small is more than a compatibility necessity. It is also an opportunity to learn about technologies from scratch, and to have fun implementing them from the ground up.<br>It is honest to say the project is a little overengineered at this point. Not everything strictly needs to exist or makes sense in the context of the project. But that has always been part of the point. Since it is primarily a toolkit from me for me, it is simply pragmatic to have all the features I need in one place. It also means that whenever a feature feels awkward, I am the first user to notice, because I am the user of every release. And being the owner of the tool I get to instantly adjust any annoyances I encounter.</p>
       <br>
       <h2 class="obs-h">AI notice.</h2>
