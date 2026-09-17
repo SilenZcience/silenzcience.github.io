@@ -90,7 +90,8 @@
   display:flex;align-items:center;justify-content:space-between;gap:8px;
   padding:8px 12px;border-bottom:1px solid var(--line);
 }
-.ml-head .mono-label{color:var(--faint)}
+.ml-head .mono-label{color:var(--faint);font-size:.64rem}
+.ml-head #mlCount{flex:0 1 auto;min-width:0;text-align:right;white-space:nowrap}
 .movelist{
   list-style:none;margin:0;padding:6px 8px;
   display:grid;grid-template-columns:auto 1fr 1fr;gap:2px 2px;align-content:start;
@@ -102,9 +103,13 @@
   background:none;border:1px solid transparent;padding:4px 8px;cursor:pointer;text-align:left;
   transition:border-color var(--t),color var(--t);
 }
+.ml-mv{opacity:1;transition:border-color var(--t),color var(--t),opacity var(--t)}
 .ml-mv:hover{border-color:var(--line-2);color:var(--ink)}
 .ml-mv.cur{border-color:var(--accent);color:var(--accent)}
+.ml-mv.fut{opacity:.42}
+.ml-mv.fut:hover{opacity:.7}
 .ml-empty{grid-column:1/-1;font-family:var(--font-mono);font-size:.72rem;color:var(--faint);padding:6px}
+.ml-latest{grid-column:1/-1;padding-top:2px;border-top:1px solid var(--line-1)}
 @media (max-width:719px){
   .duo{flex-direction:column}
   .side-panel{flex-basis:auto;min-height:0}
@@ -715,6 +720,8 @@
   var st = null, playerWhite = true, flipped = false;
   var snaps = [];
   var moves = [];
+  var curPos = 0;
+  var tipSnap = null;
   var mlKey = -1;
 
   function snapClone() {
@@ -859,21 +866,29 @@
   }
 
   function renderMoveList() {
-    if (moves.length === mlKey) return;
-    mlKey = moves.length;
+    var key = moves.length + ":" + curPos;
+    if (key === mlKey) return;
+    mlKey = key;
     var html = "", i;
     for (i = 0; i < moves.length; i += 2) {
       html += '<li class="ml-no num">' + (i / 2 + 1) + '.</li>' +
-        '<li><button type="button" class="ml-mv' + (i === mlKey - 1 ? " cur" : "") + '" data-ply="' + i + '">' + moves[i] + '</button></li>';
-      if (i + 1 < mlKey) {
-        html += '<li><button type="button" class="ml-mv' + (i + 1 === mlKey - 1 ? " cur" : "") + '" data-ply="' + (i + 1) + '">' + moves[i + 1] + '</button></li>';
+        '<li><button type="button" class="ml-mv' + (i === curPos - 1 ? " cur" : "") + (i >= curPos ? " fut" : "") + '" data-ply="' + (i + 1) + '">' + moves[i] + '</button></li>';
+      if (i + 1 < moves.length) {
+        html += '<li><button type="button" class="ml-mv' + (i + 1 === curPos - 1 ? " cur" : "") + (i + 1 >= curPos ? " fut" : "") + '" data-ply="' + (i + 2) + '">' + moves[i + 1] + '</button></li>';
       } else {
         html += "<li></li>";
       }
     }
-    moveListEl.innerHTML = html || '<li class="ml-empty">No moves recorded yet.</li>';
-    mlCount.textContent = mlKey + (mlKey === 1 ? " half-move" : " half-moves");
-    moveListEl.scrollTop = moveListEl.scrollHeight;
+    moveListEl.innerHTML = html
+      + (curPos < moves.length
+        ? '<li class="ml-latest"><button type="button" class="ml-mv" data-ply="' + moves.length + '">→ latest</button></li>'
+        : '')
+      || '<li class="ml-empty">No moves recorded yet.</li>';
+    mlCount.textContent = moves.length + (moves.length === 1 ? " half-move" : " half-moves")
+      + (curPos < moves.length ? " · at " + curPos : "");
+    var curEl = curPos > 0 ? moveListEl.querySelector(".ml-mv.cur") : null;
+    if (curEl) curEl.scrollIntoView({ block: "nearest" });
+    else moveListEl.scrollTop = moveListEl.scrollHeight;
   }
 
   function fmtN(n) {
@@ -894,7 +909,7 @@
       turnStat.textContent = (st.wt === playerWhite ? "You · " : "CPU · ") + (st.wt ? "White" : "Black");
       stateStat.textContent = thinking ? "Thinking…" : (inCheck(st) ? "Check!" : "Playing");
     }
-    undoBtn.disabled = thinking || !snaps.length;
+    undoBtn.disabled = thinking || curPos === 0;
   }
 
   function showOverlay() {
@@ -924,10 +939,11 @@
   }
   // How many times has the current position already appeared in the game,
   // including now? The snapshots record the state before each move, so the
-  // sequence of positions is snaps[0..n-1] then the live state.
+  // sequence of positions up to the current one is snaps[0..curPos-1] then
+  // the live state (position after curPos moves).
   function countPosition() {
     var key = posKey(st), c = 1, i;
-    for (i = 0; i < snaps.length; i++) if (posKey(snaps[i].s) === key) c++;
+    for (i = 0; i < curPos; i++) if (posKey(snaps[i].s) === key) c++;
     return c;
   }
 
@@ -950,11 +966,27 @@
     });
   }
 
-  function commitPlayer(m) {
+  // Record a move into the retained history. If the current position is a
+  // historic point (curPos < moves.length), the divergent future is discarded
+  // first — history after the current point is only deleted once a DIFFERENT
+  // move is made from here, not when simply navigating back.
+  // snaps[i] is the position AFTER i moves (snapshot taken before making the
+  // i-th move); tipSnap is the position after ALL recorded moves.
+  function recordMove(m) {
+    if (curPos < moves.length) {
+      moves.length = curPos;
+      snaps.length = curPos;
+    }
     moves.push(toSan(st, m));
     snaps.push(snapClone());
     make(st, m);
     lastMove = { f: m.f, t: m.t };
+    curPos = moves.length;
+    tipSnap = snapClone();
+  }
+
+  function commitPlayer(m) {
+    recordMove(m);
     positionChanged();
     render();
     maybeCpu();
@@ -1223,12 +1255,7 @@
       stateStat.textContent = "Thinking d" + (cur+1);
       if (cur >= depth) {
         thinking = false;
-        if (best) {
-          moves.push(toSan(st, best));
-          snaps.push(snapClone());
-          make(st, best);
-          lastMove = { f: best.f, t: best.t };
-        }
+        if (best) recordMove(best);
         positionChanged();
         render();
       } else {
@@ -1257,6 +1284,9 @@
     moves = [];
     marks = {};
     arrows = {};
+    curPos = 0;
+    mlKey = -1;
+    tipSnap = snapClone();
     drawAnnotations(-1, -1);
     positionChanged();
     render();
@@ -1286,7 +1316,6 @@
   function setSide(white) {
     if (thinking || pendingPromo || playerWhite === white) return;
     playerWhite = white;
-    flipped = !white;
     sel = -1; targetsMap = {};
     syncSideButtons();
     if (!over && st.wt !== playerWhite) maybeCpu();
@@ -1295,17 +1324,19 @@
   sideWBtn.addEventListener("click", function () { setSide(true); });
   sideBBtn.addEventListener("click", function () { setSide(false); });
   undoBtn.addEventListener("click", function () {
-    if (thinking || pendingPromo || !snaps.length) return;
+    if (thinking || pendingPromo || curPos === 0) return;
     var h;
-    for (h = snaps.length - 1; h >= 0; h--) if (snaps[h].s.wt === playerWhite) break;
-    jumpTo(h < 0 ? 0 : h);
+    for (h = curPos - 1; h >= 0; h--) if (snaps[h].s.wt === playerWhite) break;
+    goTo(h < 0 ? 0 : h);
   });
-  function jumpTo(keep) {
-    if (thinking || pendingPromo || !snaps.length) return;
-    keep = Math.max(0, Math.min(keep, snaps.length - 1));
-    var entry = snaps[keep];
-    snaps.length = keep;
-    moves.length = keep;
+  // Navigate to the position after `keep` half-moves WITHOUT deleting any
+  // history after it. Following history is only removed later, when a
+  // different move is actually made from that point (see recordMove).
+  function goTo(keep) {
+    if (thinking || pendingPromo) return;
+    keep = Math.max(0, Math.min(keep, moves.length));
+    var entry = keep === moves.length ? tipSnap : snaps[keep];
+    curPos = keep;
     thinkToken++;
     thinking = false;
     var s = entry.s;
@@ -1320,12 +1351,11 @@
     nodesTotal = entry.nodes;
     positionChanged();
     render();
-    if (st.wt !== playerWhite) maybeCpu();
   }
   moveListEl.addEventListener("click", function (e) {
     var btn = e.target.closest ? e.target.closest(".ml-mv") : null;
     if (!btn) return;
-    jumpTo(Number(btn.dataset.ply));
+    goTo(Number(btn.dataset.ply));
   });
   depthEl.addEventListener("input", function () {
     depth = Number(depthEl.value);
