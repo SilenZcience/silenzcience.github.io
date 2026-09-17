@@ -18,7 +18,7 @@
   width:100%;aspect-ratio:1;
   border:1px solid var(--line-2);
   --sq-lt:#B9B4A7;--sq-dk:#7E796D;--sq-last:#EFE3CC;
-  user-select:none;-webkit-user-select:none;touch-action:none;
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;
 }
 .sq{
   position:relative;display:flex;align-items:center;justify-content:center;
@@ -1060,7 +1060,12 @@
   }
 
   var drag = null, rmb = null, moveRaf = 0, moveEv = null;
+  var lpTimer = 0, lpId = -1, lpStart = { x: 0, y: 0 };
   var marks = {}, arrows = {};
+  function clearLp() {
+    if (lpTimer) { clearTimeout(lpTimer); lpTimer = 0; }
+    lpId = -1;
+  }
 
   function startGhost(d) {
     var el = sqEls[d.dp];
@@ -1091,9 +1096,9 @@
   function rmbDown(e) {
     var sq = sqFromPointer(e);
     if (sq < 0) return;
-    rmb = { sq: sq, cur: sq };
+    rmb = { sq: sq, cur: sq, pt: e.pointerType || "mouse" };
     if (boardEl.setPointerCapture) { try { boardEl.setPointerCapture(e.pointerId); } catch (_) {} }
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
   }
   function rmbMove(e) {
     if (!rmb) return;
@@ -1117,6 +1122,12 @@
     if (!d) return;
     var sqNow = e ? sqFromPointer(e) : -1;
     endDragVisual(d);
+    if (d.isT && !rmb) {
+      var ak;
+      for (ak in marks) { delete marks[ak]; }
+      for (ak in arrows) { delete arrows[ak]; }
+      drawAnnotations(-1, -1);
+    }
     if (d.moved) {
       if (sqNow >= 0 && sqNow !== d.sq && targetsMap[sqNow]) attemptMove(d.sq, sqNow);
       else render();
@@ -1169,20 +1180,40 @@
     }
     if (e.button !== 0 || e.isPrimary === false) return;
     if (rmb) return;
-    var annK;
-    for (annK in marks) { delete marks[annK]; }
-    for (annK in arrows) { delete arrows[annK]; }
-    drawAnnotations(-1, -1);
+    var isT = e.pointerType === "touch" || e.pointerType === "pen";
+    if (!isT) {
+      var annK;
+      for (annK in marks) { delete marks[annK]; }
+      for (annK in arrows) { delete arrows[annK]; }
+      drawAnnotations(-1, -1);
+    }
     if (thinking || over || pendingPromo) return;
     var sq = sqFromPointer(e);
     if (sq < 0) return;
     var p = st.b[sq];
     var own = !!(p && st.wt === playerWhite && ((p === p.toUpperCase()) === playerWhite));
+    if (isT) {
+      clearLp();
+      lpId = e.pointerId;
+      lpStart = { x: e.clientX, y: e.clientY };
+      lpTimer = setTimeout(function () {
+        lpTimer = 0;
+        if (drag) {
+          if (drag.hoverDp >= 0) sqEls[drag.hoverDp].classList.remove("over");
+          if (drag.ghost && document.body) document.body.removeChild(drag.ghost);
+          if (drag.srcImg) drag.srcImg.style.visibility = "";
+          drag = null;
+        }
+        sel = -1; targetsMap = {};
+        render();
+        rmbDown({ pointerId: lpId, clientX: lpStart.x, clientY: lpStart.y, pointerType: "touch" });
+      }, 500);
+    }
     drag = {
       sq: own ? sq : -1, dp: flipped ? 63 - sq : sq,
       moved: false, x0: e.clientX, y0: e.clientY,
       rect: boardEl.getBoundingClientRect(),
-      wasSel: own && sel === sq, ghost: null, srcImg: null, hoverDp: -1
+      wasSel: own && sel === sq, ghost: null, srcImg: null, hoverDp: -1, isT: isT
     };
     if (own) { sel = sq; buildTargets(); render(); }
     if (boardEl.setPointerCapture) { try { boardEl.setPointerCapture(e.pointerId); } catch (_) {} }
@@ -1190,12 +1221,19 @@
   });
   addEventListener("pointermove", function (e) {
     if (drag && !(e.buttons & 1)) { finishDrag(e); return; }
-    if (rmb && !(e.buttons & 2)) { finishRmb(e); return; }
+    if (rmb && !(e.buttons & (rmb.pt === "touch" ? 1 : 2))) { finishRmb(e); return; }
     if (rmb) { rmbMove(e); return; }
     if (!drag || drag.sq < 0) return;
     if (!drag.moved) {
       var ddx = e.clientX - drag.x0, ddy = e.clientY - drag.y0;
       if (ddx * ddx + ddy * ddy < 36) return;
+      clearLp();
+      if (drag.isT) {
+        var ak;
+        for (ak in marks) { delete marks[ak]; }
+        for (ak in arrows) { delete arrows[ak]; }
+        drawAnnotations(-1, -1);
+      }
       drag.moved = true;
       startGhost(drag);
     }
@@ -1223,14 +1261,22 @@
       else if (drag && !(e.buttons & 1)) finishDrag(e);
       return;
     }
-    if (e.button !== 0 || !drag) return;
+    clearLp();
+    if (e.button !== 0) return;
+    if (rmb) {
+      if (rmb.pt === "touch") finishRmb(e);
+      return;
+    }
+    if (!drag) return;
     finishDrag(e);
   });
   addEventListener("pointercancel", function (e) {
+    clearLp();
     if (drag) { try { finishDrag(e); } catch (_) {} }
     rmb = null;
   });
   addEventListener("blur", function () {
+    clearLp();
     if (drag) { endDragVisual(drag); drag = null; }
     rmb = null;
   });
