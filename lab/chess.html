@@ -323,7 +323,16 @@
        -20,-30,-30,-40,-40,-30,-30,-20,
        -10,-20,-20,-20,-20,-20,-20,-10,
         20, 20,  0,  0,  0,  0, 20, 20,
-        20, 30, 10,  0,  0, 10, 30, 20]
+        20, 30, 10,  0,  0, 10, 30, 20],
+    // Endgame king table:
+    ke:[-50,-30,-30,-30,-30,-30,-30,-50,
+       -30,-30,  0,  0,  0,  0,-30,-30,
+       -30,-10, 20, 30, 30, 20,-10,-30,
+       -30,-10, 30, 40, 40, 30,-10,-30,
+       -30,-10, 30, 40, 40, 30,-10,-30,
+       -30,-10, 20, 30, 30, 20,-10,-30,
+       -30,-20,-10,  0,  0,-10,-20,-30,
+       -50,-40,-30,-20,-20,-30,-40,-50]
   };
 
   // Board is a flat 64-array of single-char pieces (uppercase = white).
@@ -372,7 +381,8 @@
       b: b, wt: parts[1] === "w", cs: cs, ep: ep,
       half: parts.length > 4 ? (parseInt(parts[4], 10) || 0) : 0,
       full: parts.length > 5 ? (parseInt(parts[5], 10) || 1) : 1,
-      wk: wk, bk: bk, hist: []
+      wk: wk, bk: bk, hist: [],
+      key: repInit(b, parts[1] === "w", cs, ep)
     };
   }
 
@@ -513,22 +523,32 @@
   }
 
   // Apply a move to the state (mutating) — push a snapshot for unmake.
+  // The Zobrist key is kept in step with the board so isRepeat() can spot
+  // threefold repetitions anywhere on the search line.
   function make(st, m) {
-    var b = st.b;
+    var b = st.b, key = st.key;
+    var oCs = (st.cs.K ? 1 : 0) | (st.cs.Q ? 2 : 0) | (st.cs.k ? 4 : 0) | (st.cs.q ? 8 : 0);
+    var oEp = st.ep;
     st.hist.push({
       m: m,
       cs: { K: st.cs.K, Q: st.cs.Q, k: st.cs.k, q: st.cs.q },
-      ep: st.ep, half: st.half, wk: st.wk, bk: st.bk
+      ep: st.ep, half: st.half, wk: st.wk, bk: st.bk, key: st.key
     });
     var p = b[m.f];
+    var np = m.promo ? (st.wt ? m.promo : m.promo.toLowerCase()) : p;
     b[m.f] = null;
-    b[m.t] = m.promo ? (st.wt ? m.promo : m.promo.toLowerCase()) : p;
-    if (m.fl === 2) b[m.t + (st.wt ? 8 : -8)] = null;
+    b[m.t] = np;
+    key ^= ZB[m.f][PI[p]] ^ ZB[m.t][PI[np]];
+    if (m.c && m.fl !== 2) key ^= ZB[m.t][PI[m.c]];
+    if (m.fl === 2) {
+      b[m.t + (st.wt ? 8 : -8)] = null;
+      key ^= ZB[m.t + (st.wt ? 8 : -8)][PI[m.c]];
+    }
     if (m.fl === 3) {
-      if (m.t === 62) { b[63] = null; b[61] = "R"; }
-      else if (m.t === 58) { b[56] = null; b[59] = "R"; }
-      else if (m.t === 6) { b[7] = null; b[5] = "r"; }
-      else { b[0] = null; b[3] = "r"; }
+      if (m.t === 62) { b[63] = null; b[61] = "R"; key ^= ZB[63][PI["R"]] ^ ZB[61][PI["R"]]; }
+      else if (m.t === 58) { b[56] = null; b[59] = "R"; key ^= ZB[56][PI["R"]] ^ ZB[59][PI["R"]]; }
+      else if (m.t === 6) { b[7] = null; b[5] = "r"; key ^= ZB[7][PI["r"]] ^ ZB[5][PI["r"]]; }
+      else { b[0] = null; b[3] = "r"; key ^= ZB[0][PI["r"]] ^ ZB[3][PI["r"]]; }
     }
     if (p === "K") st.wk = m.t;
     else if (p === "k") st.bk = m.t;
@@ -539,9 +559,13 @@
     if (m.f === 56 || m.t === 56) st.cs.Q = false;
     if (m.f === 7 || m.t === 7) st.cs.k = false;
     if (m.f === 0 || m.t === 0) st.cs.q = false;
+    key ^= (oEp >= 0 ? ZEP[oEp] : 0n) ^ (st.ep >= 0 ? ZEP[st.ep] : 0n);
+    var nCs = (st.cs.K ? 1 : 0) | (st.cs.Q ? 2 : 0) | (st.cs.k ? 4 : 0) | (st.cs.q ? 8 : 0);
+    key ^= CST[oCs] ^ CST[nCs];
     st.half = (m.p.toLowerCase() === "p" || m.c) ? 0 : st.half + 1;
     if (!st.wt) st.full++;
     st.wt = !st.wt;
+    st.key = key ^ SIDE;
   }
 
   // Revert the last move from the snapshot stack.
@@ -560,6 +584,7 @@
       else { b[3] = null; b[0] = "r"; }
     }
     st.cs = u.cs; st.ep = u.ep; st.half = u.half; st.wk = u.wk; st.bk = u.bk;
+    st.key = u.key;
   }
 
   // Filter pseudo moves to legal ones: make, test king safety, unmake.
@@ -580,16 +605,25 @@
     return attacked(st.b, st.wt ? st.wk : st.bk, !st.wt);
   }
 
-  // Material + piece–square values from white's point of view.
+  // Material + piece–square values from white's point of view. The king uses
+  // a game-phase switch: weigh the non-pawn material left on the board
+  // (queen=4, rook=2, minor=1, summed over both sides, 24 at the start).
+  // Only once the phase drops to 8 or below — the heavy pieces are largely
+  // traded off — does the king stop sheltering and centralise.
   function evaluate(st) {
-    var b = st.b, s = 0, sq, p, lp;
+    var b = st.b, s = 0, sq, p, lp, phase = 0;
     for (sq = 0; sq < 64; sq++) {
       p = b[sq];
       if (!p) continue;
       lp = p.toLowerCase();
+      if (lp !== "k" && lp !== "p") phase += lp === "q" ? 4 : (lp === "r" ? 2 : 1);
+      if (lp === "k") continue;
       if (p === lp) s -= VAL[lp] + PST[lp][sq ^ 56];
       else s += VAL[lp] + PST[lp][sq];
     }
+    var ku = PST[phase <= 8 ? "ke" : "k"];
+    s += ku[st.wk];
+    s -= ku[st.bk ^ 56];
     return s;
   }
 
@@ -597,6 +631,48 @@
     var v = m.c ? VAL[m.c.toLowerCase()] * 10 - VAL[m.p.toLowerCase()] : 0;
     if (m.promo) v += VAL[m.promo.toLowerCase()];
     return v;
+  }
+
+  // --- Zobrist position keys (64-bit BigInt) for threefold-repetition
+  // detection inside the search: kept incrementally by make()/unmake(), so a
+  // node can check its own history in O(window) without rebuilding strings.
+  var zseed = 0x9E3779B9 | 0;
+  function zrnd() { zseed = (Math.imul(zseed, 1664525) + 1013904223) | 0; return zseed >>> 0; }
+  function zb64() { return (BigInt(zrnd()) << 32n) | BigInt(zrnd()); }
+  var ZB = [], zSq, zPi;
+  for (zSq = 0; zSq < 64; zSq++) {
+    var zRow = [];
+    for (zPi = 0; zPi < 12; zPi++) zRow.push(zb64());
+    ZB.push(zRow);
+  }
+  var SIDE = zb64(), CK = zb64(), CQ = zb64(), Ck = zb64(), Cq = zb64();
+  var ZEP = [];
+  for (zSq = 0; zSq < 64; zSq++) ZEP.push(zb64());
+  var CST = [];
+  for (zPi = 0; zPi < 16; zPi++) CST.push((zPi & 1 ? CK : 0n) ^ (zPi & 2 ? CQ : 0n) ^ (zPi & 4 ? Ck : 0n) ^ (zPi & 8 ? Cq : 0n));
+  var PI = { P: 0, N: 1, B: 2, R: 3, Q: 4, K: 5, p: 6, n: 7, b: 8, r: 9, q: 10, k: 11 };
+
+  // Hash a whole position from scratch (FEN loads / snapshot restores).
+  function repInit(b, wt, cs, ep) {
+    var key = wt ? SIDE : 0n, i;
+    for (i = 0; i < 64; i++) if (b[i]) key ^= ZB[i][PI[b[i]]];
+    key ^= CST[(cs.K ? 1 : 0) | (cs.Q ? 2 : 0) | (cs.k ? 4 : 0) | (cs.q ? 8 : 0)];
+    if (ep >= 0) key ^= ZEP[ep];
+    return key;
+  }
+
+  // Threefold repetition: has the current position occurred twice already
+  // within the last `half` plies (the window since the last capture/pawn
+  // move)? If so, this node is the third occurrence -> a draw (0).
+  function isRepeat(st) {
+    var key = st.key, h = st.hist, i, c = 0;
+    if (st.half < 8) return false;
+    for (i = h.length - 1, c = 0; i >= h.length - st.half && i >= 0; i--) {
+      if (h[i].key === key) {
+        if (++c >= 2) return true;
+      }
+    }
+    return false;
   }
 
   var nodes = 0;
@@ -628,6 +704,7 @@
   // ordering, and aspiration windows driven by the iterative-deepening caller.
   function negamax(st, depth, alpha, beta, ply) {
     nodes++;
+    if (isRepeat(st)) return 0;
     if (st.half >= 100) return 0;
     if (depth <= 0) {
       if (inCheck(st)) {
@@ -672,24 +749,26 @@
       }
       return pool[(Math.random() * pool.length) | 0];
     }
-    var best = null, bestNoisy = -INF, alpha = -INF, i, m, raw, noisy;
+    var best = null, alpha = -INF, i, m, raw;
     for (i = 0; i < ms.length; i++) {
       m = ms[i];
       make(st, m);
       if (alpha === -INF) {
         raw = -negamax(st, dd - 1, -INF, INF, 1);
       } else {
-        raw = -negamax(st, dd - 1, -(alpha + 1), -alpha, 1);
+        raw = -negamax(st, dd - 1, -(alpha + 1), -(alpha - 1), 1);
         if (raw > alpha) raw = -negamax(st, dd - 1, -INF, INF, 1);
       }
       unmake(st, m);
-      noisy = raw + Math.random() * 6 - 3;
-      if (best === null || raw > alpha) {
-        if (best === null || noisy > bestNoisy) { best = m; bestNoisy = noisy; }
-        if (raw > alpha) alpha = raw;
+      if (raw > alpha) {
+        alpha = raw;
+        best = [m];
+      } else if (raw === alpha) {
+        best.push(m);
       }
     }
-    return best;
+    if (!best) return null;
+    return best[(Math.random() * best.length) | 0];
   }
 
   var boardEl = document.getElementById("board");
@@ -729,7 +808,8 @@
       s: {
         b: st.b.slice(), wt: st.wt,
         cs: { K: st.cs.K, Q: st.cs.Q, k: st.cs.k, q: st.cs.q },
-        ep: st.ep, half: st.half, full: st.full, wk: st.wk, bk: st.bk
+        ep: st.ep, half: st.half, full: st.full, wk: st.wk, bk: st.bk,
+        key: st.key
       },
       last: lastMove,
       nodes: nodesTotal
@@ -1396,7 +1476,7 @@
       b: s.b.slice(), wt: s.wt,
       cs: { K: s.cs.K, Q: s.cs.Q, k: s.cs.k, q: s.cs.q },
       ep: s.ep, half: s.half, full: s.full,
-      wk: s.wk, bk: s.bk, hist: []
+      wk: s.wk, bk: s.bk, hist: [], key: s.key
     };
     lastMove = entry.last;
     sel = -1; targetsMap = {};
