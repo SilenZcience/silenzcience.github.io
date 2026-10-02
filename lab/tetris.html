@@ -165,6 +165,7 @@
 
   var COLS = 10, ROWS = 20, CELL = 30, WIDTH = 300, HEIGHT = 600;
   var LOCK_DELAY = 500, SOFT_DROP_INTERVAL = 38, DAS = 145, ARR = 38, CLEAR_DURATION = 190, LONG_PRESS_DELAY = 450;
+  var SWIPE_UP_RATIO = .26, SWIPE_UP_MIN = 100, HARD_DROP_LOCKOUT = 320;
   var SHAPE_NAMES = ["I", "J", "L", "O", "S", "T", "Z"];
   var SHAPES = {
     I: [
@@ -922,7 +923,7 @@
     if (key === "arrowdown" || key === "s") releaseSoft();
   });
 
-  var gesture = null, holdTimer = 0;
+  var gesture = null, holdTimer = 0, dropLockedUntil = 0;
   function clearHoldTimer() {
     if (!holdTimer) return;
     clearTimeout(holdTimer);
@@ -934,7 +935,7 @@
     clearHoldTimer();
     cv.setPointerCapture(event.pointerId);
     var pointerId = event.pointerId;
-    gesture = { id: pointerId, x: event.clientX, y: event.clientY, moved: false };
+    gesture = { id: pointerId, x: event.clientX, y: event.clientY, oy: event.clientY, moved: false, dropped: false };
     if (event.pointerType === "touch" || event.pointerType === "pen") {
       holdTimer = setTimeout(function () {
         holdTimer = 0;
@@ -947,12 +948,31 @@
   cv.addEventListener("pointermove", function (event) {
     if (!gesture || event.pointerId !== gesture.id) return;
     event.preventDefault();
+    var box = cv.getBoundingClientRect();
     var dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
-    var threshold = Math.max(16, cv.getBoundingClientRect().width * .075);
+    var threshold = Math.max(16, box.width * .075);
+    // A hard drop is deliberately hard to trigger by accident: it needs a long
+    // upward travel measured from where the finger went down (not from the last
+    // move), it only ever fires once per touch, and a drop just performed keeps
+    // the next one locked out for a moment.
+    var upTravel = gesture.oy - event.clientY;
+    var dropThreshold = Math.max(SWIPE_UP_MIN, box.height * SWIPE_UP_RATIO);
+    if (!gesture.dropped && upTravel >= dropThreshold && Math.abs(dy) > Math.abs(dx)) {
+      clearHoldTimer();
+      gesture.dropped = true;
+      gesture.moved = true;
+      gesture.x = event.clientX;
+      gesture.y = event.clientY;
+      if (performance.now() >= dropLockedUntil) {
+        dropLockedUntil = performance.now() + HARD_DROP_LOCKOUT;
+        performAction("drop");
+      }
+      return;
+    }
     if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return;
     clearHoldTimer();
     if (Math.abs(dx) > Math.abs(dy)) performAction(dx > 0 ? "right" : "left");
-    else performAction(dy > 0 ? "down" : "drop");
+    else if (dy > 0) performAction("down");
     gesture.x = event.clientX;
     gesture.y = event.clientY;
     gesture.moved = true;
