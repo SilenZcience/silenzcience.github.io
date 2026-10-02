@@ -278,26 +278,37 @@
       .catch(() => {});
   })();
 
-  // Inject the real totals into the data-lab-total / data-dossier-total
-  // placeholders. Lab total comes from the injected panel entries, dossier
-  // total from the index .files list (fetched on dossier pages).
+  // Inject the real totals into the data-lab-total / data-dossier-total /
+  // data-blog-post-total placeholders. Lab total comes from the injected
+  // panel entries, dossier and blog-post totals from their .files lists
+  // on the index (fetched on dossier/blog-post pages).
   function autoNumber(base) {
     const pad = n => String(n).padStart(2, "0");
     const labCount = $$(".lab-link").length;
     if (labCount) {
       $$("[data-lab-total]").forEach(el => { el.textContent = pad(labCount); });
     }
-    const dossierCount = $$(".files li").length;
-    if (dossierCount) {
-      $$("[data-dossier-total]").forEach(el => { el.textContent = pad(dossierCount); });
-    } else if (/\/dossiers\//.test(location.pathname)) {
+    const inBlogPosts = /\/blog-posts\//.test(location.pathname);
+    const inDossiers = /\/dossiers\//.test(location.pathname);
+    const countRows = (sectionSel, attr) => {
+      const list = $(sectionSel + " .files");
+      if (!list) return;
+      const n = list.querySelectorAll("li").length;
+      if (n) $$(attr).forEach(el => { el.textContent = pad(n); });
+    };
+    countRows("#work", "[data-dossier-total]");
+    countRows("#blog-posts", "[data-blog-post-total]");
+    if (inDossiers || inBlogPosts) {
+      const sectionSel = inBlogPosts ? "#blog-posts" : "#work";
+      const attr = inBlogPosts ? "[data-blog-post-total]" : "[data-dossier-total]";
       fetch(base + "index.html")
         .then(r => r.ok ? r.text() : "")
         .then(html => {
           const tmp = document.createElement("div");
           tmp.innerHTML = html;
-          const n = tmp.querySelectorAll(".files li").length;
-          if (n) $$("[data-dossier-total]").forEach(el => { el.textContent = pad(n); });
+          const list = tmp.querySelector(sectionSel + " .files");
+          const n = list ? list.querySelectorAll("li").length : 0;
+          if (n) $$(attr).forEach(el => { el.textContent = pad(n); });
         })
         .catch(() => {});
     }
