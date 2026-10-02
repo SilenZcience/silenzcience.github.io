@@ -12,7 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="../style.css">
 <style>
-.board-wrap{position:relative;width:min(100%,600px);margin-inline:auto}
+.board-wrap{position:relative;width:min(100%,600px);margin-inline:auto;--plan:#f95cc9}
 .chess{
   display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);
   width:100%;aspect-ratio:1;
@@ -27,7 +27,7 @@
 .sq.lt{background:var(--sq-lt)}
 .sq.dk{background:var(--sq-dk)}
 .sq:hover{filter:brightness(1.12)}
-.sq img{width:82%;height:82%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+.sq img{position:relative;z-index:1;width:82%;height:82%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
 .sq img.w{filter:drop-shadow(0 1px 0 rgba(0,0,0,.55)) drop-shadow(0 0 2px rgba(0,0,0,.3))}
 .sq img.b{filter:drop-shadow(0 0 2px rgba(244,239,227,.55))}
 .sq.last{background-color:var(--sq-last)}
@@ -37,16 +37,17 @@
 .sq.lt .lbl{color:var(--sq-dk)}
 .sq.dk .lbl{color:var(--sq-lt)}
 .sq.sel{box-shadow:inset 0 0 0 3px var(--ink)}
+.sq.mk::before{content:"";position:absolute;inset:4%;z-index:0;pointer-events:none;
+  background:rgba(249,92,201,.4);border:2px solid rgba(249,92,201,.9)}
 .sq.chk{box-shadow:inset 0 0 0 3px #E05252,inset 0 0 18px rgba(0,0,0,.4);background-image:linear-gradient(rgba(214,69,69,.5),rgba(214,69,69,.5))}
 .sq.tgt::after{content:"";position:absolute;width:28%;height:28%;border-radius:50%;background:var(--accent);opacity:.9;border:2px solid var(--bg);box-sizing:border-box;pointer-events:none;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%)}
 .sq.cap::after{content:"";position:absolute;inset:8%;border-radius:50%;border:3px solid var(--accent);box-sizing:border-box;box-shadow:0 0 0 1.5px var(--bg);pointer-events:none;z-index:2}
 .sq.over{box-shadow:inset 0 0 0 3px var(--ink)}
 .drag-ghost{position:fixed;left:0;top:0;z-index:60;pointer-events:none;opacity:.92;will-change:transform}
-#ann{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
-#ann .ar{stroke:var(--ink);stroke-width:1.8;opacity:.62}
+#ann{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:3}
+#ann .ar{stroke:var(--plan);stroke-width:1.8;opacity:.8}
 #ann .arp{opacity:.3}
-#ann .mk{fill:var(--ink);fill-opacity:.4;stroke:var(--ink);stroke-opacity:.8;stroke-width:.5}
-#ann .ah{fill:var(--ink);opacity:.62}
+#ann .ah{fill:var(--plan);opacity:.8}
 #ann .arp{opacity:.3}
 .promo{
   position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:3;
@@ -918,6 +919,7 @@
       var cls = "sq " + ((((dp >> 3) + (dp & 7)) % 2) ? "dk" : "lt");
       if (lastMove && (sq === lastMove.f || sq === lastMove.t)) cls += " last";
       if (sq === sel) cls += " sel";
+      if (marks[sq]) cls += " mk";
       if (sq === chkSq) cls += " chk";
       if (targetsMap[sq]) cls += " " + targetsMap[sq];
       el.className = cls;
@@ -1219,10 +1221,6 @@
     }
   }
 
-  function annMark(sq) {
-    var dp = flipped ? 63 - sq : sq;
-    return '<rect class="mk" x="' + ((dp & 7) * 10 + 0.7) + '" y="' + ((dp >> 3) * 10 + 0.7) + '" width="8.6" height="8.6"/>';
-  }
   function annArrow(f, t, preview) {
     function ctr(sq) { var dp = flipped ? 63 - sq : sq; return [(dp & 7) * 10 + 5, (dp >> 3) * 10 + 5]; }
     var a = ctr(f), b = ctr(t);
@@ -1242,9 +1240,9 @@
   }
   // Mark squares the opponent can capture (used to warn about hanging pieces).
   function drawAnnotations(pf, pt) {
-    var s = "";
+    var s = "", d;
     var k, p2;
-    for (k in marks) s += annMark(Number(k));
+    for (d = 0; d < 64; d++) sqEls[d].classList.toggle("mk", !!marks[flipped ? 63 - d : d]);
     for (k in arrows) { p2 = k.split("-"); s += annArrow(Number(p2[0]), Number(p2[1]), false); }
     if (pf >= 0 && pt >= 0 && pf !== pt) s += annArrow(pf, pt, true);
     annEl.innerHTML = s;
