@@ -44,6 +44,20 @@
       background: radial-gradient(120% 120% at 50% 0%, var(--bg-2) 0%, var(--bg) 100%);
       box-shadow: 0 40px 80px -60px rgba(188, 156, 98, 0.4);
     }
+    .play-btn {
+      display: block; width: 100%;
+      margin-top: 14px; padding: 14px 17px;
+      font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--dim); background: none;
+      border: 1px solid var(--line-2);
+      text-align: center; text-decoration: none;
+      cursor: pointer; user-select: none; -webkit-user-select: none;
+      transition: background .2s ease, color .2s ease, border-color .2s ease;
+    }
+    .play-btn:hover {
+      background: var(--ink); color: var(--bg); border-color: var(--ink);
+    }
 
     @keyframes blink {
       0%, 92%, 100% { transform: scaleY(1); }
@@ -164,6 +178,7 @@
       <text id="userText" x="260" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
       <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · snake</text>
     </svg>
+    <a class="play-btn" href="../lab/snake.html">Try to beat it →</a>
   </main>
 
   <script src="../share-utils.js"></script>
