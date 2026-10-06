@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sudoku High Score — Silas Kraume</title>
+  <meta name="description" content="Sudoku high score">
+  <meta name="theme-color" content="#141413">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141413;
+      --bg-2: #1B1B19;
+      --ink: #EDEBE6;
+      --dim: #908E86;
+      --faint: #5F5D57;
+      --accent: #BC9C62;
+      --line: rgba(237,235,230,0.08);
+      --line-2: rgba(237,235,230,0.22);
+      --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+      --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", "Courier New", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .card { width: 100%; max-width: 520px; }
+    .svg-card {
+      width: 100%; height: auto; display: block;
+      border: 1px solid var(--line-2);
+      background: radial-gradient(120% 120% at 50% 0%, var(--bg-2) 0%, var(--bg) 100%);
+      box-shadow: 0 40px 80px -60px rgba(188, 156, 98, 0.4);
+    }
+
+    @keyframes scoreGlow {
+      0%, 100% { opacity: .04; }
+      50%      { opacity: .11; }
+    }
+    @keyframes sheen {
+      0%       { transform: translateX(-160px); opacity: 0; }
+      12%      { opacity: .05; }
+      50%      { opacity: .05; }
+      88%      { opacity: 0; }
+      100%     { transform: translateX(560px); opacity: 0; }
+    }
+    /* The gold "cursor" cell rasters the ghost board one cell at a time
+       (81 cells, 0.15s each, steps(1,end) = jump per segment), like a
+       solver scanning 1x1 cells for the next placement. */
+    @keyframes scanRun {
+      0%     { transform: translate(0px, 0px); }
+      1.2346% { transform: translate(16px, 0px); }
+      2.4691% { transform: translate(32px, 0px); }
+      3.7037% { transform: translate(48px, 0px); }
+      4.9383% { transform: translate(64px, 0px); }
+      6.1728% { transform: translate(80px, 0px); }
+      7.4074% { transform: translate(96px, 0px); }
+      8.642%  { transform: translate(112px, 0px); }
+      9.8765% { transform: translate(128px, 0px); }
+      11.1111% { transform: translate(0px, 16px); }
+      12.3457% { transform: translate(16px, 16px); }
+      13.5802% { transform: translate(32px, 16px); }
+      14.8148% { transform: translate(48px, 16px); }
+      16.0494% { transform: translate(64px, 16px); }
+      17.284%  { transform: translate(80px, 16px); }
+      18.5185% { transform: translate(96px, 16px); }
+      19.7531% { transform: translate(112px, 16px); }
+      20.9877% { transform: translate(128px, 16px); }
+      22.2222% { transform: translate(0px, 32px); }
+      23.4568% { transform: translate(16px, 32px); }
+      24.6914% { transform: translate(32px, 32px); }
+      25.9259% { transform: translate(48px, 32px); }
+      27.1605% { transform: translate(64px, 32px); }
+      28.3951% { transform: translate(80px, 32px); }
+      29.6296% { transform: translate(96px, 32px); }
+      30.8642% { transform: translate(112px, 32px); }
+      32.0988% { transform: translate(128px, 32px); }
+      33.3333% { transform: translate(0px, 48px); }
+      34.5679% { transform: translate(16px, 48px); }
+      35.8025% { transform: translate(32px, 48px); }
+      37.037%  { transform: translate(48px, 48px); }
+      38.2716% { transform: translate(64px, 48px); }
+      39.5062% { transform: translate(80px, 48px); }
+      40.7407% { transform: translate(96px, 48px); }
+      41.9753% { transform: translate(112px, 48px); }
+      43.2099% { transform: translate(128px, 48px); }
+      44.4444% { transform: translate(0px, 64px); }
+      45.679%  { transform: translate(16px, 64px); }
+      46.9136% { transform: translate(32px, 64px); }
+      48.1481% { transform: translate(48px, 64px); }
+      49.3827% { transform: translate(64px, 64px); }
+      50.6173% { transform: translate(80px, 64px); }
+      51.8519% { transform: translate(96px, 64px); }
+      53.0864% { transform: translate(112px, 64px); }
+      54.321%  { transform: translate(128px, 64px); }
+      55.5556% { transform: translate(0px, 80px); }
+      56.7901% { transform: translate(16px, 80px); }
+      58.0247% { transform: translate(32px, 80px); }
+      59.2593% { transform: translate(48px, 80px); }
+      60.4938% { transform: translate(64px, 80px); }
+      61.7284% { transform: translate(80px, 80px); }
+      62.963%  { transform: translate(96px, 80px); }
+      64.1975% { transform: translate(112px, 80px); }
+      65.4321% { transform: translate(128px, 80px); }
+      66.6667% { transform: translate(0px, 96px); }
+      67.9012% { transform: translate(16px, 96px); }
+      69.1358% { transform: translate(32px, 96px); }
+      70.3704% { transform: translate(48px, 96px); }
+      71.6049% { transform: translate(64px, 96px); }
+      72.8395% { transform: translate(80px, 96px); }
+      74.0741% { transform: translate(96px, 96px); }
+      75.3086% { transform: translate(112px, 96px); }
+      76.5432% { transform: translate(128px, 96px); }
+      77.7778% { transform: translate(0px, 112px); }
+      79.0123% { transform: translate(16px, 112px); }
+      80.2469% { transform: translate(32px, 112px); }
+      81.4815% { transform: translate(48px, 112px); }
+      82.716%  { transform: translate(64px, 112px); }
+      83.9506% { transform: translate(80px, 112px); }
+      85.1852% { transform: translate(96px, 112px); }
+      86.4198% { transform: translate(112px, 112px); }
+      87.6543% { transform: translate(128px, 112px); }
+      88.8889% { transform: translate(0px, 128px); }
+      90.1235% { transform: translate(16px, 128px); }
+      91.358%  { transform: translate(32px, 128px); }
+      92.5926% { transform: translate(48px, 128px); }
+      93.8272% { transform: translate(64px, 128px); }
+      95.0617% { transform: translate(80px, 128px); }
+      96.2963% { transform: translate(96px, 128px); }
+      97.5309% { transform: translate(112px, 128px); }
+      98.7654% { transform: translate(128px, 128px); }
+      100%    { transform: translate(0, 0); }
+    }
+    @keyframes boardIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .score-glow { animation: scoreGlow 6s ease-in-out infinite; }
+    .sheen      { animation: sheen 11s ease-in-out infinite; }
+    .scan-hl    { animation: scanRun 12.15s steps(1, end) infinite; fill: rgba(188,156,98,0.32); stroke: rgba(188,156,98,0.6); stroke-width: 1; }
+    .board-fade { animation: boardIn 2.4s ease-out forwards; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .score-glow, .sheen, .scan-hl, .board-fade { animation: none; }
+      .scan-hl { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <svg class="svg-card" viewBox="0 0 520 260" role="img" aria-label="Sudoku high score">
+      <defs>
+        <radialGradient id="g" cx="50%" cy="0%" r="120%">
+          <stop offset="0%" stop-color="#1F1F1B" stop-opacity="1" />
+          <stop offset="100%" stop-color="#141413" stop-opacity="1" />
+        </radialGradient>
+        <radialGradient id="accentGlow">
+          <stop offset="0%" stop-color="#BC9C62" stop-opacity="1" />
+          <stop offset="100%" stop-color="#BC9C62" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="sheenGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#EDEBE6" stop-opacity="0" />
+          <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
+          <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
+        </linearGradient>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
+        </pattern>
+        <clipPath id="frame"><rect x="1" y="1" width="518" height="258" /></clipPath>
+      </defs>
+
+      <rect width="520" height="260" fill="url(#g)" />
+      <rect width="520" height="260" fill="url(#grid)" opacity="0.08" />
+
+      <ellipse class="score-glow" cx="86" cy="164" rx="120" ry="62" fill="url(#accentGlow)" />
+
+      <g clip-path="url(#frame)">
+        <rect class="sheen" x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" />
+      </g>
+
+      <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
+
+      <!-- Ghost 9×9 board behind the card text; a single gold cell cursor
+           rasters it row by row and a few faint givens sit where the player
+           left them. -->
+      <g id="ghostBoard" class="board-fade">
+        <g stroke="rgba(237,235,230,0.05)" stroke-width="0.5" fill="none">
+          <path d="M344 70 V214 M360 70 V214 M392 70 V214 M408 70 V214 M440 70 V214 M456 70 V214" />
+          <path d="M328 86 H472 M328 102 H472 M328 134 H472 M328 150 H472 M328 182 H472 M328 198 H472" />
+        </g>
+        <g stroke="rgba(237,235,230,0.10)" stroke-width="1" fill="none">
+          <path d="M376 70 V214 M424 70 V214" />
+          <path d="M328 118 H472 M328 166 H472" />
+        </g>
+        <rect x="328" y="70" width="144" height="144" fill="none" stroke="rgba(237,235,230,0.16)" stroke-width="1" />
+        <g class="giv" fill="#5F5D57" font-family="var(--font-mono)" font-size="12" text-anchor="middle" dominant-baseline="central" opacity="0.42">
+          <text x="352" y="78">4</text><text x="400" y="78">8</text><text x="448" y="78">3</text>
+          <text x="336" y="94">2</text><text x="384" y="94">6</text><text x="416" y="94">1</text><text x="464" y="94">9</text>
+          <text x="368" y="110">7</text><text x="432" y="110">5</text>
+          <text x="352" y="142">3</text><text x="400" y="142">9</text><text x="448" y="142">6</text>
+          <text x="368" y="158">1</text><text x="416" y="158">4</text><text x="464" y="158">7</text>
+          <text x="336" y="174">5</text><text x="384" y="174">8</text><text x="432" y="174">2</text>
+        </g>
+        <rect class="scan-hl" x="328" y="70" width="16" height="16" />
+      </g>
+
+      <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 08</text>
+      <text id="titleText" x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Sudoku High Score</text>
+      <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Mistakes</text>
+      <text id="mistText" x="32" y="128" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">—</text>
+      <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Time</text>
+      <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">0:00:00</text>
+      <text x="260" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
+      <text id="userText" x="260" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
+      <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · sudoku</text>
+    </svg>
+  </main>
+
+  <script src="../share-utils.js"></script>
+  <script>
+    (function () {
+      function getParam(name) {
+        var url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      }
+
+      var diffLabels = { easy: 'Easy', medium: 'Medium', hard: 'Hard', evil: 'Expert' };
+
+      var username = getParam('username') || 'Anonymous';
+      var time = Math.max(0, parseInt(getParam('time'), 10) || 0);
+      var difficulty = getParam('difficulty') || '';
+      var mistakes = getParam('mistakes') || '';
+      var token = getParam('t');
+      if (token) {
+        try {
+          var data = deobfuscateShare(token);
+          if (data && typeof data.n !== 'undefined' && typeof data.s !== 'undefined') {
+            username = String(data.n).slice(0, 60);
+            time = Math.max(0, Math.floor(Number(data.s) || 0));
+            if (data.d) difficulty = String(data.d);
+            if (typeof data.m !== 'undefined') mistakes = String(data.m);
+          }
+        } catch (e) {}
+      }
+
+      var titleText = document.getElementById('titleText');
+      if (titleText && difficulty && diffLabels[difficulty]) {
+        titleText.textContent = diffLabels[difficulty] + ' Sudoku High Score';
+      }
+
+      var scoreText = document.getElementById('scoreText');
+      if (scoreText) {
+        var hh = Math.floor(time / 3600);
+        var mm = Math.floor((time % 3600) / 60);
+        var ss = time % 60;
+        scoreText.textContent = hh + ':' + (mm < 10 ? '0' + mm : mm) + ':' + (ss < 10 ? '0' + ss : ss);
+        // Keep the H:MM:SS string clear of the Mistakes/Player column if it gets wide.
+        var fs = 52, minFs = 30, boxW = 224;
+        scoreText.setAttribute('font-size', String(fs));
+        while (scoreText.getComputedTextLength() > boxW && fs > minFs) {
+          fs -= 0.5; scoreText.setAttribute('font-size', String(fs));
+        }
+      }
+
+      var mistText = document.getElementById('mistText');
+      if (mistText) {
+        var mNum = String(mistakes).replace(/[^0-9]/g, '');
+        mistText.textContent = mNum ? String(parseInt(mNum, 10)) : '—';
+        var mSize = 22, mBox = 96;
+        mistText.setAttribute('font-size', String(mSize));
+        var mGuard = 0;
+        while (mistText.getComputedTextLength() > mBox && mSize > 12 && mGuard++ < 50) {
+          mSize -= 0.5; mistText.setAttribute('font-size', String(mSize));
+        }
+      }
+
+      var userText = document.getElementById('userText');
+      if (userText) {
+        userText.textContent = username;
+        var baseSize = 22, minSize = 11, fontSize = baseSize;
+        var boxWidth = 230;
+        userText.setAttribute('font-size', String(fontSize));
+        var guard = 0;
+        while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
+          fontSize -= 0.5; userText.setAttribute('font-size', String(fontSize));
+        }
+        if (userText.getComputedTextLength() > boxWidth && fontSize <= minSize) {
+          var maxChars = Math.floor(boxWidth / (fontSize * 0.55));
+          if (username.length > maxChars && maxChars > 1) {
+            userText.textContent = username.slice(0, maxChars - 1) + '…';
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

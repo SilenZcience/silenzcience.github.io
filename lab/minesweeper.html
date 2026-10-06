@@ -117,6 +117,7 @@
 </main>
 
 <script src="../main.js" defer></script>
+<script src="../share-utils.js"></script>
 <script>
 (function () {
   "use strict";
@@ -300,6 +301,7 @@
     }
     placed = false; over = false; revealed = 0; flagged = 0; seconds = 0;
     stopTimer();
+    removeShare();
     overlay.classList.add("hide");
     updStats();
     draw();
@@ -339,6 +341,82 @@
     }
   }
 
+  function removeShare() {
+    var ex = document.getElementById("shareBtn");
+    if (ex && ex.parentNode) ex.parentNode.removeChild(ex);
+  }
+
+  function copyTextToClipboard(text, btn, resetLabel) {
+    function done(msg, ms) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = resetLabel; }, ms);
+    }
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) { done("Link copied!", 2000); return; }
+      } catch (e) {}
+      done("Share link: " + text, 4000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done("Link copied!", 2000); }).catch(legacy);
+    } else {
+      legacy();
+    }
+  }
+
+  function offerShare() {
+    if (typeof obfuscateShare !== "function") return;
+    setTimeout(function () {
+      var overlayDiv = document.getElementById("overlay");
+      if (!overlayDiv || document.getElementById("shareBtn")) return;
+      var btn = document.createElement("button");
+      btn.id = "shareBtn";
+      btn.className = "ctrl";
+      btn.type = "button";
+      btn.style.marginTop = "16px";
+      btn.textContent = "Share your clear time";
+      btn.onclick = function (e) {
+        e.stopPropagation();
+        var username = window.prompt("Enter your username for the share card:", "Player");
+        if (username === null) return;
+        var cleanUser = (username || "Player").trim().slice(0, 40);
+        if (!cleanUser) cleanUser = "Player";
+        var token = obfuscateShare({
+          n: cleanUser,
+          s: Math.max(0, Math.floor(seconds || 0)),
+          w: cols,
+          h: rows,
+          g: "minesweeper"
+        });
+        var url = window.location.origin + "/highscoresvg/minesweeper.html?t=" + token;
+        if (navigator.share) {
+          navigator.share({
+            title: "My " + cols + "×" + rows + " Minesweeper Time",
+            text: "Check out my Minesweeper clear time!",
+            url: url
+          }).catch(function () {});
+          return;
+        }
+        try {
+          window.open(url, "_blank", "noopener,noreferrer");
+          return;
+        } catch (err) {}
+        copyTextToClipboard(url, btn, "Share your clear time");
+      };
+      var container = overlayDiv.querySelector("div");
+      if (container) container.appendChild(btn);
+    }, 0);
+  }
+
   function endWin() {
     over = true;
     stopTimer();
@@ -346,6 +424,7 @@
     ovMsg.textContent = "Field cleared.";
     ovSub.textContent = fmtTime() + " — clean sweep";
     overlay.classList.remove("hide");
+    offerShare();
   }
 
   // Loss: reveal every mine, mark misplaced flags (✕).

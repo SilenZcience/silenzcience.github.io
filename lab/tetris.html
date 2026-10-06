@@ -159,6 +159,7 @@
 </main>
 
 <script src="../main.js" defer></script>
+<script src="../share-utils.js"></script>
 <script>
 (function () {
   "use strict";
@@ -305,6 +306,73 @@
   var lastAction = "drop", lastKick = 0, last = performance.now(), hudElapsed = 0;
   var keyboardLeft = false, keyboardRight = false, keyboardSoft = false;
   var repeatElapsed = 0, softElapsed = 0;
+
+  function removeShare() {
+    var ex = document.getElementById("shareBtn");
+    if (ex && ex.parentNode) ex.parentNode.removeChild(ex);
+  }
+
+  function copyTextToClipboard(text, btn, resetLabel) {
+    function done(msg, ms) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = resetLabel; }, ms);
+    }
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) { done("Link copied!", 2000); return; }
+      } catch (e) {}
+      done("Share link: " + text, 4000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done("Link copied!", 2000); }).catch(legacy);
+    } else {
+      legacy();
+    }
+  }
+
+  // End-of-run share: obfuscated token pointing at the SVG high score card.
+  function offerShare(score, lines) {
+    if (typeof obfuscateShare !== "function") return;
+    setTimeout(function () {
+      var overlayDiv = document.getElementById("overlay");
+      if (!overlayDiv || document.getElementById("shareBtn")) return;
+      var btn = document.createElement("button");
+      btn.id = "shareBtn";
+      btn.className = "ctrl";
+      btn.type = "button";
+      btn.style.marginTop = "16px";
+      btn.textContent = "Share your highscore";
+      btn.onclick = function (e) {
+        e.stopPropagation();
+        var username = window.prompt("Enter your username for the share card:", "Player");
+        if (username === null) return;
+        var cleanUser = (username || "Player").trim().slice(0, 40);
+        if (!cleanUser) cleanUser = "Player";
+        var token = obfuscateShare({ n: cleanUser, s: Math.max(0, Math.floor(score || 0)), l: Math.max(0, Math.floor(lines || 0)), g: "tetris" });
+        var url = window.location.origin + "/highscoresvg/tetris.html?t=" + token;
+        if (navigator.share) {
+          navigator.share({ title: "My Tetris High Score", text: "Check out my Tetris high score — " + score + " points, " + lines + " lines cleared!", url: url }).catch(function () {});
+          return;
+        }
+        try {
+          window.open(url, "_blank", "noopener,noreferrer");
+          return;
+        } catch (err) {}
+        copyTextToClipboard(url, btn, "Share your highscore");
+      };
+      var container = overlayDiv.querySelector("div");
+      if (container) container.appendChild(btn);
+    }, 0);
+  }
 
   function roundRect(context, x, y, width, height, radius) {
     var r = Math.min(radius, width / 2, height / 2);
@@ -493,6 +561,7 @@
     ovSub.textContent = submessage;
     overlay.classList.remove("hide");
     overlay.setAttribute("aria-hidden", "false");
+    removeShare();
   }
   function hideOverlay() {
     overlay.classList.add("hide");
@@ -557,6 +626,7 @@
     } else {
       showOverlay("Stack overflow.", score.toLocaleString() + " points · " + lines + " lines");
     }
+    if (score > 0) offerShare(score, lines);
 
   }
   function resetGame(startNow) {

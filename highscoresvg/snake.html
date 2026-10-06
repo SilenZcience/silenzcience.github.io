@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snake High Score — Silas Kraume</title>
+  <meta name="description" content="Snake high score">
+  <meta name="theme-color" content="#141413">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #141413;
+      --bg-2: #1B1B19;
+      --ink: #EDEBE6;
+      --dim: #908E86;
+      --faint: #5F5D57;
+      --accent: #BC9C62;
+      --line: rgba(237,235,230,0.08);
+      --line-2: rgba(237,235,230,0.22);
+      --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+      --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", "Courier New", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .card { width: 100%; max-width: 520px; }
+    .svg-card {
+      width: 100%; height: auto; display: block;
+      border: 1px solid var(--line-2);
+      background: radial-gradient(120% 120% at 50% 0%, var(--bg-2) 0%, var(--bg) 100%);
+      box-shadow: 0 40px 80px -60px rgba(188, 156, 98, 0.4);
+    }
+
+    @keyframes blink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95%           { transform: scaleY(.08); }
+    }
+    @keyframes scoreGlow {
+      0%, 100% { opacity: .04; }
+      50%      { opacity: .11; }
+    }
+    @keyframes sheen {
+      0%       { transform: translateX(-160px); opacity: 0; }
+      12%      { opacity: .05; }
+      50%      { opacity: .05; }
+      88%      { opacity: 0; }
+      100%     { transform: translateX(560px); opacity: 0; }
+    }
+    @keyframes foodBreathe {
+      0%, 100% { transform: scale(.25); }
+      50%      { transform: scale(1.08); }
+    }
+    @keyframes foodGlowBreathe {
+      0%, 100% { opacity: .01; transform: scale(.25); }
+      50%      { opacity: .12; transform: scale(1.16); }
+    }
+    @keyframes headChomp {
+      0%, 100% { transform: translateX(0) scale(1); }
+      20%      { transform: translateX(1px) scale(.98); }
+      40%      { transform: translateX(0.5px) scale(.99); }
+    }
+
+    .food        { animation: foodBreathe 2.0s ease-in-out infinite; transform-origin: 240px 130px; }
+    .food-glow   { animation: foodGlowBreathe 2.0s ease-in-out infinite; transform-origin: 240px 130px; }
+    .eyes        { animation: blink 6.5s ease-in-out infinite; transform-origin: 227px 130px; }
+    .head        { animation: headChomp 2.0s ease-in-out infinite; transform-origin: 227px 130px; }
+    .score-glow  { animation: scoreGlow 6s ease-in-out infinite; }
+    .sheen       { animation: sheen 11s ease-in-out infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .food, .food-glow, .eyes, .head, .score-glow, .sheen { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <svg id="scoreSvg" class="svg-card" viewBox="0 0 520 260" role="img" aria-label="Snake high score">
+      <defs>
+        <radialGradient id="g" cx="50%" cy="0%" r="120%">
+          <stop offset="0%" stop-color="#1F1F1B" stop-opacity="1" />
+          <stop offset="100%" stop-color="#141413" stop-opacity="1" />
+        </radialGradient>
+        <radialGradient id="accentGlow">
+          <stop offset="0%" stop-color="#BC9C62" stop-opacity="1" />
+          <stop offset="100%" stop-color="#BC9C62" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="sheenGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#EDEBE6" stop-opacity="0" />
+          <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
+          <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
+        </linearGradient>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
+        </pattern>
+        <clipPath id="frame"><rect x="1" y="1" width="518" height="258" /></clipPath>
+      </defs>
+
+      <rect width="520" height="260" fill="url(#g)" />
+      <rect width="520" height="260" fill="url(#grid)" opacity="0.08" />
+
+      <ellipse class="score-glow" cx="86" cy="164" rx="120" ry="62" fill="url(#accentGlow)" />
+
+      <g clip-path="url(#frame)">
+        <rect class="sheen" x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" />
+      </g>
+
+      <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
+
+      <g>
+        <g fill="#EDEBE6">
+          <rect x="26.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".14" />
+          <rect x="39.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".17" />
+          <rect x="52.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".20" />
+          <rect x="65.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".23" />
+          <rect x="78.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".27" />
+          <rect x="78.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".28" />
+          <rect x="78.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".30" />
+          <rect x="91.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".31" />
+          <rect x="104.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          <rect x="117.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".33" />
+          <rect x="130.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          <rect x="143.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".35" />
+          <rect x="156.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".36" />
+          <rect x="156.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          <rect x="156.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          <rect x="156.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".30" />
+          <rect x="169.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          <rect x="182.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          <rect x="195.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".36" />
+          <rect x="208.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".38" />
+        </g>
+
+        <g class="head">
+          <rect x="221.5" y="124.5" width="11" height="11" rx="2" fill="#BC9C62" />
+          <g class="eyes" fill="#141413">
+            <rect x="228" y="127" width="1.8" height="2.4" rx="0.9" />
+            <rect x="228" y="130.6" width="1.8" height="2.4" rx="0.9" />
+          </g>
+        </g>
+
+        <circle class="food-glow" cx="240" cy="130" r="13" fill="url(#accentGlow)" />
+        <rect class="food" x="234.5" y="124.5" width="11" height="11" rx="2" fill="#BC9C62" />
+      </g>
+
+      <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 02</text>
+      <text x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Snake High Score</text>
+      <text x="32" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Score</text>
+      <text id="scoreText" x="32" y="180" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">000</text>
+      <text x="260" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
+      <text id="userText" x="260" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
+      <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · snake</text>
+    </svg>
+  </main>
+
+  <script src="../share-utils.js"></script>
+  <script>
+    (function () {
+      function getParam(name) {
+        var url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      }
+
+      var username = getParam('username') || 'Anonymous';
+      var highscore = getParam('highscore') || '0';
+      var token = getParam('t');
+      if (token) {
+        try {
+          var data = deobfuscateShare(token);
+          if (data && typeof data.n !== "undefined" && typeof data.s !== "undefined") {
+            username = String(data.n).slice(0, 60);
+            highscore = String(data.s);
+          }
+        } catch (e) {}
+      }
+      var userText = document.getElementById('userText');
+      var scoreText = document.getElementById('scoreText');
+      if (scoreText) {
+        var digits = String(highscore).replace(/[^0-9]/g, '') || '0';
+        scoreText.textContent = digits.slice(0, 6).padStart(3, '0');
+      }
+      if (userText) {
+        userText.textContent = username;
+        var baseSize = 22;
+        var minSize = 11;
+        var fontSize = baseSize;
+        var boxWidth = 230;
+        userText.setAttribute('font-size', String(fontSize));
+        var guard = 0;
+        while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
+          fontSize -= 0.5;
+          userText.setAttribute('font-size', String(fontSize));
+        }
+        if (userText.getComputedTextLength() > boxWidth && fontSize <= minSize) {
+          var maxChars = Math.floor(boxWidth / (fontSize * 0.55));
+          if (username.length > maxChars && maxChars > 1) {
+            userText.textContent = username.slice(0, maxChars - 1) + '…';
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

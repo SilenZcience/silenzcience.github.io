@@ -173,6 +173,7 @@
 </main>
 
 <script src="../main.js" defer></script>
+<script src="../share-utils.js"></script>
 <script>
 (function () {
   "use strict";
@@ -428,6 +429,85 @@
     mistakesStat.textContent = String(G.mistakes);
   }
 
+  function removeShare() {
+    var ex = document.getElementById("shareBtn");
+    if (ex && ex.parentNode) ex.parentNode.removeChild(ex);
+  }
+
+  function copyTextToClipboard(text, btn, resetLabel) {
+    function done(msg, ms) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = resetLabel; }, ms);
+    }
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) { done("Link copied!", 2000); return; }
+      } catch (e) {}
+      done("Share link: " + text, 4000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done("Link copied!", 2000); }).catch(legacy);
+    } else {
+      legacy();
+    }
+  }
+
+  // End-of-run share: obfuscated token pointing at the SVG high score card.
+  function offerShare(time, mistakes) {
+    if (typeof obfuscateShare !== "function") return;
+    setTimeout(function () {
+      var overlayDiv = document.getElementById("overlay");
+      if (!overlayDiv || document.getElementById("shareBtn")) return;
+      var btn = document.createElement("button");
+      btn.id = "shareBtn";
+      btn.className = "ctrl";
+      btn.type = "button";
+      btn.style.marginTop = "16px";
+      btn.textContent = "Share your solve";
+      btn.onclick = function (e) {
+        e.stopPropagation();
+        var username = window.prompt("Enter your username for the share card:", "Player");
+        if (username === null) return;
+        var cleanUser = (username || "Player").trim().slice(0, 40);
+        if (!cleanUser) cleanUser = "Player";
+        var diffNames = { easy: "Easy", medium: "Medium", hard: "Hard", evil: "Expert" };
+        var diffLabel = diffNames[G.difficulty] || "Medium";
+        var token = obfuscateShare({
+          n: cleanUser,
+          s: Math.max(0, Math.floor(time || 0)),
+          d: G.difficulty,
+          m: Math.max(0, Math.floor(mistakes || 0)),
+          g: "sudoku"
+        });
+        var url = window.location.origin + "/highscoresvg/sudoku.html?t=" + token;
+        if (navigator.share) {
+          navigator.share({
+            title: "My " + diffLabel + " Sudoku Solve",
+            text: "Solved a " + diffLabel + " Sudoku in " + formatTime(time) + " with " + mistakes + " mistakes!",
+            url: url
+          }).catch(function () {});
+          return;
+        }
+        try {
+          window.open(url, "_blank", "noopener,noreferrer");
+          return;
+        } catch (err) {}
+        copyTextToClipboard(url, btn, "Share your solve");
+      };
+      var container = overlayDiv.querySelector("div");
+      if (container) container.appendChild(btn);
+    }, 0);
+  }
+
   var undoStack = [];
 
   // Enter a number (or toggle a pencil mark in note mode) on the selected cell.
@@ -496,6 +576,7 @@
     ovMsg.textContent = "Puzzle solved!";
     ovSub.textContent = "Time: " + formatTime(G.time) + " — Mistakes: " + G.mistakes;
     overlay.classList.add("show");
+    offerShare(G.time, G.mistakes);
   }
 
   function toggleNote() {
@@ -538,6 +619,7 @@
       for (var c = 0; c < 9; c++) G.notes[r][c] = [0,0,0,0,0,0,0,0,0];
     }
     undoStack = [];
+    removeShare();
     overlay.classList.remove("show");
     noteBtn.classList.remove("on");
     setHelp(false);
