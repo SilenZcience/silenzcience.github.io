@@ -228,7 +228,7 @@
           var url = window.location.origin + "/highscoresvg/snake.html?t=" + token;
           if (navigator.share) {
             // Called from the dialog's Share tap, so user activation is intact.
-            navigator.share({ title: "My Snake High Score", text: "Check out my snake high score!", url: url }).catch(function () {});
+            navigator.share({ title: "My Snake High Score", text: "Check out my snake high score — " + score + " points!", url: url }).catch(function () {});
             return;
           }
           try {
