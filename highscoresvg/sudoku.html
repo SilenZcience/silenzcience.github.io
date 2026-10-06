@@ -221,12 +221,17 @@
         </g>
         <rect x="328" y="70" width="144" height="144" fill="none" stroke="rgba(237,235,230,0.16)" stroke-width="1" />
         <g class="giv" fill="#5F5D57" font-family="var(--font-mono)" font-size="12" text-anchor="middle" dominant-baseline="central" opacity="0.42">
-          <text x="352" y="78">4</text><text x="400" y="78">8</text><text x="448" y="78">3</text>
-          <text x="336" y="94">2</text><text x="384" y="94">6</text><text x="416" y="94">1</text><text x="464" y="94">9</text>
-          <text x="368" y="110">7</text><text x="432" y="110">5</text>
-          <text x="352" y="142">3</text><text x="400" y="142">9</text><text x="448" y="142">6</text>
-          <text x="368" y="158">1</text><text x="416" y="158">4</text><text x="464" y="158">7</text>
-          <text x="336" y="174">5</text><text x="384" y="174">8</text><text x="432" y="174">2</text>
+          <text x="368" y="78">7</text><text x="448" y="78">6</text><text x="464" y="78">8</text>
+          <text x="336" y="94">2</text><text x="400" y="94">3</text><text x="448" y="94">4</text>
+          <text x="336" y="110">4</text><text x="400" y="110">8</text>
+
+          <text x="384" y="126">6</text><text x="432" y="126">7</text>
+          <text x="368" y="142">8</text><text x="416" y="142">2</text><text x="464" y="142">4</text>
+          <text x="336" y="158">5</text><text x="384" y="158">7</text><text x="416" y="158">1</text>
+
+          <text x="336" y="174">7</text><text x="368" y="174">2</text><text x="384" y="174">8</text><text x="400" y="174">6</text><text x="432" y="174">3</text>
+          <text x="416" y="190">5</text><text x="448" y="190">2</text>
+          <text x="368" y="206">4</text><text x="384" y="206">2</text><text x="416" y="206">3</text><text x="432" y="206">8</text><text x="464" y="206">6</text>
         </g>
         <rect class="scan-hl" x="328" y="70" width="16" height="16" />
       </g>
@@ -234,11 +239,11 @@
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 08</text>
       <text id="titleText" x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Sudoku High Score</text>
       <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Mistakes</text>
-      <text id="mistText" x="32" y="128" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">—</text>
+      <text id="mistText" x="32" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">—</text>
       <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Time</text>
       <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">0:00:00</text>
-      <text x="260" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
-      <text id="userText" x="260" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
+      <text x="130" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
+      <text id="userText" x="130" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
       <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · sudoku</text>
     </svg>
     <a class="play-btn" href="../lab/sudoku.html">Try to beat it →</a>
@@ -304,19 +309,38 @@
 
       var userText = document.getElementById('userText');
       if (userText) {
-        userText.textContent = username;
-        var baseSize = 22, minSize = 11, fontSize = baseSize;
-        var boxWidth = 230;
-        userText.setAttribute('font-size', String(fontSize));
-        var guard = 0;
-        while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
-          fontSize -= 0.5; userText.setAttribute('font-size', String(fontSize));
-        }
-        if (userText.getComputedTextLength() > boxWidth && fontSize <= minSize) {
-          var maxChars = Math.floor(boxWidth / (fontSize * 0.55));
-          if (username.length > maxChars && maxChars > 1) {
-            userText.textContent = username.slice(0, maxChars - 1) + '…';
+        var boxWidth = 380;
+        var baseSize = 22, minSize = 11;
+        var fitName = function () {
+          var name = username;
+          var fontSize = baseSize;
+          userText.textContent = name;
+          userText.setAttribute('font-size', String(fontSize));
+          var guard = 0;
+          while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
+            fontSize -= 0.5;
+            userText.setAttribute('font-size', String(fontSize));
           }
+          if (userText.getComputedTextLength() > boxWidth) {
+            // Minimum size reached and the name still overflows.  The display
+            // font is proportional, so a fixed per-character width guess is
+            // wrong -- wide uppercase glyphs overrun it.  Measure the real
+            // rendered width of each candidate until it actually fits.
+            var n = name.length, k = 0;
+            while (n > 1 && k++ < 200) {
+              n -= 1;
+              var candidate = name.slice(0, n) + '…';
+              userText.textContent = candidate;
+              if (userText.getComputedTextLength() <= boxWidth) break;
+            }
+            userText.textContent = name.slice(0, n) + '…';
+          }
+        };
+        fitName();
+        // Re-fit once the webfont really is loaded: measuring before that
+        // uses the fallback font, so getComputedTextLength() can lie.
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(fitName);
         }
       }
     })();

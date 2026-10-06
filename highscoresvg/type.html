@@ -70,29 +70,33 @@
       88%      { opacity: 0; }
       100%     { transform: translateX(560px); opacity: 0; }
     }
-    /* The caret types out two ghost lines at 90ms per character (a brisk
-       ~115 WPM sweep), then blinks out and starts over. */
+    /* The caret types out four ghost console-buffer lines at 90ms per
+       character, then blinks out and starts over. */
     @keyframes caretRun {
-      0%    { transform: translate(0, 0);         opacity: 1; animation-timing-function: steps(43, end); }
-      38.7% { transform: translate(361.2px, 0);   opacity: 1; animation-timing-function: step-end; }
-      39%   { transform: translate(0, 16px);      opacity: 1; animation-timing-function: steps(40, end); }
-      75%   { transform: translate(336px, 16px);  opacity: 1; animation-timing-function: ease-in; }
-      87%   { transform: translate(336px, 16px);  opacity: 0; animation-timing-function: step-end; }
-      96%   { transform: translate(0, 0);         opacity: 0; }
-      100%  { transform: translate(0, 0);         opacity: 1; }
+      0%    { transform: translate(0, 0);          opacity: 1; animation-timing-function: steps(23, end); }
+      18.8% { transform: translate(193.2px, 0);    opacity: 1; animation-timing-function: step-end; }
+      19%   { transform: translate(0, 16px);       opacity: 1; animation-timing-function: steps(28, end); }
+      41.7% { transform: translate(235.2px, 16px); opacity: 1; animation-timing-function: step-end; }
+      42%   { transform: translate(0, 32px);       opacity: 1; animation-timing-function: steps(28, end); }
+      64.6% { transform: translate(235.2px, 32px); opacity: 1; animation-timing-function: step-end; }
+      65%   { transform: translate(0, 48px);       opacity: 1; animation-timing-function: steps(26, end); }
+      85.9% { transform: translate(218.4px, 48px); opacity: 1; }
+      92%   { transform: translate(218.4px, 48px); opacity: 0; animation-timing-function: step-end; }
+      97%   { transform: translate(0, 0);          opacity: 0; }
+      100%  { transform: translate(0, 0);          opacity: 1; }
     }
     @keyframes chFlash {
       0%   { fill: #EDEBE6; opacity: 1; }
-      6%   { fill: #BC9C62; opacity: .92; }
-      25%  { fill: #5F5D57; opacity: .5; }
+      4%   { fill: #BC9C62; opacity: .95; }
+      15%  { fill: #5F5D57; opacity: .5; }
       100% { fill: #5F5D57; opacity: .5; }
     }
 
     .score-glow { animation: scoreGlow 6s ease-in-out infinite; }
     .sheen      { animation: sheen 11s ease-in-out infinite; }
-    .caret      { animation: caretRun 10s infinite; }
+    .caret      { animation: caretRun 11s infinite; }
     .ghost      { fill: #5F5D57; }
-    .ch         { opacity: .5; animation: chFlash 10s linear infinite; }
+    .ch         { opacity: .5; animation: chFlash 11s linear infinite; }
 
     @media (prefers-reduced-motion: reduce) {
       .score-glow, .sheen, .caret, .ch { animation: none; }
@@ -126,7 +130,7 @@
       <rect width="520" height="260" fill="url(#g)" />
       <rect width="520" height="260" fill="url(#grid)" opacity="0.08" />
 
-      <ellipse class="score-glow" cx="86" cy="164" rx="120" ry="62" fill="url(#accentGlow)" />
+      <ellipse class="score-glow" cx="86" cy="178" rx="120" ry="62" fill="url(#accentGlow)" />
 
       <g clip-path="url(#frame)">
         <rect class="sheen" x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" />
@@ -134,18 +138,20 @@
 
       <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
 
-      <text x="32" y="100" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:0.00">t</tspan><tspan class="ch" style="animation-delay:0.09">h</tspan><tspan class="ch" style="animation-delay:0.18">e</tspan><tspan class="ch" style="animation-delay:0.27">&#160;</tspan><tspan class="ch" style="animation-delay:0.36">q</tspan><tspan class="ch" style="animation-delay:0.45">u</tspan><tspan class="ch" style="animation-delay:0.54">i</tspan><tspan class="ch" style="animation-delay:0.63">c</tspan><tspan class="ch" style="animation-delay:0.72">k</tspan><tspan class="ch" style="animation-delay:0.81">&#160;</tspan><tspan class="ch" style="animation-delay:0.90">b</tspan><tspan class="ch" style="animation-delay:0.99">r</tspan><tspan class="ch" style="animation-delay:1.08">o</tspan><tspan class="ch" style="animation-delay:1.17">w</tspan><tspan class="ch" style="animation-delay:1.26">n</tspan><tspan class="ch" style="animation-delay:1.35">&#160;</tspan><tspan class="ch" style="animation-delay:1.44">f</tspan><tspan class="ch" style="animation-delay:1.53">o</tspan><tspan class="ch" style="animation-delay:1.62">x</tspan><tspan class="ch" style="animation-delay:1.71">&#160;</tspan><tspan class="ch" style="animation-delay:1.80">j</tspan><tspan class="ch" style="animation-delay:1.89">u</tspan><tspan class="ch" style="animation-delay:1.98">m</tspan><tspan class="ch" style="animation-delay:2.07">p</tspan><tspan class="ch" style="animation-delay:2.16">s</tspan><tspan class="ch" style="animation-delay:2.25">&#160;</tspan><tspan class="ch" style="animation-delay:2.34">o</tspan><tspan class="ch" style="animation-delay:2.43">v</tspan><tspan class="ch" style="animation-delay:2.52">e</tspan><tspan class="ch" style="animation-delay:2.61">r</tspan><tspan class="ch" style="animation-delay:2.70">&#160;</tspan><tspan class="ch" style="animation-delay:2.79">t</tspan><tspan class="ch" style="animation-delay:2.88">h</tspan><tspan class="ch" style="animation-delay:2.97">e</tspan><tspan class="ch" style="animation-delay:3.06">&#160;</tspan><tspan class="ch" style="animation-delay:3.15">l</tspan><tspan class="ch" style="animation-delay:3.24">a</tspan><tspan class="ch" style="animation-delay:3.33">z</tspan><tspan class="ch" style="animation-delay:3.42">y</tspan><tspan class="ch" style="animation-delay:3.51">&#160;</tspan><tspan class="ch" style="animation-delay:3.60">d</tspan><tspan class="ch" style="animation-delay:3.69">o</tspan><tspan class="ch" style="animation-delay:3.78">g</tspan></text>
-      <text x="32" y="116" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:3.90">p</tspan><tspan class="ch" style="animation-delay:3.99">a</tspan><tspan class="ch" style="animation-delay:4.08">c</tspan><tspan class="ch" style="animation-delay:4.17">k</tspan><tspan class="ch" style="animation-delay:4.26">&#160;</tspan><tspan class="ch" style="animation-delay:4.35">m</tspan><tspan class="ch" style="animation-delay:4.44">y</tspan><tspan class="ch" style="animation-delay:4.53">&#160;</tspan><tspan class="ch" style="animation-delay:4.62">b</tspan><tspan class="ch" style="animation-delay:4.71">o</tspan><tspan class="ch" style="animation-delay:4.80">x</tspan><tspan class="ch" style="animation-delay:4.89">&#160;</tspan><tspan class="ch" style="animation-delay:4.98">w</tspan><tspan class="ch" style="animation-delay:5.07">i</tspan><tspan class="ch" style="animation-delay:5.16">t</tspan><tspan class="ch" style="animation-delay:5.25">h</tspan><tspan class="ch" style="animation-delay:5.34">&#160;</tspan><tspan class="ch" style="animation-delay:5.43">f</tspan><tspan class="ch" style="animation-delay:5.52">i</tspan><tspan class="ch" style="animation-delay:5.61">v</tspan><tspan class="ch" style="animation-delay:5.70">e</tspan><tspan class="ch" style="animation-delay:5.79">&#160;</tspan><tspan class="ch" style="animation-delay:5.88">d</tspan><tspan class="ch" style="animation-delay:5.97">o</tspan><tspan class="ch" style="animation-delay:6.06">z</tspan><tspan class="ch" style="animation-delay:6.15">e</tspan><tspan class="ch" style="animation-delay:6.24">n</tspan><tspan class="ch" style="animation-delay:6.33">&#160;</tspan><tspan class="ch" style="animation-delay:6.42">l</tspan><tspan class="ch" style="animation-delay:6.51">i</tspan><tspan class="ch" style="animation-delay:6.60">q</tspan><tspan class="ch" style="animation-delay:6.69">u</tspan><tspan class="ch" style="animation-delay:6.78">o</tspan><tspan class="ch" style="animation-delay:6.87">r</tspan><tspan class="ch" style="animation-delay:6.96">&#160;</tspan><tspan class="ch" style="animation-delay:7.05">j</tspan><tspan class="ch" style="animation-delay:7.14">u</tspan><tspan class="ch" style="animation-delay:7.23">g</tspan><tspan class="ch" style="animation-delay:7.32">s</tspan><tspan class="ch" style="animation-delay:7.41">.</tspan></text>
-      <rect class="caret" x="32" y="89" width="2" height="14" fill="#BC9C62" />
+      <text x="260" y="156" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:0.00">f</tspan><tspan class="ch" style="animation-delay:0.09">i</tspan><tspan class="ch" style="animation-delay:0.18">r</tspan><tspan class="ch" style="animation-delay:0.27">m</tspan><tspan class="ch" style="animation-delay:0.36">w</tspan><tspan class="ch" style="animation-delay:0.45">a</tspan><tspan class="ch" style="animation-delay:0.54">r</tspan><tspan class="ch" style="animation-delay:0.63">e</tspan><tspan class="ch" style="animation-delay:0.72">&#160;</tspan><tspan class="ch" style="animation-delay:0.81">b</tspan><tspan class="ch" style="animation-delay:0.90">u</tspan><tspan class="ch" style="animation-delay:0.99">f</tspan><tspan class="ch" style="animation-delay:1.08">f</tspan><tspan class="ch" style="animation-delay:1.17">e</tspan><tspan class="ch" style="animation-delay:1.26">r</tspan><tspan class="ch" style="animation-delay:1.35">&#160;</tspan><tspan class="ch" style="animation-delay:1.44">c</tspan><tspan class="ch" style="animation-delay:1.53">o</tspan><tspan class="ch" style="animation-delay:1.62">n</tspan><tspan class="ch" style="animation-delay:1.71">s</tspan><tspan class="ch" style="animation-delay:1.80">o</tspan><tspan class="ch" style="animation-delay:1.89">l</tspan><tspan class="ch" style="animation-delay:1.98">e</tspan></text>
+      <text x="260" y="172" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:2.07">s</tspan><tspan class="ch" style="animation-delay:2.16">e</tspan><tspan class="ch" style="animation-delay:2.25">l</tspan><tspan class="ch" style="animation-delay:2.34">e</tspan><tspan class="ch" style="animation-delay:2.43">c</tspan><tspan class="ch" style="animation-delay:2.52">t</tspan><tspan class="ch" style="animation-delay:2.61">&#160;</tspan><tspan class="ch" style="animation-delay:2.70">c</tspan><tspan class="ch" style="animation-delay:2.79">o</tspan><tspan class="ch" style="animation-delay:2.88">r</tspan><tspan class="ch" style="animation-delay:2.97">e</tspan><tspan class="ch" style="animation-delay:3.06">&#160;</tspan><tspan class="ch" style="animation-delay:3.15">s</tspan><tspan class="ch" style="animation-delay:3.24">c</tspan><tspan class="ch" style="animation-delay:3.33">r</tspan><tspan class="ch" style="animation-delay:3.42">i</tspan><tspan class="ch" style="animation-delay:3.51">p</tspan><tspan class="ch" style="animation-delay:3.60">t</tspan><tspan class="ch" style="animation-delay:3.69">&#160;</tspan><tspan class="ch" style="animation-delay:3.78">t</tspan><tspan class="ch" style="animation-delay:3.87">l</tspan><tspan class="ch" style="animation-delay:3.96">s</tspan><tspan class="ch" style="animation-delay:4.05">&#160;</tspan><tspan class="ch" style="animation-delay:4.14">y</tspan><tspan class="ch" style="animation-delay:4.23">i</tspan><tspan class="ch" style="animation-delay:4.32">e</tspan><tspan class="ch" style="animation-delay:4.41">l</tspan><tspan class="ch" style="animation-delay:4.50">d</tspan></text>
+      <text x="260" y="188" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:4.59">m</tspan><tspan class="ch" style="animation-delay:4.68">a</tspan><tspan class="ch" style="animation-delay:4.77">c</tspan><tspan class="ch" style="animation-delay:4.86">h</tspan><tspan class="ch" style="animation-delay:4.95">i</tspan><tspan class="ch" style="animation-delay:5.04">n</tspan><tspan class="ch" style="animation-delay:5.13">e</tspan><tspan class="ch" style="animation-delay:5.22">&#160;</tspan><tspan class="ch" style="animation-delay:5.31">d</tspan><tspan class="ch" style="animation-delay:5.40">e</tspan><tspan class="ch" style="animation-delay:5.49">p</tspan><tspan class="ch" style="animation-delay:5.58">l</tspan><tspan class="ch" style="animation-delay:5.67">o</tspan><tspan class="ch" style="animation-delay:5.76">y</tspan><tspan class="ch" style="animation-delay:5.85">&#160;</tspan><tspan class="ch" style="animation-delay:5.94">r</tspan><tspan class="ch" style="animation-delay:6.03">u</tspan><tspan class="ch" style="animation-delay:6.12">n</tspan><tspan class="ch" style="animation-delay:6.21">t</tspan><tspan class="ch" style="animation-delay:6.30">i</tspan><tspan class="ch" style="animation-delay:6.39">m</tspan><tspan class="ch" style="animation-delay:6.48">e</tspan><tspan class="ch" style="animation-delay:6.57">&#160;</tspan><tspan class="ch" style="animation-delay:6.66">q</tspan><tspan class="ch" style="animation-delay:6.75">u</tspan><tspan class="ch" style="animation-delay:6.84">e</tspan><tspan class="ch" style="animation-delay:6.93">u</tspan><tspan class="ch" style="animation-delay:7.02">e</tspan></text>
+      <text x="260" y="204" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:7.11">c</tspan><tspan class="ch" style="animation-delay:7.20">l</tspan><tspan class="ch" style="animation-delay:7.29">u</tspan><tspan class="ch" style="animation-delay:7.38">s</tspan><tspan class="ch" style="animation-delay:7.47">t</tspan><tspan class="ch" style="animation-delay:7.56">e</tspan><tspan class="ch" style="animation-delay:7.65">r</tspan><tspan class="ch" style="animation-delay:7.74">&#160;</tspan><tspan class="ch" style="animation-delay:7.83">i</tspan><tspan class="ch" style="animation-delay:7.92">n</tspan><tspan class="ch" style="animation-delay:8.01">d</tspan><tspan class="ch" style="animation-delay:8.10">e</tspan><tspan class="ch" style="animation-delay:8.19">x</tspan><tspan class="ch" style="animation-delay:8.28">&#160;</tspan><tspan class="ch" style="animation-delay:8.37">s</tspan><tspan class="ch" style="animation-delay:8.46">t</tspan><tspan class="ch" style="animation-delay:8.55">r</tspan><tspan class="ch" style="animation-delay:8.64">u</tspan><tspan class="ch" style="animation-delay:8.73">c</tspan><tspan class="ch" style="animation-delay:8.82">t</tspan><tspan class="ch" style="animation-delay:8.91">&#160;</tspan><tspan class="ch" style="animation-delay:9.00">t</tspan><tspan class="ch" style="animation-delay:9.09">o</tspan><tspan class="ch" style="animation-delay:9.18">k</tspan><tspan class="ch" style="animation-delay:9.27">e</tspan><tspan class="ch" style="animation-delay:9.36">n</tspan></text>
+      <rect class="caret" x="260" y="145" width="2" height="14" fill="#BC9C62" />
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 05</text>
       <text x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Typing Velocity High Score</text>
-      <text x="32" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">WPM</text>
-      <text id="scoreText" x="32" y="180" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">000</text>
-      <text x="152" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Accuracy</text>
-      <text id="accText" x="152" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">—</text>
-      <text x="260" y="138" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
-      <text id="userText" x="260" y="170" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
+      <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">WPM</text>
+      <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">000</text>
+      <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Accuracy</text>
+      <text id="accText" x="32" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">—</text>
+      <text x="130" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
+      <text id="userText" x="130" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
       <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · type</text>
     </svg>
     <a class="play-btn" href="../lab/type.html">Try to beat it →</a>
@@ -193,22 +199,38 @@
         }
       }
       if (userText) {
-        userText.textContent = username;
-        var baseSize = 22;
-        var minSize = 11;
-        var fontSize = baseSize;
-        var boxWidth = 230;
-        userText.setAttribute('font-size', String(fontSize));
-        var guard = 0;
-        while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
-          fontSize -= 0.5;
+        var boxWidth = 380;
+        var baseSize = 22, minSize = 11;
+        var fitName = function () {
+          var name = username;
+          var fontSize = baseSize;
+          userText.textContent = name;
           userText.setAttribute('font-size', String(fontSize));
-        }
-        if (userText.getComputedTextLength() > boxWidth && fontSize <= minSize) {
-          var maxChars = Math.floor(boxWidth / (fontSize * 0.55));
-          if (username.length > maxChars && maxChars > 1) {
-            userText.textContent = username.slice(0, maxChars - 1) + '…';
+          var guard = 0;
+          while (userText.getComputedTextLength() > boxWidth && fontSize > minSize && guard++ < 100) {
+            fontSize -= 0.5;
+            userText.setAttribute('font-size', String(fontSize));
           }
+          if (userText.getComputedTextLength() > boxWidth) {
+            // Minimum size reached and the name still overflows.  The display
+            // font is proportional, so a fixed per-character width guess is
+            // wrong -- wide uppercase glyphs overrun it.  Measure the real
+            // rendered width of each candidate until it actually fits.
+            var n = name.length, k = 0;
+            while (n > 1 && k++ < 200) {
+              n -= 1;
+              var candidate = name.slice(0, n) + '…';
+              userText.textContent = candidate;
+              if (userText.getComputedTextLength() <= boxWidth) break;
+            }
+            userText.textContent = name.slice(0, n) + '…';
+          }
+        };
+        fitName();
+        // Re-fit once the webfont really is loaded: measuring before that
+        // uses the fallback font, so getComputedTextLength() can lie.
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(fitName);
         }
       }
     })();
