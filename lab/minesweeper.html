@@ -386,31 +386,31 @@
       btn.textContent = "Share your clear time";
       btn.onclick = function (e) {
         e.stopPropagation();
-        var username = window.prompt("Enter your username for the share card:", "Player");
-        if (username === null) return;
-        var cleanUser = (username || "Player").trim().slice(0, 40);
-        if (!cleanUser) cleanUser = "Player";
-        var token = obfuscateShare({
-          n: cleanUser,
-          s: Math.max(0, Math.floor(seconds || 0)),
-          w: cols,
-          h: rows,
-          g: "minesweeper"
+        askUsername(function (cleanUser) {
+          if (cleanUser === null) return;
+          var token = obfuscateShare({
+            n: cleanUser,
+            s: Math.max(0, Math.floor(seconds || 0)),
+            w: cols,
+            h: rows,
+            g: "minesweeper"
+          });
+          var url = window.location.origin + "/highscoresvg/minesweeper.html?t=" + token;
+          if (navigator.share) {
+            // Called from the dialog's Share tap, so user activation is intact.
+            navigator.share({
+              title: "My " + cols + "×" + rows + " Minesweeper Time",
+              text: "Check out my Minesweeper clear time!",
+              url: url
+            }).catch(function () {});
+            return;
+          }
+          try {
+            window.open(url, "_blank", "noopener,noreferrer");
+            return;
+          } catch (err) {}
+          copyTextToClipboard(url, btn, "Share your clear time");
         });
-        var url = window.location.origin + "/highscoresvg/minesweeper.html?t=" + token;
-        if (navigator.share) {
-          navigator.share({
-            title: "My " + cols + "×" + rows + " Minesweeper Time",
-            text: "Check out my Minesweeper clear time!",
-            url: url
-          }).catch(function () {});
-          return;
-        }
-        try {
-          window.open(url, "_blank", "noopener,noreferrer");
-          return;
-        } catch (err) {}
-        copyTextToClipboard(url, btn, "Share your clear time");
       };
       var container = overlayDiv.querySelector("div");
       if (container) container.appendChild(btn);

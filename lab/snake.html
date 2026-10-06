@@ -222,21 +222,21 @@
       btn.textContent = "Share your highscore";
       btn.onclick = function (e) {
         e.stopPropagation();
-        var username = window.prompt("Enter your username for the share card:", "Player");
-        if (username === null) return;
-        var cleanUser = (username || "Player").trim().slice(0, 40);
-        if (!cleanUser) cleanUser = "Player";
-        var token = obfuscateShare({ n: cleanUser, s: Math.max(0, Math.floor(score || 0)), g: "snake" });
-        var url = window.location.origin + "/highscoresvg/snake.html?t=" + token;
-        if (navigator.share) {
-          navigator.share({ title: "My Snake High Score", text: "Check out my snake high score!", url: url }).catch(function () {});
-          return;
-        }
-        try {
-          window.open(url, "_blank", "noopener,noreferrer");
-          return;
-        } catch (err) {}
-        copyTextToClipboard(url, btn, "Share your highscore");
+        askUsername(function (cleanUser) {
+          if (cleanUser === null) return;
+          var token = obfuscateShare({ n: cleanUser, s: Math.max(0, Math.floor(score || 0)), g: "snake" });
+          var url = window.location.origin + "/highscoresvg/snake.html?t=" + token;
+          if (navigator.share) {
+            // Called from the dialog's Share tap, so user activation is intact.
+            navigator.share({ title: "My Snake High Score", text: "Check out my snake high score!", url: url }).catch(function () {});
+            return;
+          }
+          try {
+            window.open(url, "_blank", "noopener,noreferrer");
+            return;
+          } catch (err) {}
+          copyTextToClipboard(url, btn, "Share your highscore");
+        });
       };
       var container = overlayDiv.querySelector("div");
       if (container) container.appendChild(btn);
