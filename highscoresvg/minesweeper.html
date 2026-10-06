@@ -163,10 +163,7 @@
     .boom-ring2 { animation: boomRing2 6.4s ease-out infinite; }
     .spark      { animation: sparkFly 6.4s linear infinite; }
     .shake      { animation: cardShake 6.4s ease-out infinite; }
-    .sweep-n    { animation: sweepNum 2.4s ease-in-out infinite; }
-    .sweep-n-1  { animation-delay: 0s; }
-    .sweep-n-2  { animation-delay: .4s; }
-    .sweep-n-3  { animation-delay: .8s; }
+    .sweep-n    { animation: sweepNum 2.4s ease-in-out infinite; animation-delay: var(--sd, 0s); }
     .board-fade { animation: boardIn 2.4s ease-out forwards; }
     @media (prefers-reduced-motion: reduce) {
       .score-glow, .sheen, .mine, .shake, .sweep-n, .board-fade { animation: none; }
@@ -264,13 +261,12 @@
 </g>
 <g opacity="0.511"><rect x="380" y="82" width="12" height="12" fill="#232320" /><rect x="380.5" y="82.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.318"><rect x="392" y="82" width="12" height="12" fill="#232320" /><rect x="392.5" y="82.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="398" y="88" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">&#9873;</text>
 </g>
 <g opacity="0.139"><rect x="404" y="82" width="12" height="12" fill="#232320" /><rect x="404.5" y="82.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.041"><rect x="200" y="94" width="12" height="12" fill="#232320" /><rect x="200.5" y="94.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
 </g>
 <g opacity="0.209"><rect x="212.5" y="94.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="218" y="100" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
+<text style="--sd:0.120s" class="sweep-n" x="218" y="100" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
 </g>
 <g opacity="0.444"><rect x="224.5" y="94.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.685"><rect x="236.5" y="94.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
@@ -296,7 +292,7 @@
 <g opacity="0.153"><rect x="200" y="106" width="12" height="12" fill="#232320" /><rect x="200.5" y="106.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
 </g>
 <g opacity="0.399"><rect x="212.5" y="106.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="218" y="112" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
+<text style="--sd:0.240s" class="sweep-n" x="218" y="112" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
 </g>
 <g opacity="0.672"><rect x="224.5" y="106.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.895"><rect x="236.5" y="106.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
@@ -329,7 +325,7 @@
 <g opacity="0.204"><rect x="200" y="118" width="12" height="12" fill="#232320" /><rect x="200.5" y="118.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
 </g>
 <g opacity="0.471"><rect x="212.5" y="118.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="218" y="124" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">4</text>
+<text style="--sd:0.360s" class="sweep-n" x="218" y="124" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">4</text>
 </g>
 <g opacity="0.747"><rect x="224.5" y="118.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
 <text x="230" y="124" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
@@ -370,6 +366,7 @@
 </g>
 <g opacity="0.399"><rect x="212" y="130" width="12" height="12" fill="#232320" /><rect x="212.5" y="130.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.672"><rect x="224" y="130" width="12" height="12" fill="#232320" /><rect x="224.5" y="130.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
+<text x="230" y="136" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">&#9873;</text>
 </g>
 <g opacity="0.895"><rect x="236.5" y="130.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
 <text x="242" y="136" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
@@ -421,7 +418,7 @@
 <text x="386" y="148" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
 </g>
 <g opacity="0.685"><rect x="392.5" y="142.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text class="sweep-n sweep-n-1" x="398" y="148" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
+<text class="sweep-n" style="--sd:0s" x="398" y="148" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
 </g>
 <g opacity="0.444"><rect x="404" y="142" width="12" height="12" fill="#232320" /><rect x="404.5" y="142.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
 </g>
@@ -444,17 +441,17 @@
 <text x="362" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
 </g>
 <g opacity="0.684"><rect x="368.5" y="154.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text class="sweep-n sweep-n-2" x="374" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
+<text class="sweep-n" style="--sd:.15s" x="374" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
 </g>
 <g opacity="0.511"><rect x="380.5" y="154.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text class="sweep-n sweep-n-3" x="386" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
+<text class="sweep-n" style="--sd:.3s" x="386" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
 </g>
 <g opacity="0.318"><rect x="392" y="154" width="12" height="12" fill="#232320" /><rect x="392.5" y="154.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
 <text x="398" y="160" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">&#9873;</text>
 </g>
 <g opacity="0.139"><rect x="404" y="154" width="12" height="12" fill="#232320" /><rect x="404.5" y="154.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" /></g>
 <g opacity="0.092"><rect x="248.5" y="166.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="254" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
+<text style="--sd:0.840s" class="sweep-n" x="254" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#9F937A">2</text>
 </g>
 <g opacity="0.197"><rect x="260.5" y="166.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
 <text x="266" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
@@ -481,11 +478,13 @@
 <text x="350" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#908E86">1</text>
 </g>
 <g opacity="0.305"><rect x="356.5" y="166.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.09)" stroke-width="1" vector-effect="non-scaling-stroke" />
-<text x="362" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
+<text style="--sd:0.960s" class="sweep-n" x="362" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#AD976E">3</text>
 </g>
 <g opacity="0.197"><rect x="368" y="166" width="12" height="12" fill="#232320" /><rect x="368.5" y="166.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
+<text x="374" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">&#9873;</text>
 </g>
 <g opacity="0.092"><rect x="380" y="166" width="12" height="12" fill="#232320" /><rect x="380.5" y="166.5" width="11" height="11" fill="none" stroke="rgba(237,235,230,0.22)" stroke-width="1" vector-effect="non-scaling-stroke" />
+<text x="386" y="172" font-family="var(--font-mono)" font-size="8" text-anchor="middle" dominant-baseline="central" fill="#BC9C62">&#9873;</text>
 </g>
       </g>
 

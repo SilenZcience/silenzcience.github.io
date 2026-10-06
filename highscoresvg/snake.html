@@ -188,7 +188,7 @@
       </g>
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 02</text>
-      <text x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Snake High Score</text>
+      <text id="titleText" x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Snake High Score</text>
       <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Score</text>
       <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">000</text>
       <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
@@ -208,6 +208,8 @@
 
       var username = getParam('username') || 'Anonymous';
       var highscore = getParam('highscore') || '0';
+      var fieldW = getParam('w') || '';
+      var fieldH = getParam('h') || '';
       var token = getParam('t');
       if (token) {
         try {
@@ -215,8 +217,14 @@
           if (data && typeof data.n !== "undefined" && typeof data.s !== "undefined") {
             username = String(data.n).slice(0, 60);
             highscore = String(data.s);
+            if (data.w) fieldW = String(data.w);
+            if (data.h) fieldH = String(data.h);
           }
         } catch (e) {}
+      }
+      var titleText = document.getElementById('titleText');
+      if (titleText && fieldW && fieldH) {
+        titleText.textContent = fieldW + '×' + fieldH + ' Snake High Score';
       }
       var userText = document.getElementById('userText');
       var scoreText = document.getElementById('scoreText');
