@@ -18,6 +18,12 @@
   line-height:2.15;letter-spacing:.02em;color:var(--faint);
   height:6.45em;overflow:hidden;scroll-behavior:smooth;
 }
+/* Touch devices keep 4 visible lines (the taller box also leaves room for the
+   end screen plus share button). Mouse/keyboard devices keep 3 lines so the
+   automatic caret follow-scroll stays active. */
+@media (pointer: coarse){
+  .stream{height:8.6em}
+}
 .stream span{white-space:pre-wrap}
 .t-cur{color:var(--ink);border-bottom:2px solid var(--accent)}
 .t-ok{color:var(--soft)}
@@ -61,7 +67,7 @@
 
   <figure class="fig" data-reveal style="--rd:150ms">
     <div class="stage-wrap">
-      <div class="stage" style="display:block;padding-inline:clamp(20px,4vw,40px)">
+      <div class="stage" style="display:block;padding-inline:clamp(16px,3vw,38px)">
         <p class="stream" id="stream"></p>
         <div class="overlay hide" id="overlay" style="padding:0">
           <div>
@@ -70,7 +76,7 @@
           </div>
         </div>
       </div>
-      <input id="capture" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Typing input"
+      <input id="capture" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Typing input"
              style="position:absolute;opacity:0;pointer-events:none;left:-9999px">
     </div>
     <figcaption class="fig-cap">Fig. 01 — Just start typing. The clock runs on your first keystroke.</figcaption>
@@ -213,6 +219,48 @@ var WORDS = [
 
   var target = "", spans = [], pos = 0, startedAt = 0, finished = true;
   var correct = 0, wrong = 0, ticker = null;
+  var okFlags = [], breaks = [];
+
+  // Off-screen probe measuring text in the stream's exact font, used to
+  // decide where the fixed line breaks go.
+  var probeEl = document.createElement("span");
+  probeEl.style.cssText = "position:fixed;left:-9999px;top:0;visibility:hidden;white-space:pre;pointer-events:none;";
+  document.body.appendChild(probeEl);
+
+  function measureText(str) {
+    var cs = getComputedStyle(streamEl);
+    probeEl.style.font = cs.font;
+    probeEl.style.letterSpacing = cs.letterSpacing;
+    probeEl.textContent = str;
+    return probeEl.offsetWidth;
+  }
+
+  // Greedy line fill against the stream's real width. Every word claims one
+  // trailing space in the budget (+1), so when a line closes, its trailing
+  // space (where the caret sits) is guaranteed to fit inside the content box
+  // instead of reaching the right edge. The probe must run in `pre` mode: it
+  // preserves trailing spaces, whereas `nowrap` would collapse them to 0px.
+  function computeBreaks() {
+    var cs = getComputedStyle(streamEl);
+    var width = streamEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var words = target.split(" "), lines = [], cur = [];
+    for (var i = 0; i < words.length; i++) {
+      var trial = (cur.length ? cur.join(" ") + " " : "") + words[i] + " ";
+      if (cur.length && measureText(trial) > width) {
+        lines.push(cur);
+        cur = [words[i]];
+      } else {
+        cur.push(words[i]);
+      }
+    }
+    if (cur.length) lines.push(cur);
+    var ptr = 0, br = [];
+    for (var L = 0; L < lines.length - 1; L++) {
+      ptr += lines[L].join(" ").length + 1;
+      br.push(ptr);
+    }
+    breaks = br;
+  }
 
   function removeShare() {
     var ex = document.getElementById("shareBtn");
@@ -297,17 +345,21 @@ var WORDS = [
   }
 
   function render() {
+    computeBreaks();
     streamEl.innerHTML = "";
     spans = [];
+    var isBreak = {}, i, s;
+    for (i = 0; i < breaks.length; i++) isBreak[breaks[i]] = 1;
     var frag = document.createDocumentFragment();
-    for (var i = 0; i < target.length; i++) {
-      var s = document.createElement("span");
+    for (i = 0; i < target.length; i++) {
+      s = document.createElement("span");
       s.textContent = target[i];
+      if (okFlags[i]) s.dataset.ok = "1";
       frag.appendChild(s);
       spans.push(s);
+      if (isBreak[i + 1]) frag.appendChild(document.createElement("br"));
     }
     streamEl.appendChild(frag);
-    streamEl.scrollTop = 0;
     mark();
   }
 
@@ -354,6 +406,7 @@ var WORDS = [
   function reset(newText) {
     if (newText || !target) target = pickWords();
     pos = 0; correct = 0; wrong = 0; startedAt = 0; finished = false;
+    okFlags = [];
     render();
     removeShare();
     overlay.classList.add("hide");
@@ -367,7 +420,12 @@ var WORDS = [
     var ch = capture.value;
     capture.value = "";
     if (!ch || finished) return;
-    for (var k = 0; k < ch.length; k++) step(ch[k]);
+    // A multi-character burst is a mobile autocorrect/composition insert or a
+    // paste, not deliberate typing. Stepping every char would tag a whole
+    // word as keystrokes (or as wrong keystrokes); ignore the burst instead.
+    // autocorrect="off" prevents most of these at the source.
+    if (ch.length > 1) return;
+    step(ch);
   });
 
   // Clock starts on first real keystroke; errors stay on record (no backspace).
@@ -378,8 +436,10 @@ var WORDS = [
     }
     if (pos >= target.length) return;
     var expect = target[pos];
-    spans[pos].dataset.ok = ch === expect ? "1" : "";
-    if (ch === expect) correct++; else wrong++;
+    var ok = ch === expect;
+    okFlags[pos] = ok ? 1 : 0;
+    spans[pos].dataset.ok = ok ? "1" : "";
+    if (ok) correct++; else wrong++;
     pos++;
     if (pos >= target.length) { mark(); finish(); return; }
     mark();
@@ -400,6 +460,16 @@ var WORDS = [
   document.querySelector(".stage").addEventListener("click", function () { capture.focus(); });
 
   newBtn.addEventListener("click", function () { reset(true); });
+
+  // Re-flow the fixed line breaks when the window width changes.
+  var rzTimer = null;
+  addEventListener("resize", function () {
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(function () { render(); }, 150);
+  });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { render(); });
+  }
 
   reset(true);
 })();
