@@ -70,37 +70,66 @@
       88%      { opacity: 0; }
       100%     { transform: translateX(560px); opacity: 0; }
     }
-    /* The caret types out four ghost console-buffer lines at 90ms per
-       character, then blinks out and starts over. */
-    @keyframes caretRun {
-      0%    { transform: translate(0, 0);          opacity: 1; animation-timing-function: steps(23, end); }
-      18.8% { transform: translate(193.2px, 0);    opacity: 1; animation-timing-function: step-end; }
-      19%   { transform: translate(0, 16px);       opacity: 1; animation-timing-function: steps(28, end); }
-      41.7% { transform: translate(235.2px, 16px); opacity: 1; animation-timing-function: step-end; }
-      42%   { transform: translate(0, 32px);       opacity: 1; animation-timing-function: steps(28, end); }
-      64.6% { transform: translate(235.2px, 32px); opacity: 1; animation-timing-function: step-end; }
-      65%   { transform: translate(0, 48px);       opacity: 1; animation-timing-function: steps(26, end); }
-      85.9% { transform: translate(218.4px, 48px); opacity: 1; }
-      92%   { transform: translate(218.4px, 48px); opacity: 0; animation-timing-function: step-end; }
-      97%   { transform: translate(0, 0);          opacity: 0; }
-      100%  { transform: translate(0, 0);          opacity: 1; }
+    @keyframes bash {
+      0%   { transform: translate(0, -3px) scale(1.65) rotate(-3deg); fill: #FFFFFF; }
+      16%  { transform: translate(-1.3px, 1px) scale(0.86) rotate(2.5deg); }
+      34%  { transform: translate(1.3px, -0.7px) scale(1.3) rotate(-2deg); fill: #F5EFE3; }
+      52%  { transform: translate(-1px, 0.5px) scale(1.06) rotate(1.5deg); }
+      70%  { transform: translate(0.7px, -0.35px) scale(1.16) rotate(-1deg); }
+      86%  { transform: translate(-0.35px, 0.18px) scale(1.03) rotate(0.5deg); }
+      100% { transform: translate(0, 0) scale(1) rotate(0deg); fill: #EDEBE6; }
     }
-    @keyframes chFlash {
-      0%   { fill: #EDEBE6; opacity: 1; }
-      4%   { fill: #BC9C62; opacity: .95; }
-      15%  { fill: #5F5D57; opacity: .5; }
-      100% { fill: #5F5D57; opacity: .5; }
+    @keyframes dust {
+      0%   { opacity: .85; transform: scale(1) translate(0, 0); }
+      100% { opacity: 0; transform: scale(0.2) translate(var(--dx, 8px), var(--dy, -10px)); }
+    }
+    @keyframes sparkleFloat {
+      0%   { opacity: 0; transform: scale(0) translate(0, 0) rotate(0deg); }
+      18%  { opacity: 1; transform: scale(1) translate(0, 0) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.2) translate(var(--dx, 10px), var(--dy, -20px)) rotate(var(--rot, 90deg)); }
+    }
+    @keyframes burst {
+      0%   { opacity: .5; transform: scale(0.2); }
+      100% { opacity: 0; transform: scale(1.7); }
     }
 
     .score-glow { animation: scoreGlow 6s ease-in-out infinite; }
     .sheen      { animation: sheen 11s ease-in-out infinite; }
-    .caret      { animation: caretRun 11s infinite; }
-    .ghost      { fill: #5F5D57; }
-    .ch         { opacity: .5; animation: chFlash 11s linear infinite; }
+
+    #textGroup { font-family: var(--font-mono); font-size: 14px; }
+
+    .ghost   { fill: #5F5D57; opacity: 0.5; }
+    .typed   { fill: #BC9C62; opacity: 1; }
+    .current { opacity: 0; fill: #BC9C62; fill-opacity: 0; }  /* hidden while the hero letter performs the strike */
+
+    /* Each struck letter is its own transformable <text> so the key-bashes can
+       overlap while the caret runs on ahead. */
+    #trails, #heroes, #sparkles { pointer-events: none; }
+    .hero, .dust, .sparkle, .burst { will-change: transform, opacity; }
+
+    .hero {
+      fill: #EDEBE6;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      transform-box: fill-box;
+      transform-origin: 50% 88%;
+    }
+    .hero.bash { animation: bash 0.14s cubic-bezier(.18,.82,.28,1) both; }
+
+    .dust { transform-box: fill-box; transform-origin: center; }
+    .dust.animate { animation: dust 0.5s ease-out forwards; }
+
+    .sparkle { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .sparkle.animate { animation: sparkleFloat 0.9s ease-out forwards; }
+
+    .burst { opacity: 0; transform-box: fill-box; transform-origin: center; }
+    .burst.animate { animation: burst 0.7s ease-out forwards; }
 
     @media (prefers-reduced-motion: reduce) {
-      .score-glow, .sheen, .caret, .ch { animation: none; }
-      .ch { opacity: .5; }
+      .score-glow, .sheen, .dust.animate, .sparkle.animate, .burst.animate { animation: none; }
+      #heroes { display: none; }
+      .current { opacity: 1; fill: #EDEBE6; fill-opacity: 1; }
     }
   </style>
 </head>
@@ -121,6 +150,10 @@
           <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
           <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
         </linearGradient>
+        <linearGradient id="smearGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#BC9C62" stop-opacity="0" />
+          <stop offset="100%" stop-color="#D9BC82" stop-opacity="0.85" />
+        </linearGradient>
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
         </pattern>
@@ -138,11 +171,29 @@
 
       <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
 
-      <text x="260" y="156" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:0.00">f</tspan><tspan class="ch" style="animation-delay:0.09">i</tspan><tspan class="ch" style="animation-delay:0.18">r</tspan><tspan class="ch" style="animation-delay:0.27">m</tspan><tspan class="ch" style="animation-delay:0.36">w</tspan><tspan class="ch" style="animation-delay:0.45">a</tspan><tspan class="ch" style="animation-delay:0.54">r</tspan><tspan class="ch" style="animation-delay:0.63">e</tspan><tspan class="ch" style="animation-delay:0.72">&#160;</tspan><tspan class="ch" style="animation-delay:0.81">b</tspan><tspan class="ch" style="animation-delay:0.90">u</tspan><tspan class="ch" style="animation-delay:0.99">f</tspan><tspan class="ch" style="animation-delay:1.08">f</tspan><tspan class="ch" style="animation-delay:1.17">e</tspan><tspan class="ch" style="animation-delay:1.26">r</tspan><tspan class="ch" style="animation-delay:1.35">&#160;</tspan><tspan class="ch" style="animation-delay:1.44">c</tspan><tspan class="ch" style="animation-delay:1.53">o</tspan><tspan class="ch" style="animation-delay:1.62">n</tspan><tspan class="ch" style="animation-delay:1.71">s</tspan><tspan class="ch" style="animation-delay:1.80">o</tspan><tspan class="ch" style="animation-delay:1.89">l</tspan><tspan class="ch" style="animation-delay:1.98">e</tspan></text>
-      <text x="260" y="172" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:2.07">s</tspan><tspan class="ch" style="animation-delay:2.16">e</tspan><tspan class="ch" style="animation-delay:2.25">l</tspan><tspan class="ch" style="animation-delay:2.34">e</tspan><tspan class="ch" style="animation-delay:2.43">c</tspan><tspan class="ch" style="animation-delay:2.52">t</tspan><tspan class="ch" style="animation-delay:2.61">&#160;</tspan><tspan class="ch" style="animation-delay:2.70">c</tspan><tspan class="ch" style="animation-delay:2.79">o</tspan><tspan class="ch" style="animation-delay:2.88">r</tspan><tspan class="ch" style="animation-delay:2.97">e</tspan><tspan class="ch" style="animation-delay:3.06">&#160;</tspan><tspan class="ch" style="animation-delay:3.15">s</tspan><tspan class="ch" style="animation-delay:3.24">c</tspan><tspan class="ch" style="animation-delay:3.33">r</tspan><tspan class="ch" style="animation-delay:3.42">i</tspan><tspan class="ch" style="animation-delay:3.51">p</tspan><tspan class="ch" style="animation-delay:3.60">t</tspan><tspan class="ch" style="animation-delay:3.69">&#160;</tspan><tspan class="ch" style="animation-delay:3.78">t</tspan><tspan class="ch" style="animation-delay:3.87">l</tspan><tspan class="ch" style="animation-delay:3.96">s</tspan><tspan class="ch" style="animation-delay:4.05">&#160;</tspan><tspan class="ch" style="animation-delay:4.14">y</tspan><tspan class="ch" style="animation-delay:4.23">i</tspan><tspan class="ch" style="animation-delay:4.32">e</tspan><tspan class="ch" style="animation-delay:4.41">l</tspan><tspan class="ch" style="animation-delay:4.50">d</tspan></text>
-      <text x="260" y="188" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:4.59">m</tspan><tspan class="ch" style="animation-delay:4.68">a</tspan><tspan class="ch" style="animation-delay:4.77">c</tspan><tspan class="ch" style="animation-delay:4.86">h</tspan><tspan class="ch" style="animation-delay:4.95">i</tspan><tspan class="ch" style="animation-delay:5.04">n</tspan><tspan class="ch" style="animation-delay:5.13">e</tspan><tspan class="ch" style="animation-delay:5.22">&#160;</tspan><tspan class="ch" style="animation-delay:5.31">d</tspan><tspan class="ch" style="animation-delay:5.40">e</tspan><tspan class="ch" style="animation-delay:5.49">p</tspan><tspan class="ch" style="animation-delay:5.58">l</tspan><tspan class="ch" style="animation-delay:5.67">o</tspan><tspan class="ch" style="animation-delay:5.76">y</tspan><tspan class="ch" style="animation-delay:5.85">&#160;</tspan><tspan class="ch" style="animation-delay:5.94">r</tspan><tspan class="ch" style="animation-delay:6.03">u</tspan><tspan class="ch" style="animation-delay:6.12">n</tspan><tspan class="ch" style="animation-delay:6.21">t</tspan><tspan class="ch" style="animation-delay:6.30">i</tspan><tspan class="ch" style="animation-delay:6.39">m</tspan><tspan class="ch" style="animation-delay:6.48">e</tspan><tspan class="ch" style="animation-delay:6.57">&#160;</tspan><tspan class="ch" style="animation-delay:6.66">q</tspan><tspan class="ch" style="animation-delay:6.75">u</tspan><tspan class="ch" style="animation-delay:6.84">e</tspan><tspan class="ch" style="animation-delay:6.93">u</tspan><tspan class="ch" style="animation-delay:7.02">e</tspan></text>
-      <text x="260" y="204" font-family="var(--font-mono)" font-size="14" class="ghost"><tspan class="ch" style="animation-delay:7.11">c</tspan><tspan class="ch" style="animation-delay:7.20">l</tspan><tspan class="ch" style="animation-delay:7.29">u</tspan><tspan class="ch" style="animation-delay:7.38">s</tspan><tspan class="ch" style="animation-delay:7.47">t</tspan><tspan class="ch" style="animation-delay:7.56">e</tspan><tspan class="ch" style="animation-delay:7.65">r</tspan><tspan class="ch" style="animation-delay:7.74">&#160;</tspan><tspan class="ch" style="animation-delay:7.83">i</tspan><tspan class="ch" style="animation-delay:7.92">n</tspan><tspan class="ch" style="animation-delay:8.01">d</tspan><tspan class="ch" style="animation-delay:8.10">e</tspan><tspan class="ch" style="animation-delay:8.19">x</tspan><tspan class="ch" style="animation-delay:8.28">&#160;</tspan><tspan class="ch" style="animation-delay:8.37">s</tspan><tspan class="ch" style="animation-delay:8.46">t</tspan><tspan class="ch" style="animation-delay:8.55">r</tspan><tspan class="ch" style="animation-delay:8.64">u</tspan><tspan class="ch" style="animation-delay:8.73">c</tspan><tspan class="ch" style="animation-delay:8.82">t</tspan><tspan class="ch" style="animation-delay:8.91">&#160;</tspan><tspan class="ch" style="animation-delay:9.00">t</tspan><tspan class="ch" style="animation-delay:9.09">o</tspan><tspan class="ch" style="animation-delay:9.18">k</tspan><tspan class="ch" style="animation-delay:9.27">e</tspan><tspan class="ch" style="animation-delay:9.36">n</tspan></text>
-      <rect class="caret" x="260" y="145" width="2" height="14" fill="#BC9C62" />
+      <!-- Typing area - right side -->
+      <g id="typingGroup">
+        <g id="trails">
+          <rect id="smear" x="0" y="145" width="0" height="14" rx="1" fill="url(#smearGrad)" opacity="0" />
+        </g>
+        <g id="textGroup" font-size="14">
+          <text x="260" y="156">
+            <tspan class="char ghost" data-index="0">f</tspan><tspan class="char ghost" data-index="1">i</tspan><tspan class="char ghost" data-index="2">r</tspan><tspan class="char ghost" data-index="3">m</tspan><tspan class="char ghost" data-index="4">w</tspan><tspan class="char ghost" data-index="5">a</tspan><tspan class="char ghost" data-index="6">r</tspan><tspan class="char ghost" data-index="7">e</tspan><tspan class="char ghost" data-index="8">&#160;</tspan><tspan class="char ghost" data-index="9">b</tspan><tspan class="char ghost" data-index="10">u</tspan><tspan class="char ghost" data-index="11">f</tspan><tspan class="char ghost" data-index="12">f</tspan><tspan class="char ghost" data-index="13">e</tspan><tspan class="char ghost" data-index="14">r</tspan><tspan class="char ghost" data-index="15">&#160;</tspan><tspan class="char ghost" data-index="16">c</tspan><tspan class="char ghost" data-index="17">o</tspan><tspan class="char ghost" data-index="18">n</tspan><tspan class="char ghost" data-index="19">s</tspan><tspan class="char ghost" data-index="20">o</tspan><tspan class="char ghost" data-index="21">l</tspan><tspan class="char ghost" data-index="22">e</tspan>
+          </text>
+          <text x="260" y="172">
+            <tspan class="char ghost" data-index="23">s</tspan><tspan class="char ghost" data-index="24">e</tspan><tspan class="char ghost" data-index="25">l</tspan><tspan class="char ghost" data-index="26">e</tspan><tspan class="char ghost" data-index="27">c</tspan><tspan class="char ghost" data-index="28">t</tspan><tspan class="char ghost" data-index="29">&#160;</tspan><tspan class="char ghost" data-index="30">c</tspan><tspan class="char ghost" data-index="31">o</tspan><tspan class="char ghost" data-index="32">r</tspan><tspan class="char ghost" data-index="33">e</tspan><tspan class="char ghost" data-index="34">&#160;</tspan><tspan class="char ghost" data-index="35">s</tspan><tspan class="char ghost" data-index="36">c</tspan><tspan class="char ghost" data-index="37">r</tspan><tspan class="char ghost" data-index="38">i</tspan><tspan class="char ghost" data-index="39">p</tspan><tspan class="char ghost" data-index="40">t</tspan><tspan class="char ghost" data-index="41">&#160;</tspan><tspan class="char ghost" data-index="42">t</tspan><tspan class="char ghost" data-index="43">l</tspan><tspan class="char ghost" data-index="44">s</tspan><tspan class="char ghost" data-index="45">&#160;</tspan><tspan class="char ghost" data-index="46">y</tspan><tspan class="char ghost" data-index="47">i</tspan><tspan class="char ghost" data-index="48">e</tspan><tspan class="char ghost" data-index="49">l</tspan><tspan class="char ghost" data-index="50">d</tspan>
+          </text>
+          <text x="260" y="188">
+            <tspan class="char ghost" data-index="51">m</tspan><tspan class="char ghost" data-index="52">a</tspan><tspan class="char ghost" data-index="53">c</tspan><tspan class="char ghost" data-index="54">h</tspan><tspan class="char ghost" data-index="55">i</tspan><tspan class="char ghost" data-index="56">n</tspan><tspan class="char ghost" data-index="57">e</tspan><tspan class="char ghost" data-index="58">&#160;</tspan><tspan class="char ghost" data-index="59">d</tspan><tspan class="char ghost" data-index="60">e</tspan><tspan class="char ghost" data-index="61">p</tspan><tspan class="char ghost" data-index="62">l</tspan><tspan class="char ghost" data-index="63">o</tspan><tspan class="char ghost" data-index="64">y</tspan><tspan class="char ghost" data-index="65">&#160;</tspan><tspan class="char ghost" data-index="66">r</tspan><tspan class="char ghost" data-index="67">u</tspan><tspan class="char ghost" data-index="68">n</tspan><tspan class="char ghost" data-index="69">t</tspan><tspan class="char ghost" data-index="70">i</tspan><tspan class="char ghost" data-index="71">m</tspan><tspan class="char ghost" data-index="72">e</tspan><tspan class="char ghost" data-index="73">&#160;</tspan><tspan class="char ghost" data-index="74">q</tspan><tspan class="char ghost" data-index="75">u</tspan><tspan class="char ghost" data-index="76">e</tspan><tspan class="char ghost" data-index="77">u</tspan><tspan class="char ghost" data-index="78">e</tspan>
+          </text>
+          <text x="260" y="204">
+            <tspan class="char ghost" data-index="79">c</tspan><tspan class="char ghost" data-index="80">l</tspan><tspan class="char ghost" data-index="81">u</tspan><tspan class="char ghost" data-index="82">s</tspan><tspan class="char ghost" data-index="83">t</tspan><tspan class="char ghost" data-index="84">e</tspan><tspan class="char ghost" data-index="85">r</tspan><tspan class="char ghost" data-index="86">&#160;</tspan><tspan class="char ghost" data-index="87">i</tspan><tspan class="char ghost" data-index="88">n</tspan><tspan class="char ghost" data-index="89">d</tspan><tspan class="char ghost" data-index="90">e</tspan><tspan class="char ghost" data-index="91">x</tspan><tspan class="char ghost" data-index="92">&#160;</tspan><tspan class="char ghost" data-index="93">s</tspan><tspan class="char ghost" data-index="94">t</tspan><tspan class="char ghost" data-index="95">r</tspan><tspan class="char ghost" data-index="96">u</tspan><tspan class="char ghost" data-index="97">c</tspan><tspan class="char ghost" data-index="98">t</tspan><tspan class="char ghost" data-index="99">&#160;</tspan><tspan class="char ghost" data-index="100">t</tspan><tspan class="char ghost" data-index="101">o</tspan><tspan class="char ghost" data-index="102">k</tspan><tspan class="char ghost" data-index="103">e</tspan><tspan class="char ghost" data-index="104">n</tspan>
+          </text>
+        </g>
+        <g id="heroes"></g>
+        <rect id="cursor" x="260" y="145" width="2" height="14" fill="#D9BC82" />
+        <g id="sparkles"></g>
+      </g>
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 05</text>
       <text x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">Typing Velocity High Score</text>
@@ -212,10 +263,6 @@
             userText.setAttribute('font-size', String(fontSize));
           }
           if (userText.getComputedTextLength() > boxWidth) {
-            // Minimum size reached and the name still overflows.  The display
-            // font is proportional, so a fixed per-character width guess is
-            // wrong -- wide uppercase glyphs overrun it.  Measure the real
-            // rendered width of each candidate until it actually fits.
             var n = name.length, k = 0;
             while (n > 1 && k++ < 200) {
               n -= 1;
@@ -227,11 +274,337 @@
           }
         };
         fitName();
-        // Re-fit once the webfont really is loaded: measuring before that
-        // uses the fallback font, so getComputedTextLength() can lie.
         if (document.fonts && document.fonts.ready) {
           document.fonts.ready.then(fitName);
         }
+      }
+    })();
+  </script>
+  <script>
+    (function() {
+      "use strict";
+      var SVGNS = "http://www.w3.org/2000/svg";
+      var chars = Array.prototype.slice.call(document.querySelectorAll("#textGroup .char"));
+      var textGroup = document.getElementById("textGroup");
+      var heroesGroup = document.getElementById("heroes");
+      var cursor = document.getElementById("cursor");
+      var sparklesGroup = document.getElementById("sparkles");
+
+      var total = chars.length;
+      var index = 0;
+      var cursorPos = { x: 260, y: 145 };
+      var startPos = { x: 260, y: 145 };
+      var completed = false;
+      var started = false;
+      var pendingReveals = [];
+
+      var reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+      var WARP_MIN = 28, WARP_MAX = 200, HOLD = 30, BASH_MS = 140;
+
+      var smear = document.getElementById("smear");
+      var smearGrad = document.getElementById("smearGrad");
+      var trailLast = null;
+      var smearAnimId = null;
+      var smearRunning = false;
+
+      function lineY(i) {
+        return parseFloat(chars[i].parentElement.getAttribute("y")) || 0;
+      }
+
+      // NOTE: tspan.getBBox() reports coordinates in the SVG's own user space
+      // (i.e. already absolute), so the line's x/y must NOT be added again.
+      function getCharPos(i) {
+        if (i < 0 || i >= total) return { x: cursorPos.x, y: cursorPos.y };
+        var bbox = chars[i].getBBox();
+        return { x: bbox.x, y: lineY(i) - 12 };
+      }
+
+      function setCursor(x, y) {
+        cursor.setAttribute("x", x.toFixed(2));
+        cursor.setAttribute("y", y.toFixed(2));
+      }
+
+      function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      // A simple motion-blur attached to the caret: a gradient box to its left
+      // that fades out to transparent - longer/brighter as the caret moves faster.
+      function drawSmear(x, y, L, op) {
+        var top = y, height = 14;
+        var right = x + 2, left = right - L;
+        if (left < 0) left = 0;
+        var w = right - left;
+        var lx = Math.round(left);
+        var rx = Math.round(right);
+        var ty = Math.round(top);
+        var h  = Math.round(height);
+        var ww = Math.round(w);
+        smear.setAttribute("x", lx);
+        smear.setAttribute("y", ty);
+        smear.setAttribute("width", ww);
+        smear.setAttribute("height", h);
+        smearGrad.setAttribute("x1", lx);
+        smearGrad.setAttribute("y1", ty);
+        smearGrad.setAttribute("x2", rx);
+        smearGrad.setAttribute("y2", ty);
+        smear.setAttribute("opacity", op.toFixed(3));
+      }
+
+      function pushTrail(x, y, dirX, dirY) {
+        if (reduceMotion) return;
+        if (trailLast) {
+          var vx = x - trailLast.x, vy = y - trailLast.y;
+          var d = Math.sqrt(vx * vx + vy * vy);
+          if (d < 0.25) { trailLast = { x: x, y: y }; return; }
+          if (d > 0.3) {
+            drawSmear(x, y, Math.max(12, Math.min(44, d * 6 + 8)), Math.min(0.8, 0.3 + d * 0.08));
+          } else {
+            drawSmear(x, y, 26, 0.5);
+          }
+        } else {
+          drawSmear(x, y, 26, 0.5);
+        }
+        trailLast = { x: x, y: y };
+      }
+
+      // When the caret settles, ease the smear away.
+      function fadeTrailOut() {
+        if (reduceMotion) { trailLast = null; return; }
+        var o0 = parseFloat(smear.getAttribute("opacity")) || 0;
+        var t0 = performance.now(), dur = 150;
+        function f(now) {
+          var p = Math.min(1, (now - t0) / dur);
+          smear.setAttribute("opacity", (o0 * (1 - p)).toFixed(3));
+          if (p < 1) requestAnimationFrame(f);
+          else {
+            trailLast = null;
+            smear.setAttribute("width", "0");
+            smear.setAttribute("opacity", "0");
+          }
+        }
+        requestAnimationFrame(f);
+      }
+
+      // Smooth warp, never a teleport. Long jumps - line wraps, the return to
+      // the start - travel visibly and leave the comet trail behind.
+      function warpTo(target, done) {
+        var fromX = cursorPos.x, fromY = cursorPos.y;
+        var dx = target.x - fromX, dy = target.y - fromY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var dur = reduceMotion ? 1 : Math.max(WARP_MIN, Math.min(WARP_MAX, dist));
+        if (dist < 0.4) {
+          cursorPos.x = target.x;
+          cursorPos.y = target.y;
+          setCursor(target.x, target.y);
+          fadeTrailOut();
+          if (done) requestAnimationFrame(done);
+          return;
+        }
+        var t0 = performance.now();
+        function step(now) {
+          var p = Math.min(1, (now - t0) / dur);
+          var e = easeInOutCubic(p);
+          var x = fromX + dx * e;
+          var y = fromY + dy * e;
+          cursorPos.x = x;
+          cursorPos.y = y;
+          setCursor(x, y);
+          pushTrail(x, y, dx, dy);
+          if (p < 1) {
+            requestAnimationFrame(step);
+          } else {
+            cursorPos.x = target.x;
+            cursorPos.y = target.y;
+            setCursor(target.x, target.y);
+            fadeTrailOut();
+            if (done) done();
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      // The caret has landed: hide the plain glyph and drop a temporary "hero"
+      // copy of the letter that takes the hit. Bashes overlap, so the caret can
+      // move on while the previous letters are still settling.
+      function strike(i) {
+        var c = chars[i];
+        c.classList.remove("ghost");
+        c.classList.add("current"); // hidden while the hero performs
+
+        var pos = getCharPos(i);
+        var t = document.createElementNS(SVGNS, "text");
+        t.setAttribute("class", "hero");
+        t.setAttribute("x", pos.x.toFixed(2));
+        t.setAttribute("y", lineY(i));
+        t.textContent = chars[i].textContent;
+        heroesGroup.appendChild(t);
+        requestAnimationFrame(function() { t.classList.add("bash"); });
+
+        var id = setTimeout(function() {
+          c.classList.remove("current");
+          c.classList.add("typed");
+          if (t.parentNode) t.parentNode.removeChild(t);
+          var k = pendingReveals.indexOf(id);
+          if (k > -1) pendingReveals.splice(k, 1);
+        }, BASH_MS);
+        pendingReveals.push(id);
+
+        kickDust(i);
+      }
+
+      // A little debris kicked up by the key-bash.
+      function kickDust(i) {
+        if (reduceMotion) return;
+        var x = getCharPos(i).x + 1;
+        var y = lineY(i) - 2;
+        for (var k = 0; k < 3; k++) {
+          (function(k) {
+            setTimeout(function() {
+              var g = document.createElementNS(SVGNS, "g");
+              g.setAttribute("transform", "translate(" + x.toFixed(1) + "," + y.toFixed(1) + ")");
+              var dot = document.createElementNS(SVGNS, "circle");
+              dot.setAttribute("cx", "0");
+              dot.setAttribute("cy", "0");
+              dot.setAttribute("r", (0.5 + Math.random() * 0.8).toFixed(2));
+              dot.setAttribute("fill", Math.random() < 0.5 ? "#BC9C62" : "#EDEBE6");
+              dot.classList.add("dust");
+              dot.style.setProperty("--dx", (Math.random() * 12 - 6).toFixed(1) + "px");
+              dot.style.setProperty("--dy", (-Math.random() * 12 - 3).toFixed(1) + "px");
+              g.appendChild(dot);
+              sparklesGroup.appendChild(g);
+              requestAnimationFrame(function() { dot.classList.add("animate"); });
+              setTimeout(function() { if (g.parentNode) g.parentNode.removeChild(g); }, 560);
+            }, k * 16);
+          })(k);
+        }
+      }
+
+      function pastEndPos(i) {
+        var w = chars[i].getComputedTextLength ? chars[i].getComputedTextLength() : 8;
+        return { x: getCharPos(i).x + w, y: lineY(i) - 12 };
+      }
+
+      function typeNext() {
+        if (index >= total) {
+          // settle the caret just past the final letter, then celebrate
+          warpTo(pastEndPos(total - 1), finishRun);
+          return;
+        }
+        var i = index;
+        warpTo(getCharPos(i), function() {
+          strike(i);
+          index++;
+          setTimeout(typeNext, HOLD);
+        });
+      }
+
+      function finishRun() {
+        completed = true;
+        celebrate();
+        setTimeout(returnHome, 1500);
+      }
+
+      function starPath(s) {
+        var p = [[0, -4], [1.1, -1.1], [4, 0], [1.1, 1.1], [0, 4], [-1.1, 1.1], [-4, 0], [-1.1, -1.1]];
+        var out = [];
+        for (var i = 0; i < p.length; i++) {
+          out.push((i ? "L" : "M") + (p[i][0] * s).toFixed(2) + "," + (p[i][1] * s).toFixed(2));
+        }
+        return out.join(" ") + " Z";
+      }
+
+      function spawnSparkle(x, y, star, s, fill, dx, dy, rot, life) {
+        var g = document.createElementNS(SVGNS, "g");
+        g.setAttribute("transform", "translate(" + x.toFixed(1) + "," + y.toFixed(1) + ")");
+        var el = document.createElementNS(SVGNS, star ? "path" : "circle");
+        if (star) {
+          el.setAttribute("d", starPath(s));
+        } else {
+          el.setAttribute("cx", "0");
+          el.setAttribute("cy", "0");
+          el.setAttribute("r", s.toFixed(2));
+        }
+        el.setAttribute("fill", fill);
+        el.classList.add("sparkle");
+        el.style.setProperty("--dx", dx.toFixed(1) + "px");
+        el.style.setProperty("--dy", dy.toFixed(1) + "px");
+        el.style.setProperty("--rot", (rot || 0) + "deg");
+        g.appendChild(el);
+        sparklesGroup.appendChild(g);
+        requestAnimationFrame(function() { el.classList.add("animate"); });
+        setTimeout(function() { if (g.parentNode) g.parentNode.removeChild(g); }, life);
+      }
+
+      function celebrate() {
+        var bb = textGroup.getBBox();
+        var padX = 8, padY = 10;
+        // A soft accent bloom at the caret...
+        var ring = document.createElementNS(SVGNS, "circle");
+        ring.setAttribute("cx", (cursorPos.x + 1).toFixed(1));
+        ring.setAttribute("cy", (cursorPos.y + 7).toFixed(1));
+        ring.setAttribute("r", "24");
+        ring.setAttribute("fill", "url(#accentGlow)");
+        ring.classList.add("burst");
+        sparklesGroup.appendChild(ring);
+        requestAnimationFrame(function() { ring.classList.add("animate"); });
+        setTimeout(function() { if (ring.parentNode) ring.parentNode.removeChild(ring); }, 800);
+
+        var palette = ["#BC9C62", "#EDEBE6", "#E7C98A", "#D9BC82"];
+        for (var i = 0; i < 32; i++) {
+          (function(i) {
+            setTimeout(function() {
+              var x = bb.x - padX + Math.random() * (bb.width + padX * 2);
+              var y = bb.y - padY + Math.random() * (bb.height + padY * 2);
+              var star = Math.random() < 0.5;
+              spawnSparkle(
+                x, y, star,
+                star ? (0.5 + Math.random() * 0.9) : (0.7 + Math.random() * 1.7),
+                palette[(Math.random() * palette.length) | 0],
+                Math.random() * 44 - 22,
+                -6 - Math.random() * 34,
+                Math.random() * 200 - 100,
+                950
+              );
+            }, i * 22);
+          })(i);
+        }
+      }
+
+      // Warp back to the start instead of snapping, then lay the words down again.
+      function returnHome() {
+        warpTo(startPos, function() {
+          // cancel anything still in flight from the previous run
+          for (var p = 0; p < pendingReveals.length; p++) clearTimeout(pendingReveals[p]);
+          pendingReveals = [];
+          while (heroesGroup.firstChild) heroesGroup.removeChild(heroesGroup.firstChild);
+          for (var i = 0; i < chars.length; i++) {
+            chars[i].classList.remove("typed", "current");
+            chars[i].classList.add("ghost");
+          }
+          index = 0;
+          completed = false;
+          setTimeout(function() {
+            if (!completed) typeNext();
+          }, 400);
+        });
+      }
+
+      function start() {
+        if (started) return;
+        started = true;
+        index = 0;
+        cursorPos = { x: startPos.x, y: startPos.y };
+        setCursor(startPos.x, startPos.y);
+        typeNext();
+      }
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function() { setTimeout(start, 250); });
+        setTimeout(start, 1500);
+      } else {
+        setTimeout(start, 400);
       }
     })();
   </script>
