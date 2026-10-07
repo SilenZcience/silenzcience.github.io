@@ -79,8 +79,110 @@
     .score-glow { animation: scoreGlow 6s ease-in-out infinite; }
     .sheen      { animation: sheen 11s ease-in-out infinite; }
     .fall-t     { animation: fallT 2.6s cubic-bezier(.45,.05,.55,.95) infinite; }
+    /* -- the landing chain: piece lands at 62%% of the 2.6s cycle, then
+       shake -> squash -> floor slam -> shockwave -> cell ripple fires,
+       every effect keyed off that one moment.                           */
+    .board-shake { animation: shakeHit 2.6s ease-out infinite; }
+    .stack       { transform-box: fill-box; transform-origin: 50% 100%;
+                   animation: squash 2.6s ease-out infinite; }
+    .stack rect  { transform-box: fill-box; transform-origin: center;
+                   animation: cellHit 2.6s linear infinite;
+                   animation-delay: var(--d, 0s); }
+    .land-hit    { transform-box: fill-box; transform-origin: 50% 100%;
+                   animation: pieceHit 2.6s ease-out infinite; }
+    .trail       { filter: blur(1.5px);
+                   animation: trailFade 2.6s linear infinite; }
+    .marker      { transform-box: fill-box; transform-origin: center;
+                   animation: markerPulse 1.3s ease-in-out infinite,
+                              markerHide 2.6s ease-in-out infinite; }
+    .slam        { transform-box: fill-box; transform-origin: 100% 50%;
+                   animation: slam 2.6s ease-out infinite; }
+    .board-flare { animation: flarePop 2.6s ease-out infinite; }
+    .ring, .flash, .fx-spark { transform-box: fill-box; transform-origin: center; }
+    .ring        { animation: ringPop 2.6s ease-out infinite; }
+    .flash       { animation: flashPop 2.6s ease-out infinite; }
+    .fx-spark    { animation: sparkPop 2.6s ease-out infinite; }
+    @keyframes shakeHit {
+      0%, 61%, 74%, 100% { transform: translate(0, 0); }
+      63%    { transform: translate(1.6px, -1.2px); }
+      65.5%  { transform: translate(-1.6px, 1px); }
+      68%    { transform: translate(1px, -0.6px); }
+      70.5%  { transform: translate(-0.6px, 0.5px); }
+      73%    { transform: translate(0.3px, -0.2px); }
+    }
+    @keyframes squash {
+      0%, 61%  { transform: translateY(0) scaleY(1); }
+      63.5%    { transform: translateY(1.6px) scaleY(.945); }
+      67%      { transform: translateY(0) scaleY(1.015); }
+      71%, 100%{ transform: translateY(0) scaleY(1); }
+    }
+    @keyframes pieceHit {
+      0%, 61%  { transform: translateY(0) scaleY(1); }
+      63%      { transform: translateY(1.2px) scaleY(.9); }
+      67%      { transform: translateY(0) scaleY(1.03); }
+      71%, 100%{ transform: translateY(0) scaleY(1); }
+    }
+    @keyframes slam {
+      0%, 61%    { opacity: 0; transform: scaleX(.06); }
+      62.5%      { opacity: .95; transform: scaleX(.4); }
+      70%        { opacity: .5; transform: scaleX(1); }
+      80%, 100%  { opacity: 0; transform: scaleX(1.05); }
+    }
+    @keyframes ringPop {
+      0%, 61.5% { opacity: 0; transform: scale(.35); }
+      63%       { opacity: .95; transform: scale(.7); }
+      74%       { opacity: .5; transform: scale(3); }
+      85%, 100% { opacity: 0; transform: scale(4.4); }
+    }
+    @keyframes flashPop {
+      0%, 61.5% { opacity: 0; transform: scale(.3); }
+      63%       { opacity: .9; transform: scale(1); }
+      69%       { opacity: .35; transform: scale(1.6); }
+      76%, 100% { opacity: 0; transform: scale(2); }
+    }
+    @keyframes sparkPop {
+      0%, 61%   { opacity: 0; transform: translate(0, 0) scale(.5); }
+      63%       { opacity: 1; transform: translate(0, 0) scale(1); }
+      74%       { opacity: 1; transform: translate(calc(var(--dx) * .5), calc(var(--dy) * .5)) scale(1.15); }
+      86%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.4); }
+    }
+    @keyframes flarePop {
+      0%, 61%   { opacity: 0; }
+      63%       { opacity: .5; }
+      76%, 100% { opacity: 0; }
+    }
+    @keyframes cellHit {
+      0%     { opacity: .7; transform: scale(1); filter: none; }
+      2.5%   { opacity: 1; transform: scale(1.14);
+               filter: brightness(2.3) drop-shadow(0 0 3px rgba(247,232,200,.85)); }
+      5.5%   { opacity: .78; transform: scale(1); filter: none; }
+      100%   { opacity: .7; transform: scale(1); filter: none; }
+    }
+    @keyframes markerPulse {
+      0%, 100% { opacity: .16; }
+      50%      { opacity: .5; }
+    }
+    /* blink the projections out the instant the piece plants — the landing
+       squash/shake would otherwise uncover the top one; back at 93% when
+       the piece resets off-screen (hidden underneath while shrinking) */
+    @keyframes markerHide {
+      0%, 61.5%  { transform: scale(1); }
+      62.5%, 92% { transform: scale(0); }
+      93%, 100%  { transform: scale(1); }
+    }
+    /* streak builds while the piece accelerates, vanishes the instant it lands */
+    @keyframes trailFade {
+      0%, 4%   { opacity: 0; }
+      12%      { opacity: .45; }
+      30%      { opacity: .65; }
+      56%      { opacity: 1; }
+      62%, 100%{ opacity: 0; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .score-glow, .sheen, .fall-t { animation: none; }
+      .score-glow, .sheen, .fall-t, .trail, .board-shake, .stack,
+      .land-hit, .marker, .slam, .board-flare, .ring, .flash, .fx-spark { animation: none; }
+      .stack rect { animation: none; }
     }
   </style>
 </head>
@@ -101,6 +203,43 @@
           <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
           <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
         </linearGradient>
+        <linearGradient id="trailGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#B36AC2" stop-opacity="0" />
+          <stop offset="55%" stop-color="#B36AC2" stop-opacity="0.28" />
+          <stop offset="100%" stop-color="#B36AC2" stop-opacity="0.75" />
+        </linearGradient>
+        <!-- 3D bevel like /lab/tetris drawCell: inset highlight line near the top
+             and inset shadow line near the bottom (white .18 / black .14) -->
+        <pattern id="cell-green" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#72B55C"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
+        <pattern id="cell-orange" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#E18A45"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
+        <pattern id="cell-yellow" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#D7B23F"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
+        <pattern id="cell-blue" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#6174CF"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
+        <pattern id="cell-red" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#D65A62"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
+        <pattern id="cell-purple" patternUnits="userSpaceOnUse" width="16" height="16">
+          <rect width="16" height="16" fill="#B36AC2"/>
+          <rect x="2.4" y="1.87" width="11.2" height="1.33" rx="0.5" fill="#FFFFFF" fill-opacity="0.18"/>
+          <rect x="2.4" y="13.07" width="11.2" height="1.07" fill="#000000" fill-opacity="0.14"/>
+        </pattern>
         <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
         </pattern>
@@ -112,40 +251,69 @@
       <g clip-path="url(#frame)"><rect class="sheen" x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" /></g>
       <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
 
+      <g class="board-shake">
+      <!-- impact bloom behind the stack -->
+      <ellipse class="board-flare" cx="466" cy="214" rx="64" ry="34" fill="url(#accentGlow)" opacity="0" />
+      <!-- dashed landing projections, covered once the piece arrives -->
+      <rect class="marker" x="475" y="177" width="14" height="14" rx="3.2" opacity=".3" fill="none" stroke="url(#cell-purple)" stroke-width="1.2" stroke-dasharray="2.5 2.5" />
+      <rect class="marker" x="475" y="193" width="14" height="14" rx="3.2" opacity=".3" fill="none" stroke="url(#cell-purple)" stroke-width="1.2" stroke-dasharray="2.5 2.5" />
+      <rect class="marker" x="475" y="209" width="14" height="14" rx="3.2" opacity=".3" fill="none" stroke="url(#cell-purple)" stroke-width="1.2" stroke-dasharray="2.5 2.5" />
+      <rect class="marker" x="459" y="193" width="14" height="14" rx="3.2" opacity=".3" fill="none" stroke="url(#cell-purple)" stroke-width="1.2" stroke-dasharray="2.5 2.5" />
+      <g class="stack">
       <g transform="translate(330, 176)">
         <!-- Row 0: --S------- -->
-        <rect x="32" y="-16" width="16" height="16" rx="3.2" opacity="0.7" fill="#72B55C" />
+        <rect x="32" y="-16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-green)" style="--d:2.383s" />
         <!-- Row 1: --SS-L---- -->
-        <rect x="32" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="#72B55C" />
-        <rect x="48" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="#72B55C" />
-        <rect x="80" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="#E18A45" />
+        <rect x="32" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-green)" style="--d:2.339s" />
+        <rect x="48" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-green)" style="--d:2.243s" />
+        <rect x="80" y="0" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-orange)" style="--d:2.062s" />
         <!-- Row 2: OOJS-LZZ-- -->
-        <rect x="0"  y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#D7B23F" />
-        <rect x="16" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#D7B23F" />
-        <rect x="32" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#6174CF" />
-        <rect x="48" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#72B55C" />
-        <rect x="80" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#E18A45" />
-        <rect x="96" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#D65A62" />
-        <rect x="112" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="#D65A62" />
+        <rect x="0"  y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-yellow)" style="--d:2.513s" />
+        <rect x="16" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-yellow)" style="--d:2.410s" />
+        <rect x="32" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-blue)" style="--d:2.309s" />
+        <rect x="48" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-green)" style="--d:2.208s" />
+        <rect x="80" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-orange)" style="--d:2.011s" />
+        <rect x="96" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-red)" style="--d:1.918s" />
+        <rect x="112" y="16" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-red)" style="--d:1.836s" />
         <!-- Row 3: OOJJJLLZZ- -->
-        <rect x="0"  y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#D7B23F" />
-        <rect x="16" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#D7B23F" />
-        <rect x="32" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#6174CF" />
-        <rect x="48" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#6174CF" />
-        <rect x="64" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#6174CF" />
-        <rect x="80" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#E18A45" />
-        <rect x="96" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#E18A45" />
-        <rect x="112" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#D65A62" />
-        <rect x="128" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="#D65A62" />
+        <rect x="0"  y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-yellow)" style="--d:2.501s" />
+        <rect x="16" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-yellow)" style="--d:2.397s" />
+        <rect x="32" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-blue)" style="--d:2.293s" />
+        <rect x="48" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-blue)" style="--d:2.189s" />
+        <rect x="64" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-blue)" style="--d:2.086s" />
+        <rect x="80" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-orange)" style="--d:1.983s" />
+        <rect x="96" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-orange)" style="--d:1.880s" />
+        <rect x="112" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-red)" style="--d:1.779s" />
+        <rect x="128" y="32" width="16" height="16" rx="3.2" opacity="0.7" fill="url(#cell-red)" style="--d:1.689s" />
       </g>
-
+      </g>
       <g class="fall-t">
+        <!-- soft comet streak trailing above the piece while it falls -->
+        <rect class="trail" x="474" y="120" width="16" height="56" fill="url(#trailGrad)" opacity="0" />
+        <g class="land-hit">
         <g transform="translate(458, 176)">
-          <rect x="16" y="0"  width="16" height="16" rx="3.2" fill="#B36AC2" />
-          <rect x="0"  y="16" width="16" height="16" rx="3.2" fill="#B36AC2" />
-          <rect x="16" y="16" width="16" height="16" rx="3.2" fill="#B36AC2" />
-          <rect x="16" y="32" width="16" height="16" rx="3.2" fill="#B36AC2" />
+          <rect x="16" y="0"  width="16" height="16" rx="3.2" fill="url(#cell-purple)" />
+          <rect x="0"  y="16" width="16" height="16" rx="3.2" fill="url(#cell-purple)" />
+          <rect x="16" y="16" width="16" height="16" rx="3.2" fill="url(#cell-purple)" />
+          <rect x="16" y="32" width="16" height="16" rx="3.2" fill="url(#cell-purple)" />
         </g>
+        </g>
+      </g>
+      <!-- floor slam line shooting out from the impact point -->
+      <rect class="slam" x="330" y="223" width="160" height="2.4" fill="url(#sheenGrad)" opacity="0" />
+      <!-- shockwave rings, flash and tetris-cell debris -->
+      <g transform="translate(474, 222)">
+        <circle class="flash" r="7" fill="url(#accentGlow)" opacity="0" />
+        <rect class="ring" x="-8" y="-8" width="16" height="16" rx="3.2" fill="none" stroke="#BC9C62" stroke-width="2" opacity="0" />
+        <rect class="ring" x="-8" y="-8" width="16" height="16" rx="3.2" fill="none" stroke="#EDEBE6" stroke-width="1.2" opacity="0" style="animation-delay:.1s" />
+          <rect class="fx-spark" style="--dx:-46px; --dy:-12px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#D7B23F" opacity="0" />
+          <rect class="fx-spark" style="--dx:-30px; --dy:-36px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#6174CF" opacity="0" />
+          <rect class="fx-spark" style="--dx:-10px; --dy:-48px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#D65A62" opacity="0" />
+          <rect class="fx-spark" style="--dx:18px; --dy:-42px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#72B55C" opacity="0" />
+          <rect class="fx-spark" style="--dx:38px; --dy:-20px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#E18A45" opacity="0" />
+          <rect class="fx-spark" style="--dx:-44px; --dy:-2px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#B36AC2" opacity="0" />
+          <rect class="fx-spark" style="--dx:32px; --dy:-4px" x="-2.5" y="-2.5" width="5" height="5" rx="1" fill="#EDEBE6" opacity="0" />
+      </g>
       </g>
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 09</text>
