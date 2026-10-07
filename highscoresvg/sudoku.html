@@ -70,93 +70,186 @@
       88%      { opacity: 0; }
       100%     { transform: translateX(560px); opacity: 0; }
     }
-    /* The gold "cursor" cell rasters the ghost board one cell at a time
-       (81 cells, 0.15s each, steps(1,end) = jump per segment), like a
-       solver scanning 1x1 cells for the next placement. */
-    @keyframes scanRun {
-      0%     { transform: translate(0px, 0px); }
-      1.2346% { transform: translate(16px, 0px); }
-      2.4691% { transform: translate(32px, 0px); }
-      3.7037% { transform: translate(48px, 0px); }
-      4.9383% { transform: translate(64px, 0px); }
-      6.1728% { transform: translate(80px, 0px); }
-      7.4074% { transform: translate(96px, 0px); }
-      8.642%  { transform: translate(112px, 0px); }
-      9.8765% { transform: translate(128px, 0px); }
-      11.1111% { transform: translate(0px, 16px); }
-      12.3457% { transform: translate(16px, 16px); }
-      13.5802% { transform: translate(32px, 16px); }
-      14.8148% { transform: translate(48px, 16px); }
-      16.0494% { transform: translate(64px, 16px); }
-      17.284%  { transform: translate(80px, 16px); }
-      18.5185% { transform: translate(96px, 16px); }
-      19.7531% { transform: translate(112px, 16px); }
-      20.9877% { transform: translate(128px, 16px); }
-      22.2222% { transform: translate(0px, 32px); }
-      23.4568% { transform: translate(16px, 32px); }
-      24.6914% { transform: translate(32px, 32px); }
-      25.9259% { transform: translate(48px, 32px); }
-      27.1605% { transform: translate(64px, 32px); }
-      28.3951% { transform: translate(80px, 32px); }
-      29.6296% { transform: translate(96px, 32px); }
-      30.8642% { transform: translate(112px, 32px); }
-      32.0988% { transform: translate(128px, 32px); }
-      33.3333% { transform: translate(0px, 48px); }
-      34.5679% { transform: translate(16px, 48px); }
-      35.8025% { transform: translate(32px, 48px); }
-      37.037%  { transform: translate(48px, 48px); }
-      38.2716% { transform: translate(64px, 48px); }
-      39.5062% { transform: translate(80px, 48px); }
-      40.7407% { transform: translate(96px, 48px); }
-      41.9753% { transform: translate(112px, 48px); }
-      43.2099% { transform: translate(128px, 48px); }
-      44.4444% { transform: translate(0px, 64px); }
-      45.679%  { transform: translate(16px, 64px); }
-      46.9136% { transform: translate(32px, 64px); }
-      48.1481% { transform: translate(48px, 64px); }
-      49.3827% { transform: translate(64px, 64px); }
-      50.6173% { transform: translate(80px, 64px); }
-      51.8519% { transform: translate(96px, 64px); }
-      53.0864% { transform: translate(112px, 64px); }
-      54.321%  { transform: translate(128px, 64px); }
-      55.5556% { transform: translate(0px, 80px); }
-      56.7901% { transform: translate(16px, 80px); }
-      58.0247% { transform: translate(32px, 80px); }
-      59.2593% { transform: translate(48px, 80px); }
-      60.4938% { transform: translate(64px, 80px); }
-      61.7284% { transform: translate(80px, 80px); }
-      62.963%  { transform: translate(96px, 80px); }
-      64.1975% { transform: translate(112px, 80px); }
-      65.4321% { transform: translate(128px, 80px); }
-      66.6667% { transform: translate(0px, 96px); }
-      67.9012% { transform: translate(16px, 96px); }
-      69.1358% { transform: translate(32px, 96px); }
-      70.3704% { transform: translate(48px, 96px); }
-      71.6049% { transform: translate(64px, 96px); }
-      72.8395% { transform: translate(80px, 96px); }
-      74.0741% { transform: translate(96px, 96px); }
-      75.3086% { transform: translate(112px, 96px); }
-      76.5432% { transform: translate(128px, 96px); }
-      77.7778% { transform: translate(0px, 112px); }
-      79.0123% { transform: translate(16px, 112px); }
-      80.2469% { transform: translate(32px, 112px); }
-      81.4815% { transform: translate(48px, 112px); }
-      82.716%  { transform: translate(64px, 112px); }
-      83.9506% { transform: translate(80px, 112px); }
-      85.1852% { transform: translate(96px, 112px); }
-      86.4198% { transform: translate(112px, 112px); }
-      87.6543% { transform: translate(128px, 112px); }
-      88.8889% { transform: translate(0px, 128px); }
-      90.1235% { transform: translate(16px, 128px); }
-      91.358%  { transform: translate(32px, 128px); }
-      92.5926% { transform: translate(48px, 128px); }
-      93.8272% { transform: translate(64px, 128px); }
-      95.0617% { transform: translate(80px, 128px); }
-      96.2963% { transform: translate(96px, 128px); }
-      97.5309% { transform: translate(112px, 128px); }
-      98.7654% { transform: translate(128px, 128px); }
-      100%    { transform: translate(0, 0); }
+    /* --- Right-side gamefield show --------------------------------
+       One shared 11s cycle: a gold cursor rasters all 81 cells, each
+       missing digit springs in with a gold flash the moment the cursor
+       lands, every finished row sweeps a shine bar, then the solved
+       board celebrates (flare, flash, triple shockwave,
+       confetti, sparkle stars, a border that draws itself and a group
+       bounce) and dissolves digit-by-digit back to the givens.
+       Per-cell --d delays carry the stagger; digits use a negative
+       delay so their phase is right from the first frame.            */
+    @keyframes cursorRun {
+      0%      { transform: translate(336px, 78px); opacity: 0; }
+      3.6364% { transform: translate(336px, 78px); opacity: 1; }
+      4.1414% { transform: translate(352px, 78px); opacity: 1; }
+      4.6465% { transform: translate(368px, 78px); opacity: 1; }
+      5.1515% { transform: translate(384px, 78px); opacity: 1; }
+      5.6566% { transform: translate(400px, 78px); opacity: 1; }
+      6.1616% { transform: translate(416px, 78px); opacity: 1; }
+      6.6667% { transform: translate(432px, 78px); opacity: 1; }
+      7.1717% { transform: translate(448px, 78px); opacity: 1; }
+      7.6768% { transform: translate(464px, 78px); opacity: 1; }
+      8.1818% { transform: translate(336px, 94px); opacity: 1; }
+      8.6869% { transform: translate(352px, 94px); opacity: 1; }
+      9.1919% { transform: translate(368px, 94px); opacity: 1; }
+      9.6970% { transform: translate(384px, 94px); opacity: 1; }
+      10.2020% { transform: translate(400px, 94px); opacity: 1; }
+      10.7071% { transform: translate(416px, 94px); opacity: 1; }
+      11.2121% { transform: translate(432px, 94px); opacity: 1; }
+      11.7172% { transform: translate(448px, 94px); opacity: 1; }
+      12.2222% { transform: translate(464px, 94px); opacity: 1; }
+      12.7273% { transform: translate(336px, 110px); opacity: 1; }
+      13.2323% { transform: translate(352px, 110px); opacity: 1; }
+      13.7374% { transform: translate(368px, 110px); opacity: 1; }
+      14.2424% { transform: translate(384px, 110px); opacity: 1; }
+      14.7475% { transform: translate(400px, 110px); opacity: 1; }
+      15.2525% { transform: translate(416px, 110px); opacity: 1; }
+      15.7576% { transform: translate(432px, 110px); opacity: 1; }
+      16.2626% { transform: translate(448px, 110px); opacity: 1; }
+      16.7677% { transform: translate(464px, 110px); opacity: 1; }
+      17.2727% { transform: translate(336px, 126px); opacity: 1; }
+      17.7778% { transform: translate(352px, 126px); opacity: 1; }
+      18.2828% { transform: translate(368px, 126px); opacity: 1; }
+      18.7879% { transform: translate(384px, 126px); opacity: 1; }
+      19.2929% { transform: translate(400px, 126px); opacity: 1; }
+      19.7980% { transform: translate(416px, 126px); opacity: 1; }
+      20.3030% { transform: translate(432px, 126px); opacity: 1; }
+      20.8081% { transform: translate(448px, 126px); opacity: 1; }
+      21.3131% { transform: translate(464px, 126px); opacity: 1; }
+      21.8182% { transform: translate(336px, 142px); opacity: 1; }
+      22.3232% { transform: translate(352px, 142px); opacity: 1; }
+      22.8283% { transform: translate(368px, 142px); opacity: 1; }
+      23.3333% { transform: translate(384px, 142px); opacity: 1; }
+      23.8384% { transform: translate(400px, 142px); opacity: 1; }
+      24.3434% { transform: translate(416px, 142px); opacity: 1; }
+      24.8485% { transform: translate(432px, 142px); opacity: 1; }
+      25.3535% { transform: translate(448px, 142px); opacity: 1; }
+      25.8586% { transform: translate(464px, 142px); opacity: 1; }
+      26.3636% { transform: translate(336px, 158px); opacity: 1; }
+      26.8687% { transform: translate(352px, 158px); opacity: 1; }
+      27.3737% { transform: translate(368px, 158px); opacity: 1; }
+      27.8788% { transform: translate(384px, 158px); opacity: 1; }
+      28.3838% { transform: translate(400px, 158px); opacity: 1; }
+      28.8889% { transform: translate(416px, 158px); opacity: 1; }
+      29.3939% { transform: translate(432px, 158px); opacity: 1; }
+      29.8990% { transform: translate(448px, 158px); opacity: 1; }
+      30.4040% { transform: translate(464px, 158px); opacity: 1; }
+      30.9091% { transform: translate(336px, 174px); opacity: 1; }
+      31.4141% { transform: translate(352px, 174px); opacity: 1; }
+      31.9192% { transform: translate(368px, 174px); opacity: 1; }
+      32.4242% { transform: translate(384px, 174px); opacity: 1; }
+      32.9293% { transform: translate(400px, 174px); opacity: 1; }
+      33.4343% { transform: translate(416px, 174px); opacity: 1; }
+      33.9394% { transform: translate(432px, 174px); opacity: 1; }
+      34.4444% { transform: translate(448px, 174px); opacity: 1; }
+      34.9495% { transform: translate(464px, 174px); opacity: 1; }
+      35.4545% { transform: translate(336px, 190px); opacity: 1; }
+      35.9596% { transform: translate(352px, 190px); opacity: 1; }
+      36.4646% { transform: translate(368px, 190px); opacity: 1; }
+      36.9697% { transform: translate(384px, 190px); opacity: 1; }
+      37.4747% { transform: translate(400px, 190px); opacity: 1; }
+      37.9798% { transform: translate(416px, 190px); opacity: 1; }
+      38.4848% { transform: translate(432px, 190px); opacity: 1; }
+      38.9899% { transform: translate(448px, 190px); opacity: 1; }
+      39.4949% { transform: translate(464px, 190px); opacity: 1; }
+      40.0000% { transform: translate(336px, 206px); opacity: 1; }
+      40.5051% { transform: translate(352px, 206px); opacity: 1; }
+      41.0101% { transform: translate(368px, 206px); opacity: 1; }
+      41.5152% { transform: translate(384px, 206px); opacity: 1; }
+      42.0202% { transform: translate(400px, 206px); opacity: 1; }
+      42.5253% { transform: translate(416px, 206px); opacity: 1; }
+      43.0303% { transform: translate(432px, 206px); opacity: 1; }
+      43.5354% { transform: translate(448px, 206px); opacity: 1; }
+      44.0404% { transform: translate(464px, 206px); opacity: 1; }
+      54.5%    { transform: translate(464px, 206px); opacity: 1; }
+      58%      { transform: translate(464px, 206px); opacity: 0; }
+      100%      { transform: translate(336px, 78px); opacity: 0; }
     }
+    @keyframes solvePop {
+      0%     { opacity: 0; transform: scale(.15) rotate(-9deg); fill: #FFF6E4;
+               filter: brightness(2.6) drop-shadow(0 0 5px rgba(255,238,195,.95)); }
+      0.9%   { opacity: 1; transform: scale(1.38) rotate(5deg); }
+      1.7%   { transform: scale(1.05) rotate(-2.5deg); fill: #F2DDAC; }
+      2.9%   { transform: scale(1) rotate(0deg); fill: #D8B87E;
+               filter: brightness(1.3) drop-shadow(0 0 2px rgba(240,222,174,.55)); }
+      5.4%   { fill: #BC9C62; filter: none; }
+      50.9%  { opacity: 1; transform: scale(1) rotate(0deg); filter: none; }
+      52.3%  { opacity: 1; transform: scale(1.14) rotate(3deg); filter: brightness(1.6); }
+      53.6%  { opacity: 0; transform: scale(.1) rotate(-6deg); filter: none; }
+      100%   { opacity: 0; transform: scale(.1) rotate(-6deg); fill: #BC9C62; filter: none; }
+    }
+    /* gold shine wipes across a row the moment its last digit lands */
+    @keyframes rowSweep {
+      0%     { opacity: 0; transform: translateX(-158px); }
+      0.8%   { opacity: .85; }
+      5%     { opacity: .6; }
+      6.4%   { opacity: 0; transform: translateX(158px); }
+      100%   { opacity: 0; transform: translateX(158px); }
+    }
+    /* --- the solved-board celebration, fired at ~46.5% --- */
+    @keyframes celShake {
+      0%, 46.4% { transform: translate(0, 0); }
+      46.9% { transform: translate(2.4px, -1.8px); }
+      47.4% { transform: translate(-2.2px, 1.5px); }
+      47.9% { transform: translate(1.6px, -1px); }
+      48.4% { transform: translate(-1px, 0.8px); }
+      48.9% { transform: translate(0.4px, -0.3px); }
+      49.4%, 100% { transform: translate(0, 0); }
+    }
+    @keyframes celFlare {
+      0%, 46.2%  { opacity: 0; transform: scale(.6); }
+      47.6%     { opacity: .5; transform: scale(1); }
+      52%       { opacity: .3; transform: scale(1.18); }
+      58%, 100% { opacity: 0; transform: scale(1.3); }
+    }
+    @keyframes celFlash {
+      0%, 46.3%  { opacity: 0; transform: scale(.3); }
+      47.4%     { opacity: .95; transform: scale(.85); }
+      50%       { opacity: .45; transform: scale(1.6); }
+      54%, 100% { opacity: 0; transform: scale(2.3); }
+    }
+    @keyframes celRing {
+      0%, 46.5%  { opacity: 0; transform: scale(.25); }
+      47.8%     { opacity: .9; transform: scale(.55); }
+      53%       { opacity: .45; transform: scale(1.5); }
+      58%, 100% { opacity: 0; transform: scale(2.1); }
+    }
+    @keyframes celBand {
+      0%, 46.4%  { opacity: 0; transform: translateY(-46px); }
+      47.2%     { opacity: .85; }
+      53.5%     { opacity: .3; }
+      56.5%     { opacity: 0; transform: translateY(168px); }
+      100%      { opacity: 0; transform: translateY(168px); }
+    }
+    @keyframes celBorder {
+      0%, 46.35% { opacity: 0; stroke-dashoffset: 580; }
+      46.45%  { opacity: 1; }
+      51%     { opacity: 1; stroke-dashoffset: 0; }
+      56%     { opacity: 0; stroke-dashoffset: 0; }
+      100%    { opacity: 0; stroke-dashoffset: 580; }
+    }
+    @keyframes celPulse {
+      0%, 46.3%  { transform: scale(1); }
+      47.8%     { transform: scale(1.05); }
+      49.6%     { transform: scale(.985); }
+      51.6%, 100% { transform: scale(1); }
+    }
+    @keyframes confetti {
+      0%, 46.4% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(.5); }
+      47.4%    { opacity: 1; transform: translate(calc(var(--dx) * .25), calc(var(--dy) * .25)) rotate(calc(var(--rot) * .3)) scale(1.2); }
+      52%      { opacity: 1; transform: translate(calc(var(--dx) * .7), calc(var(--dy) * .7)) rotate(calc(var(--rot) * .8)) scale(1.05); }
+      57.5%    { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.45); }
+      100%     { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.45); }
+    }
+    @keyframes starPop {
+      0%, 46.8% { opacity: 0; transform: scale(.2) rotate(0deg); }
+      48.5%    { opacity: .95; transform: scale(1.3) rotate(70deg); }
+      51.5%    { opacity: .5; transform: scale(.85) rotate(120deg); }
+      55%      { opacity: 0; transform: scale(.25) rotate(170deg); }
+      100%     { opacity: 0; transform: scale(.2) rotate(170deg); }
+    }
+
     @keyframes boardIn {
       from { opacity: 0; }
       to   { opacity: 1; }
@@ -164,12 +257,32 @@
 
     .score-glow { animation: scoreGlow 6s ease-in-out infinite; }
     .sheen      { animation: sheen 11s ease-in-out infinite; }
-    .scan-hl    { animation: scanRun 12.15s steps(1, end) infinite; fill: rgba(188,156,98,0.32); stroke: rgba(188,156,98,0.6); stroke-width: 1; }
+    .cursor     { opacity: 0; animation: cursorRun 11s linear infinite; }
+    .sd         { fill: #BC9C62; transform-box: fill-box; transform-origin: center;
+                   animation: solvePop 11s linear infinite; animation-delay: var(--d, 0s); }
+    .row-sw     { opacity: 0; animation: rowSweep 11s linear infinite; animation-delay: var(--d, 0s); }
+    .cel-shake  { animation: celShake 11s ease-out infinite; }
+    .cel-pulse  { transform-box: fill-box; transform-origin: center;
+                   animation: celPulse 11s ease-out infinite; }
+    .cel-flare  { opacity: 0; transform-box: fill-box; transform-origin: center;
+                   animation: celFlare 11s ease-out infinite; }
+    .cel-flash  { opacity: 0; transform-box: fill-box; transform-origin: center;
+                   animation: celFlash 11s ease-out infinite; }
+    .cel-ring   { opacity: 0; transform-box: fill-box; transform-origin: center;
+                   animation: celRing 11s ease-out infinite; animation-delay: var(--sd, 0s); }
+    .cel-band   { opacity: 0; animation: celBand 11s linear infinite; }
+    .cel-border { opacity: 0; stroke-dasharray: 580; stroke-dashoffset: 580;
+                   animation: celBorder 11s linear infinite; }
+    .fx-c       { opacity: 0; transform-box: fill-box; transform-origin: center;
+                   animation: confetti 11s ease-out infinite; }
+    .fx-star    { opacity: 0; transform-box: fill-box; transform-origin: center;
+                   animation: starPop 11s ease-out infinite; animation-delay: var(--sd, 0s); }
     .board-fade { animation: boardIn 2.4s ease-out forwards; }
 
     @media (prefers-reduced-motion: reduce) {
-      .score-glow, .sheen, .scan-hl, .board-fade { animation: none; }
-      .scan-hl { opacity: 0; }
+      .score-glow, .sheen, .board-fade, .cursor, .sd, .row-sw,
+      .cel-shake, .cel-pulse, .cel-flare, .cel-flash, .cel-ring,
+      .cel-band, .cel-border, .fx-c, .fx-star { animation: none; }
     }
   </style>
 </head>
@@ -194,6 +307,17 @@
           <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
         </pattern>
         <clipPath id="frame"><rect x="1" y="1" width="518" height="258" /></clipPath>
+        <clipPath id="boardClip"><rect x="328" y="70" width="144" height="144" /></clipPath>
+        <linearGradient id="shineH" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#F6E7C6" stop-opacity="0" />
+          <stop offset="50%" stop-color="#F6E7C6" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#F6E7C6" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="shineV" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#F6E7C6" stop-opacity="0" />
+          <stop offset="50%" stop-color="#F6E7C6" stop-opacity="0.9" />
+          <stop offset="100%" stop-color="#F6E7C6" stop-opacity="0" />
+        </linearGradient>
       </defs>
 
       <rect width="520" height="260" fill="url(#g)" />
@@ -207,20 +331,25 @@
 
       <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
 
-      <!-- Ghost 9×9 board behind the card text; a single gold cell cursor
-           rasters it row by row and a few faint givens sit where the player
-           left them. -->
-      <g id="ghostBoard" class="board-fade">
-        <g stroke="rgba(237,235,230,0.05)" stroke-width="0.5" fill="none">
-          <path d="M344 70 V214 M360 70 V214 M392 70 V214 M408 70 V214 M440 70 V214 M456 70 V214" />
-          <path d="M328 86 H472 M328 102 H472 M328 134 H472 M328 150 H472 M328 182 H472 M328 198 H472" />
-        </g>
-        <g stroke="rgba(237,235,230,0.10)" stroke-width="1" fill="none">
-          <path d="M376 70 V214 M424 70 V214" />
-          <path d="M328 118 H472 M328 166 H472" />
-        </g>
-        <rect x="328" y="70" width="144" height="144" fill="none" stroke="rgba(237,235,230,0.16)" stroke-width="1" />
-        <g class="giv" fill="#5F5D57" font-family="var(--font-mono)" font-size="12" text-anchor="middle" dominant-baseline="central" opacity="0.42">
+      <!-- Ghost 9×9 board: a gold cursor with a row/col crosshair rasters
+           every cell while the solver springs each missing digit in gold,
+           finished rows sweep, then the solved board celebrates and
+           dissolves back to the givens. -->
+      <ellipse class="cel-flare" cx="432" cy="142" rx="98" ry="84" fill="url(#accentGlow)" />
+      <g id="ghostBoard" class="board-fade" transform="translate(32 0)">
+        <g class="cel-shake">
+          <g stroke="rgba(237,235,230,0.05)" stroke-width="0.5" fill="none">
+            <path d="M344 70 V214 M360 70 V214 M392 70 V214 M408 70 V214 M440 70 V214 M456 70 V214" />
+            <path d="M328 86 H472 M328 102 H472 M328 134 H472 M328 150 H472 M328 182 H472 M328 198 H472" />
+          </g>
+          <g stroke="rgba(237,235,230,0.10)" stroke-width="1" fill="none">
+            <path d="M376 70 V214 M424 70 V214" />
+            <path d="M328 118 H472 M328 166 H472" />
+          </g>
+          <rect x="328" y="70" width="144" height="144" fill="none" stroke="rgba(237,235,230,0.16)" stroke-width="1" />
+
+          <g class="cel-pulse">
+            <g class="giv" fill="#5F5D57" font-family="var(--font-mono)" font-size="12" text-anchor="middle" dominant-baseline="central" opacity="0.42">
           <text x="368" y="78">7</text><text x="448" y="78">6</text><text x="464" y="78">8</text>
           <text x="336" y="94">2</text><text x="400" y="94">3</text><text x="448" y="94">4</text>
           <text x="336" y="110">4</text><text x="400" y="110">8</text>
@@ -233,7 +362,85 @@
           <text x="416" y="190">5</text><text x="448" y="190">2</text>
           <text x="368" y="206">4</text><text x="384" y="206">2</text><text x="416" y="206">3</text><text x="432" y="206">8</text><text x="464" y="206">6</text>
         </g>
-        <rect class="scan-hl" x="328" y="70" width="16" height="16" />
+
+            <!-- solved digits: spring in gold, celebrate, then dissolve -->
+            <g font-family="var(--font-mono)" font-size="13" text-anchor="middle" dominant-baseline="central">
+            <text class="sd" style="--d:-10.6s" x="336" y="78">1</text><text class="sd" style="--d:-10.544s" x="352" y="78">3</text><text class="sd" style="--d:-10.433s" x="384" y="78">4</text>
+            <text class="sd" style="--d:-10.378s" x="400" y="78">2</text><text class="sd" style="--d:-10.322s" x="416" y="78">9</text><text class="sd" style="--d:-10.267s" x="432" y="78">5</text>
+            <text class="sd" style="--d:-10.044s" x="352" y="94">8</text><text class="sd" style="--d:-9.989s" x="368" y="94">6</text><text class="sd" style="--d:-9.933s" x="384" y="94">5</text>
+            <text class="sd" style="--d:-9.822s" x="416" y="94">7</text><text class="sd" style="--d:-9.767s" x="432" y="94">1</text><text class="sd" style="--d:-9.656s" x="464" y="94">9</text>
+            <text class="sd" style="--d:-9.544s" x="352" y="110">9</text><text class="sd" style="--d:-9.489s" x="368" y="110">5</text><text class="sd" style="--d:-9.433s" x="384" y="110">1</text>
+            <text class="sd" style="--d:-9.322s" x="416" y="110">6</text><text class="sd" style="--d:-9.267s" x="432" y="110">2</text><text class="sd" style="--d:-9.211s" x="448" y="110">3</text>
+            <text class="sd" style="--d:-9.156s" x="464" y="110">7</text>
+            <text class="sd" style="--d:-9.1s" x="336" y="126">3</text><text class="sd" style="--d:-9.044s" x="352" y="126">4</text><text class="sd" style="--d:-8.989s" x="368" y="126">1</text>
+            <text class="sd" style="--d:-8.878s" x="400" y="126">9</text><text class="sd" style="--d:-8.822s" x="416" y="126">8</text><text class="sd" style="--d:-8.711s" x="448" y="126">5</text>
+            <text class="sd" style="--d:-8.656s" x="464" y="126">2</text>
+            <text class="sd" style="--d:-8.6s" x="336" y="142">6</text><text class="sd" style="--d:-8.544s" x="352" y="142">7</text><text class="sd" style="--d:-8.433s" x="384" y="142">3</text>
+            <text class="sd" style="--d:-8.378s" x="400" y="142">5</text><text class="sd" style="--d:-8.267s" x="432" y="142">9</text><text class="sd" style="--d:-8.211s" x="448" y="142">1</text>
+            <text class="sd" style="--d:-8.044s" x="352" y="158">2</text><text class="sd" style="--d:-7.989s" x="368" y="158">9</text><text class="sd" style="--d:-7.878s" x="400" y="158">4</text>
+            <text class="sd" style="--d:-7.767s" x="432" y="158">6</text><text class="sd" style="--d:-7.711s" x="448" y="158">8</text><text class="sd" style="--d:-7.656s" x="464" y="158">3</text>
+            <text class="sd" style="--d:-7.544s" x="352" y="174">1</text><text class="sd" style="--d:-7.322s" x="416" y="174">4</text><text class="sd" style="--d:-7.211s" x="448" y="174">9</text>
+            <text class="sd" style="--d:-7.156s" x="464" y="174">5</text>
+            <text class="sd" style="--d:-7.1s" x="336" y="190">8</text><text class="sd" style="--d:-7.044s" x="352" y="190">6</text><text class="sd" style="--d:-6.989s" x="368" y="190">3</text>
+            <text class="sd" style="--d:-6.933s" x="384" y="190">9</text><text class="sd" style="--d:-6.878s" x="400" y="190">7</text><text class="sd" style="--d:-6.767s" x="432" y="190">4</text>
+            <text class="sd" style="--d:-6.656s" x="464" y="190">1</text>
+            <text class="sd" style="--d:-6.6s" x="336" y="206">9</text><text class="sd" style="--d:-6.544s" x="352" y="206">5</text><text class="sd" style="--d:-6.378s" x="400" y="206">1</text>
+            <text class="sd" style="--d:-6.211s" x="448" y="206">7</text>
+            </g>
+          </g>
+
+          <!-- row shine sweeps, completion band and the live cursor,
+               all clipped to the board -->
+          <g clip-path="url(#boardClip)">
+            <rect class="row-sw" style="--d:-10.267s" x="328" y="70" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-9.656s" x="328" y="86" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-9.156s" x="328" y="102" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-8.656s" x="328" y="118" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-8.211s" x="328" y="134" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-7.656s" x="328" y="150" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-7.156s" x="328" y="166" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-6.656s" x="328" y="182" width="144" height="16" fill="url(#shineH)" />
+            <rect class="row-sw" style="--d:-6.211s" x="328" y="198" width="144" height="16" fill="url(#shineH)" />
+            <rect class="cel-band" x="328" y="54" width="144" height="30" fill="url(#shineV)" />
+            <g class="cursor">
+              <rect x="-360" y="-8" width="720" height="16" fill="#BC9C62" opacity="0.09" />
+              <rect x="-8" y="-360" width="16" height="720" fill="#BC9C62" opacity="0.09" />
+              <circle r="26" fill="url(#accentGlow)" opacity="0.5" />
+              <rect x="-8" y="-8" width="16" height="16" fill="#BC9C62" fill-opacity="0.16" />
+              <rect x="-7.5" y="-7.5" width="15" height="15" fill="none" stroke="#BC9C62" stroke-width="1.2" opacity="0.95" />
+            </g>
+          </g>
+
+          <!-- the gold border draws itself around the solved board -->
+          <rect class="cel-border" x="327.5" y="69.5" width="145" height="145" fill="none" stroke="#BC9C62" stroke-width="2" />
+        </g>
+      </g>
+
+      <!-- celebration burst: flash, triple shockwave, sparkle stars and
+           confetti (clipped to the card frame) -->
+      <g clip-path="url(#frame)" transform="translate(32 0)">
+        <circle class="cel-flash" cx="400" cy="142" r="40" fill="url(#accentGlow)" />
+        <circle class="cel-ring" cx="400" cy="142" r="64" fill="none" stroke="#BC9C62" stroke-width="2.4" />
+        <circle class="cel-ring" cx="400" cy="142" r="64" fill="none" stroke="#EDEBE6" stroke-width="1.2" style="--sd:.14s" />
+        <circle class="cel-ring" cx="400" cy="142" r="64" fill="none" stroke="#F0DCAE" stroke-width="0.9" style="--sd:.3s" />
+        <path class="fx-star" d="M324 58.5 C325 63.5 326.5 65 331.5 66 C326.5 67 325 68.5 324 73.5 C323 68.5 321.5 67 316.5 66 C321.5 65 323 63.5 324 58.5 Z" style="--sd:0s" />
+        <path class="fx-star" d="M476 58.5 C477 63.5 478.5 65 483.5 66 C478.5 67 477 68.5 476 73.5 C475 68.5 473.5 67 468.5 66 C473.5 65 475 63.5 476 58.5 Z" style="--sd:0.12s" />
+        <path class="fx-star" d="M324 210.5 C325 215.5 326.5 217 331.5 218 C326.5 219 325 220.5 324 225.5 C323 220.5 321.5 219 316.5 218 C321.5 217 323 215.5 324 210.5 Z" style="--sd:0.24s" />
+        <path class="fx-star" d="M476 210.5 C477 215.5 478.5 217 483.5 218 C478.5 219 477 220.5 476 225.5 C475 220.5 473.5 219 468.5 218 C473.5 217 475 215.5 476 210.5 Z" style="--sd:0.36s" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#D7B23F" style="--dx:-78px; --dy:-46px; --rot:-200deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#72B55C" style="--dx:-52px; --dy:-74px; --rot:160deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#EDEBE6" style="--dx:-18px; --dy:-84px; --rot:-140deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#6174CF" style="--dx:16px; --dy:-88px; --rot:210deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#E18A45" style="--dx:52px; --dy:-70px; --rot:-170deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#B36AC2" style="--dx:84px; --dy:-42px; --rot:130deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#BC9C62" style="--dx:94px; --dy:-6px; --rot:-240deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#D65A62" style="--dx:88px; --dy:38px; --rot:190deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#EDEBE6" style="--dx:56px; --dy:72px; --rot:-120deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#72B55C" style="--dx:14px; --dy:86px; --rot:150deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#D7B23F" style="--dx:-28px; --dy:82px; --rot:-180deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#6174CF" style="--dx:-64px; --dy:64px; --rot:220deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#E18A45" style="--dx:-92px; --dy:24px; --rot:-160deg" />
+        <rect class="fx-c" x="397" y="139" width="6" height="6" rx="1.4" fill="#F0DCAE" style="--dx:70px; --dy:14px; --rot:-300deg" />
       </g>
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 08</text>
