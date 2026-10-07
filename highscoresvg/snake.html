@@ -95,8 +95,76 @@
     .score-glow  { animation: scoreGlow 6s ease-in-out infinite; }
     .sheen       { animation: sheen 11s ease-in-out infinite; }
 
+    /* -- the snake comes alive -------------------------------------------------
+       .sgn       a serpentine slither wave, phase-offset per segment so the wave
+                  travels head-to-tail like a real undulation.
+       .sgn rect  a copper charge pulse that surges through the body every 5.5s,
+                  staggered tail->head: each segment flashes cream, bulges and
+                  settles back as the wave rolls through it.
+       .vein      a comet spark racing along the spine on the same 5.5s clock,
+                  landing on the head exactly when the charge reaches it, where
+                  .head-flare blooms.                                          */
+    .sgn      { animation: slither 2.2s ease-in-out infinite;
+                animation-delay: calc(var(--i) * -0.06s); }
+    .sgn rect {
+      transform-box: fill-box; transform-origin: center;
+      animation: charge 5.5s linear infinite;
+      animation-delay: calc(var(--i) * 0.06s);
+    }
+    @keyframes slither {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-1.7px); }
+    }
+    @keyframes charge {
+      0%   { fill: #EDEBE6; transform: scale(1); }
+      4%   { fill: #F7E8C8; transform: scale(1.22); }
+      10%  { fill: #BC9C62; transform: scale(1.08); }
+      20%  { fill: #EDEBE6; transform: scale(1); }
+      100% { fill: #EDEBE6; transform: scale(1); }
+    }
+    .vein, .vein-glow {
+      fill: none; stroke-linecap: round; stroke-linejoin: round;
+      animation: veinRun 5.5s linear infinite;
+    }
+    .vein      { stroke: #F7E8C8; stroke-width: 1.8; stroke-dasharray: 16 1000; }
+    .vein-glow { stroke: #BC9C62; stroke-width: 7; stroke-opacity: .2; stroke-dasharray: 34 1000; }
+    @keyframes veinRun {
+      0%   { stroke-dashoffset: 0; opacity: 0; }
+      4%   { stroke-dashoffset: -48; opacity: 1; }
+      38%  { stroke-dashoffset: -445; opacity: 1; }
+      44%  { stroke-dashoffset: -529; opacity: 0; }
+      100% { stroke-dashoffset: -529; opacity: 0; }
+    }
+    .head-flare {
+      transform-box: fill-box; transform-origin: center;
+      animation: headFlare 5.5s ease-out infinite;
+      animation-delay: 0.15s;
+    }
+    @keyframes headFlare {
+      0%, 36% { opacity: 0; transform: scale(.45); }
+      41%     { opacity: .85; transform: scale(1.4); }
+      50%     { opacity: .3;  transform: scale(1.05); }
+      64%     { opacity: 0; transform: scale(.8); }
+      100%    { opacity: 0; transform: scale(.45); }
+    }
+    .food-ping {
+      fill: none; stroke: #BC9C62; stroke-width: 1.4;
+      transform-box: fill-box; transform-origin: center;
+      animation: foodPing 2.0s ease-out infinite;
+    }
+    @keyframes foodPing {
+      0%, 50% { opacity: 0; transform: scale(.35); }
+      62%     { opacity: .7; transform: scale(.9); }
+      86%     { opacity: 0; transform: scale(1.7); }
+      100%    { opacity: 0; transform: scale(1.7); }
+    }
+    .food-orbit { transform-origin: 440px 130px; animation: orbit 4.2s linear infinite; }
+    @keyframes orbit { to { transform: rotate(360deg); } }
+
     @media (prefers-reduced-motion: reduce) {
-      .food, .food-glow, .eyes, .head, .score-glow, .sheen { animation: none; }
+      .food, .food-glow, .eyes, .head, .score-glow, .sheen,
+      .sgn, .sgn rect, .head-flare, .food-orbit { animation: none; }
+      .vein, .vein-glow, .food-ping { animation: none; opacity: 0; }
     }
   </style>
 </head>
@@ -136,44 +204,125 @@
 
       <g>
         <g fill="#EDEBE6">
-          <rect x="317.5" y="242.5" width="11" height="11" rx="2" fill-opacity=".09" />
-          <rect x="317.5" y="229.5" width="11" height="11" rx="2" fill-opacity=".11" />
-          <rect x="317.5" y="216.5" width="11" height="11" rx="2" fill-opacity=".13" />
-          <rect x="317.5" y="203.5" width="11" height="11" rx="2" fill-opacity=".15" />
-          <rect x="317.5" y="189.5" width="11" height="11" rx="2" fill-opacity=".17" />
-          <rect x="317.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".19" />
-          <rect x="304.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".18" />
-          <rect x="291.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".17" />
-          <rect x="278.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".16" />
-          <rect x="265.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".15" />
-          <rect x="252.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".14" />
-          <rect x="239.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".13" />
-          <rect x="226.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".12" />
-          <rect x="226.5" y="163.5" width="11" height="11" rx="2" fill-opacity=".14" />
-          <rect x="226.5" y="150.5" width="11" height="11" rx="2" fill-opacity=".16" />
-          <rect x="226.5" y="137.5" width="11" height="11" rx="2" fill-opacity=".18" />
-          <rect x="226.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".20" />
-          <rect x="226.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".22" />
-          <rect x="239.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".23" />
-          <rect x="252.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".24" />
-          <rect x="265.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".25" />
-          <rect x="278.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".26" />
-          <rect x="278.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".28" />
-          <rect x="278.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".30" />
-          <rect x="291.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".31" />
-          <rect x="304.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".32" />
-          <rect x="317.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".33" />
-          <rect x="330.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".34" />
-          <rect x="343.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".35" />
-          <rect x="356.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".36" />
-          <rect x="356.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".34" />
-          <rect x="356.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".32" />
-          <rect x="356.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".30" />
-          <rect x="369.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".32" />
-          <rect x="382.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".34" />
-          <rect x="395.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".36" />
-          <rect x="408.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".38" />
+          <g class="sgn" style="--i:0">
+            <rect x="317.5" y="242.5" width="11" height="11" rx="2" fill-opacity=".09" />
+          </g>
+          <g class="sgn" style="--i:1">
+            <rect x="317.5" y="229.5" width="11" height="11" rx="2" fill-opacity=".11" />
+          </g>
+          <g class="sgn" style="--i:2">
+            <rect x="317.5" y="216.5" width="11" height="11" rx="2" fill-opacity=".13" />
+          </g>
+          <g class="sgn" style="--i:3">
+            <rect x="317.5" y="203.5" width="11" height="11" rx="2" fill-opacity=".15" />
+          </g>
+          <g class="sgn" style="--i:4">
+            <rect x="317.5" y="189.5" width="11" height="11" rx="2" fill-opacity=".17" />
+          </g>
+          <g class="sgn" style="--i:5">
+            <rect x="317.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".19" />
+          </g>
+          <g class="sgn" style="--i:6">
+            <rect x="304.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".18" />
+          </g>
+          <g class="sgn" style="--i:7">
+            <rect x="291.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".17" />
+          </g>
+          <g class="sgn" style="--i:8">
+            <rect x="278.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".16" />
+          </g>
+          <g class="sgn" style="--i:9">
+            <rect x="265.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".15" />
+          </g>
+          <g class="sgn" style="--i:10">
+            <rect x="252.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".14" />
+          </g>
+          <g class="sgn" style="--i:11">
+            <rect x="239.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".13" />
+          </g>
+          <g class="sgn" style="--i:12">
+            <rect x="226.5" y="176.5" width="11" height="11" rx="2" fill-opacity=".12" />
+          </g>
+          <g class="sgn" style="--i:13">
+            <rect x="226.5" y="163.5" width="11" height="11" rx="2" fill-opacity=".14" />
+          </g>
+          <g class="sgn" style="--i:14">
+            <rect x="226.5" y="150.5" width="11" height="11" rx="2" fill-opacity=".16" />
+          </g>
+          <g class="sgn" style="--i:15">
+            <rect x="226.5" y="137.5" width="11" height="11" rx="2" fill-opacity=".18" />
+          </g>
+          <g class="sgn" style="--i:16">
+            <rect x="226.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".20" />
+          </g>
+          <g class="sgn" style="--i:17">
+            <rect x="226.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".22" />
+          </g>
+          <g class="sgn" style="--i:18">
+            <rect x="239.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".23" />
+          </g>
+          <g class="sgn" style="--i:19">
+            <rect x="252.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".24" />
+          </g>
+          <g class="sgn" style="--i:20">
+            <rect x="265.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".25" />
+          </g>
+          <g class="sgn" style="--i:21">
+            <rect x="278.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".26" />
+          </g>
+          <g class="sgn" style="--i:22">
+            <rect x="278.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".28" />
+          </g>
+          <g class="sgn" style="--i:23">
+            <rect x="278.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".30" />
+          </g>
+          <g class="sgn" style="--i:24">
+            <rect x="291.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".31" />
+          </g>
+          <g class="sgn" style="--i:25">
+            <rect x="304.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          </g>
+          <g class="sgn" style="--i:26">
+            <rect x="317.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".33" />
+          </g>
+          <g class="sgn" style="--i:27">
+            <rect x="330.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          </g>
+          <g class="sgn" style="--i:28">
+            <rect x="343.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".35" />
+          </g>
+          <g class="sgn" style="--i:29">
+            <rect x="356.5" y="85.5" width="11" height="11" rx="2" fill-opacity=".36" />
+          </g>
+          <g class="sgn" style="--i:30">
+            <rect x="356.5" y="98.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          </g>
+          <g class="sgn" style="--i:31">
+            <rect x="356.5" y="111.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          </g>
+          <g class="sgn" style="--i:32">
+            <rect x="356.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".30" />
+          </g>
+          <g class="sgn" style="--i:33">
+            <rect x="369.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".32" />
+          </g>
+          <g class="sgn" style="--i:34">
+            <rect x="382.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".34" />
+          </g>
+          <g class="sgn" style="--i:35">
+            <rect x="395.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".36" />
+          </g>
+          <g class="sgn" style="--i:36">
+            <rect x="408.5" y="124.5" width="11" height="11" rx="2" fill-opacity=".38" />
+          </g>
         </g>
+
+        <!-- a spark ignites at the tail and races up the spine into the head -->
+        <polyline class="vein-glow" opacity="0" points="323,248 323,235 323,222 323,209 323,195 323,182 310,182 297,182 284,182 271,182 258,182 245,182 232,182 232,169 232,156 232,143 232,130 232,117 245,117 258,117 271,117 284,117 284,104 284,91 297,91 310,91 323,91 336,91 349,91 362,91 362,104 362,117 362,130 375,130 388,130 401,130 414,130" />
+        <polyline class="vein" opacity="0" points="323,248 323,235 323,222 323,209 323,195 323,182 310,182 297,182 284,182 271,182 258,182 245,182 232,182 232,169 232,156 232,143 232,130 232,117 245,117 258,117 271,117 284,117 284,104 284,91 297,91 310,91 323,91 336,91 349,91 362,91 362,104 362,117 362,130 375,130 388,130 401,130 414,130" />
+        <!-- copper flare blooming behind the head when the spark lands -->
+        <circle class="head-flare" cx="427" cy="130" r="10" fill="url(#accentGlow)" opacity="0" />
+
 
         <g class="head">
           <rect x="421.5" y="124.5" width="11" height="11" rx="2" fill="#BC9C62" />
@@ -184,7 +333,13 @@
         </g>
 
         <circle class="food-glow" cx="440" cy="130" r="13" fill="url(#accentGlow)" />
+        <circle class="food-ping" cx="440" cy="130" r="17" opacity="0" />
+        <circle class="food-ping" cx="440" cy="130" r="17" opacity="0" style="animation-delay:-1s" />
         <rect class="food" x="434.5" y="124.5" width="11" height="11" rx="2" fill="#BC9C62" />
+        <g class="food-orbit" fill="#EDEBE6">
+          <circle cx="440" cy="115.5" r="1.1" opacity=".55" />
+          <circle cx="440" cy="144.5" r="1.1" opacity=".35" />
+        </g>
       </g>
 
       <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 02</text>
