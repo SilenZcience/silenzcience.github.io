@@ -179,14 +179,6 @@
       53.6%  { opacity: 0; transform: scale(.1) rotate(-6deg); filter: none; }
       100%   { opacity: 0; transform: scale(.1) rotate(-6deg); fill: #BC9C62; filter: none; }
     }
-    /* gold shine wipes across a row the moment its last digit lands */
-    @keyframes rowSweep {
-      0%     { opacity: 0; transform: translateX(-158px); }
-      0.8%   { opacity: .85; }
-      5%     { opacity: .6; }
-      6.4%   { opacity: 0; transform: translateX(158px); }
-      100%   { opacity: 0; transform: translateX(158px); }
-    }
     /* --- the solved-board celebration, fired at ~46.5% --- */
     @keyframes celShake {
       0%, 46.4% { transform: translate(0, 0); }
@@ -260,7 +252,6 @@
     .cursor     { opacity: 0; animation: cursorRun 11s linear infinite; }
     .sd         { fill: #BC9C62; transform-box: fill-box; transform-origin: center;
                    animation: solvePop 11s linear infinite; animation-delay: var(--d, 0s); }
-    .row-sw     { opacity: 0; animation: rowSweep 11s linear infinite; animation-delay: var(--d, 0s); }
     .cel-shake  { animation: celShake 11s ease-out infinite; }
     .cel-pulse  { transform-box: fill-box; transform-origin: center;
                    animation: celPulse 11s ease-out infinite; }
@@ -280,7 +271,7 @@
     .board-fade { animation: boardIn 2.4s ease-out forwards; }
 
     @media (prefers-reduced-motion: reduce) {
-      .score-glow, .sheen, .board-fade, .cursor, .sd, .row-sw,
+      .score-glow, .sheen, .board-fade, .cursor, .sd,
       .cel-shake, .cel-pulse, .cel-flare, .cel-flash, .cel-ring,
       .cel-band, .cel-border, .fx-c, .fx-star { animation: none; }
     }
@@ -392,15 +383,6 @@
           <!-- row shine sweeps, completion band and the live cursor,
                all clipped to the board -->
           <g clip-path="url(#boardClip)">
-            <rect class="row-sw" style="--d:-10.267s" x="328" y="70" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-9.656s" x="328" y="86" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-9.156s" x="328" y="102" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-8.656s" x="328" y="118" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-8.211s" x="328" y="134" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-7.656s" x="328" y="150" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-7.156s" x="328" y="166" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-6.656s" x="328" y="182" width="144" height="16" fill="url(#shineH)" />
-            <rect class="row-sw" style="--d:-6.211s" x="328" y="198" width="144" height="16" fill="url(#shineH)" />
             <rect class="cel-band" x="328" y="54" width="144" height="30" fill="url(#shineV)" />
             <g class="cursor">
               <rect x="-360" y="-8" width="720" height="16" fill="#BC9C62" opacity="0.09" />
