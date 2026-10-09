@@ -23,6 +23,10 @@
       --font-display: "Fraunces", Georgia, "Times New Roman", serif;
       --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
       --font-mono: "IBM Plex Mono", "Courier New", monospace;
+      --sheen-peak: 0.05;
+      --scoreglow-peak: 0.11;
+      --celflare-peak: 0.5;
+      --celflash-peak: 0.5;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -61,12 +65,12 @@
 
     @keyframes scoreGlow {
       0%, 100% { opacity: .04; }
-      50%      { opacity: .11; }
+      50%      { opacity: var(--scoreglow-peak); }
     }
     @keyframes sheen {
       0%       { transform: translateX(-160px); opacity: 0; }
-      12%      { opacity: .05; }
-      50%      { opacity: .05; }
+      12%      { opacity: var(--sheen-peak); }
+      50%      { opacity: var(--sheen-peak); }
       88%      { opacity: 0; }
       100%     { transform: translateX(560px); opacity: 0; }
     }
@@ -130,6 +134,14 @@
       .score-glow, .sheen, .dust.animate, .sparkle.animate, .burst.animate { animation: none; }
       #heroes { display: none; }
       .current { opacity: 1; fill: #EDEBE6; fill-opacity: 1; }
+    }
+    @media (dynamic-range: high) {
+      :root {
+        --sheen-peak: 0.028;
+        --scoreglow-peak: 0.07;
+        --celflare-peak: 0.34;
+        --celflash-peak: 0.34;
+      }
     }
   </style>
 </head>
