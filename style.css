@@ -193,7 +193,7 @@ body.lab-open .lab{transform:none;visibility:visible;transition:transform .3s va
   display:block;font-family:var(--font-display);font-weight:400;
   font-size:1.3rem;line-height:1.15;
 }
-.ln-tag{display:block;margin-top:5px;color:var(--faint)}
+.ln-tag{display:block;margin-top:5px;color:var(--faint);white-space:nowrap}
 .ln-arrow{
   color:var(--ink);font-size:17px;opacity:.35;
   transition:opacity var(--t),transform var(--t),color var(--t);
