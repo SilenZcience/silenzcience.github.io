@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB·10 — T-Rex Runner — Silas Kraume</title>
+<meta name="description" content="A classic endless runner.">
+<meta name="theme-color" content="#141413">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23141413'/%3E%3Crect x='10' y='10' width='44' height='44' fill='none' stroke='%23BC9C62' stroke-width='5'/%3E%3Ccircle cx='43' cy='43' r='7' fill='%23BC9C62'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../style.css">
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="wrap head-in">
+    <div class="head-left">
+      <button class="menu-btn" type="button" aria-expanded="false" aria-controls="lab-panel" aria-label="Open laboratory menu" data-menu-btn><i></i><i></i><i></i></button>
+      <a class="brand" href="../index.html">SILENZCIENCE</a>
+    </div>
+    <div class="head-right">
+      <nav class="mono-label" aria-label="Primary">
+        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+      </nav>
+      <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
+    </div>
+  </div>
+  <span class="progress" data-progress aria-hidden="true"></span>
+</header>
+
+<main id="main">
+<article class="doc">
+
+  <p class="crumbs mono-label" data-decode>Laboratory / Lab 10 / T-Rex Runner</p>
+  <h1 class="doc-title" data-reveal>Project Bolan.</h1>
+
+  <dl class="doc-meta" data-reveal style="--rd:90ms">
+    <div><dt>Unit</dt><dd>LAB·10</dd></div>
+    <div><dt>Genre</dt><dd>Endless runner</dd></div>
+    <div><dt>Interface</dt><dd>Keyboard · Touch</dd></div>
+    <div><dt>Engine</dt><dd>Vanilla JS · Canvas</dd></div>
+    <div><dt>Status</dt><dd>Playable</dd></div>
+  </dl>
+
+  <figure class="fig" data-reveal style="--rd:150ms">
+    <div class="stage-wrap">
+      <div class="stage">
+        <canvas id="cv" width="660" height="240" aria-label="Dino playfield"></canvas>
+      </div>
+      <div class="overlay" id="overlay">
+        <div>
+          <p class="overlay-msg" id="ovMsg">Project Bolan.</p>
+          <span class="overlay-sub" id="ovSub">Space / ↑ jump — ↓ duck — P pauses</span>
+        </div>
+      </div>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Authentic footage from the prehistoric era. Trust.</figcaption>
+  </figure>
+
+  <div class="ctrl-row" data-reveal>
+    <button class="ctrl" type="button" id="toggleBtn">▶ Start</button>
+    <button class="ctrl" type="button" id="resetBtn">↺ Reset</button>
+  </div>
+
+  <div class="stat-row" data-reveal>
+    <div class="stat"><span class="mono-label">Score</span><b id="scoreStat">00000</b></div>
+    <div class="stat"><span class="mono-label">Best</span><b id="bestStat">00000</b></div>
+    <div class="stat"><span class="mono-label">Speed</span><b id="speedStat">—</b></div>
+  </div>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 001</span>
+    <h2 class="obs-h">Tea, Rex?</h2>
+    <p class="prose-p">The T-Rex Runner first appeared in September 2014 as an easter egg on Chrome's "No internet" error page: losing your connection sends you back to the prehistoric ages. By 2018 Google reported about 270&nbsp;million games played per month yet sadly noone has ever finished it. That is because it was tuned so that a flawless endless run would take about 17&nbsp;million years — precisely how long T. rex walked the Earth.</p>
+  </section>
+
+  <section class="obs" data-reveal>
+    <span class="obs-no mono-label">Build note 002</span>
+    <h2 class="obs-h">Gradual difficulty scaling.</h2>
+    <p class="prose-p">The world speed climbs with distance, and once the score clears four hundred, pterodactyls join the game. Gap spacing scales with speed so every obstacle stays theoretically dodgable forever — but once the speed scaling caps out, the gaps keep creeping tighter until their eventual cap is hit.</p>
+  </section>
+
+  <p class="endfile mono-label" data-reveal>■ End of Lab File 10</p>
+
+  <nav class="pager" aria-label="Lab navigation" data-reveal>
+    <a class="pg" href="tetris.html">
+      <span class="pg-label mono-label">← Previous unit</span>
+      <span class="pg-title">Tetris</span>
+    </a>
+    <a class="pg" href="../index.html#work">
+      <span class="pg-label mono-label">↑ The index</span>
+      <span class="pg-title">Projects on record</span>
+    </a>
+    <a class="pg pg-next" href="minesweeper.html">
+      <span class="pg-label mono-label">Next unit →</span>
+      <span class="pg-title">Minesweeper</span>
+    </a>
+  </nav>
+
+  </div>
+</article>
+
+<footer class="doc">
+  <div class="mini-foot mono-label">
+    <span>© MMXXVI Silas Kraume — Lab Unit 10 of <span data-lab-total>10</span></span>
+    <a href="#main">Back to top ↑</a>
+  </div>
+</footer>
+</main>
+
+<script src="../main.js" defer></script>
+<script src="../share-utils.js"></script>
+<script>
+(function () {
+  "use strict";
+  var W = 660, H = 240;
+  var GROUND_Y = 196, DINO_X = 64;
+  var GRAVITY = 2300, JUMP_V = -880, FAST_FALL = 2600, CUT_V = -300;
+  var START_SPEED = 340, MAX_SPEED = 780, PTERO_MIN_SCORE = 400, TIGHTEN_FLOOR = 0.85;
+
+  var cv = document.getElementById("cv");
+  var ctx = cv.getContext("2d");
+  var ovMsg = document.getElementById("ovMsg");
+  var ovSub = document.getElementById("ovSub");
+  var toggleBtn = document.getElementById("toggleBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var scoreStat = document.getElementById("scoreStat");
+  var bestStat = document.getElementById("bestStat");
+  var speedStat = document.getElementById("speedStat");
+  var overlay = document.getElementById("overlay");
+
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  function setupCanvas() {
+    cv.width = W * dpr;
+    cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  setupCanvas();
+
+  var COL = { ink: "#EDEBE6", accent: "#BC9C62", field: "#1B1B19", cloud: "rgba(237,235,230,.16)", ground: "rgba(237,235,230,.5)", bump: "rgba(237,235,230,.25)" };
+  function hexA(hex, a) {
+    hex = String(hex).replace("#", "");
+    if (hex.length === 3) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    var n = parseInt(hex, 16);
+    if (isNaN(n)) return "rgba(128,128,128," + a + ")";
+    return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a + ")";
+  }
+  function refreshColors() {
+    var s = getComputedStyle(document.documentElement);
+    function v(name, fb) { var x = s.getPropertyValue(name).trim(); return x || fb; }
+    COL.ink = v("--ink", COL.ink);
+    COL.accent = v("--accent", COL.accent);
+    COL.field = v("--bg-2", COL.field);
+    COL.cloud = hexA(COL.ink, .16);
+    COL.ground = hexA(COL.ink, .5);
+    COL.bump = hexA(COL.ink, .25);
+    COL.halo = hexA(COL.ink, .35);
+  }
+  refreshColors();
+  addEventListener("silenz:theme", refreshColors);
+
+  // Persistent high score across sessions.
+  var best = Number(localStorage.getItem("silenz:dino-best") || 0) || 0;
+  function padScore(n) { return String(Math.min(99999, Math.max(0, Math.floor(n)))).padStart(5, "0"); }
+  bestStat.textContent = padScore(best);
+
+  var state, score, speed, distance, last, acc;
+  var dino, obstacles, clouds, bumps, nextSpawnIn, runPhase, tighten = 1, elapsed = 0;
+  var keyDown = { jump: false, duck: false };
+
+  // Touch affordance: which half of the screen does what.
+  var TOUCH = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  var TIP = TOUCH ? "Tap right to jump — hold left to duck"
+                  : "Space / ↑ jump — ↓ duck — P pauses";
+
+  function reset() {
+    state = "ready";
+    score = 0; speed = START_SPEED; distance = 0; elapsed = 0;
+    // y = vertical position of the dino's feet.
+    dino = { y: GROUND_Y, vy: 0, grounded: true, duck: false, dead: false };
+    obstacles = [];
+    clouds = [
+      { x: W * 0.55, y: 44 + Math.random() * 40 },
+      { x: W * 1.1, y: 60 + Math.random() * 50 }
+    ];
+    bumps = [];
+    for (var i = 0; i < 26; i++) {
+      bumps.push({ x: Math.random() * W, w: 4 + Math.random() * 18 });
+    }
+    nextSpawnIn = 460;
+    tighten = 1;
+    runPhase = 0;
+    updHud();
+    draw();
+    showOv("The connection was lost.", TIP);
+    toggleBtn.textContent = "▶ Start";
+    toggleBtn.classList.remove("on");
+  }
+
+  function showOv(msg, sub) {
+    ovMsg.textContent = msg;
+    ovSub.textContent = sub;
+    overlay.classList.remove("hide");
+    removeShare();
+  }
+  function hideOv() { overlay.classList.add("hide"); }
+
+  function start() {
+    if (state === "dead") reset();
+    if (state === "run") return;
+    state = "run";
+    hideOv();
+    toggleBtn.textContent = "❚❚ Pause";
+    toggleBtn.classList.add("on");
+    last = performance.now();
+    acc = 0;
+    requestAnimationFrame(loop);
+  }
+  function pause() {
+    if (state !== "run") return;
+    state = "pause";
+    toggleBtn.textContent = "▶ Resume";
+    toggleBtn.classList.remove("on");
+    showOv("Paused.", "P or resume continues");
+  }
+
+  overlay.addEventListener("pointerup", function () {
+    if (state === "ready" || state === "pause") start();
+  });
+  toggleBtn.addEventListener("click", function () {
+    if (state === "run") pause(); else start();
+  });
+  resetBtn.addEventListener("click", function () { reset(); });
+
+  function jump() {
+    if (state === "ready") { start(); }
+    if (state !== "run" || !dino.grounded) return;
+    dino.vy = JUMP_V;
+    dino.grounded = false;
+  }
+
+  addEventListener("keydown", function (e) {
+    var k = e.key.toLowerCase();
+    if (k === " " || k === "arrowup" || k === "w") {
+      e.preventDefault();
+      if (!keyDown.jump) { keyDown.jump = true; jump(); }
+      else if (state === "ready") start();
+    } else if (k === "arrowdown" || k === "s") {
+      e.preventDefault();
+      keyDown.duck = true;
+      if (state === "ready") start();
+    } else if (k === "p") {
+      if (state === "run") pause(); else if (state === "pause") start();
+    } else if (k === "enter" && (state === "dead" || state === "ready")) {
+      reset(); start();
+    }
+  });
+  addEventListener("keyup", function (e) {
+    var k = e.key.toLowerCase();
+    if (k === " " || k === "arrowup" || k === "w") {
+      keyDown.jump = false;
+      // Release cuts the jump short for variable-height arcs.
+      if (!dino.grounded && dino.vy < CUT_V) dino.vy = CUT_V;
+    } else if (k === "arrowdown" || k === "s") {
+      keyDown.duck = false;
+    }
+  });
+
+  // Touch: LEFT half ducks while held, RIGHT half jumps (tap = full arc,
+  // release cuts it short, hold = longer arc). Both sides work in parallel —
+  // hold left to fast-drop while tapping right to clear a gap.
+  var tSide = {};
+  cv.addEventListener("touchstart", function (e) {
+    e.preventDefault();
+    if (state === "ready" || state === "pause") { start(); return; }
+    if (state === "dead") { reset(); start(); return; }
+    var r = cv.getBoundingClientRect();
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      var tx = e.changedTouches[i];
+      var right = (tx.clientX - r.left) / r.width >= 0.5;
+      tSide[tx.identifier] = right;
+      if (right) { keyDown.jump = true; jump(); }
+      else keyDown.duck = true;
+    }
+  }, { passive: false });
+  function touchRelease(e) {
+    var cut = false;
+    for (var i = 0; i < e.changedTouches.length; i++) {
+      if (tSide[e.changedTouches[i].identifier]) cut = true;
+      delete tSide[e.changedTouches[i].identifier];
+    }
+    var right = false, left = false, id;
+    for (id in tSide) { if (tSide[id]) right = true; else left = true; }
+    keyDown.jump = right;
+    keyDown.duck = left;
+    if (cut && !dino.grounded && dino.vy < CUT_V) dino.vy = CUT_V;
+  }
+  cv.addEventListener("touchend", touchRelease, { passive: true });
+  cv.addEventListener("touchcancel", touchRelease, { passive: true });
+
+  // Obstacle table: small and large cacti in clusters, then the flyers.
+  // Each entry: width, height, cluster count range, altitude of the base
+  // relative to the ground line (0 = standing on the ground).
+  var CACTI = [
+    { w: 17, h: 35, min: 1, max: 3, base: 0, big: false },
+    { w: 25, h: 48, min: 1, max: 2, base: 0, big: true }
+  ];
+
+  function spawnObstacle() {
+    var r = Math.random();
+    if (score >= PTERO_MIN_SCORE && r < 0.28) {
+      // Pterodactyl altitude bands: low = must jump, mid = jump or duck,
+      // high = head height, so running straight under is fatal — only
+      // ducking survives that band. Base y measured for the body box.
+      var band = Math.floor(Math.random() * 3);
+      var alt = [GROUND_Y - 10, GROUND_Y - 48, GROUND_Y - 56][band];
+      obstacles.push({ type: "ptero", x: W + 10, y: alt, w: 46, h: 26, flap: Math.random() * 400 });
+      // Flyers travel slightly faster than the ground scroll.
+      obstacles[obstacles.length - 1].drift = speed * (0.1 + Math.random() * 0.12);
+    } else {
+      var spec = CACTI[r < 0.55 ? 0 : 1];
+      var count = spec.min + Math.floor(Math.random() * (spec.max - spec.min + 1));
+      var totalW = spec.w * count + (count - 1) * 2;
+      obstacles.push({ type: "cactus", x: W + 10, y: GROUND_Y - spec.h, w: totalW, h: spec.h, count: count, big: spec.big });
+    }
+    // Gap scales with speed so the runway stays fair at high velocity;
+    // past the speed cap the creep factor keeps pinching it.
+    nextSpawnIn = (speed * (0.52 + Math.random() * 0.55) + 120) * tighten;
+  }
+
+  function hitbox(o) {
+    if (o.type === "ptero") {
+      // Tight box around the body; wing pixels are forgiveness, not hit area.
+      return { x: o.x + 6, y: o.y + 5, w: o.w - 12, h: 13 };
+    }
+    return { x: o.x + 3, y: o.y + 3, w: o.w - 6, h: o.h - 3 };
+  }
+  function dinoBox() {
+    if (dino.duck) {
+      return { x: DINO_X - 4, y: GROUND_Y - 28, w: 50, h: 28 };
+    }
+    return { x: DINO_X - 2, y: dino.y - 44, w: 38, h: 44 };
+  }
+  function boxesHit(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function step(dt) {
+    distance += speed * dt;
+    score = Math.floor(distance * 0.06);
+    speed = Math.min(MAX_SPEED, START_SPEED + distance * 0.007);
+
+    // Once the engine tops out the world stops gaining speed, so the gaps
+    // creep tighter instead — slowly, and never below the 0.85 floor.
+    if (speed >= MAX_SPEED && tighten > TIGHTEN_FLOOR) {
+      tighten = Math.max(TIGHTEN_FLOOR, tighten - dt * 0.0015);
+    }
+
+    // Ducking only matters while grounded; airborne ↓ fast-drops instead.
+    dino.duck = keyDown.duck && dino.grounded;
+
+    if (!dino.grounded) {
+      dino.vy += GRAVITY * dt;
+      if (keyDown.duck) dino.vy += FAST_FALL * dt;
+      dino.y += dino.vy * dt;
+      if (dino.y >= GROUND_Y) {
+        dino.y = GROUND_Y;
+        dino.vy = 0;
+        dino.grounded = true;
+      }
+    }
+
+    // Run cycle respects the world tempo.
+    runPhase += dt * speed * 0.055;
+    elapsed += dt;
+
+    for (var i = 0; i < obstacles.length; i++) {
+      var o = obstacles[i];
+      o.x -= speed * dt;
+      if (o.drift) o.x -= o.drift * dt;
+      if (o.type === "ptero") o.flap = (o.flap + dt * 1000) % 400;
+    }
+    if (obstacles.length && obstacles[0].x < -80) obstacles.shift();
+
+    nextSpawnIn -= speed * dt;
+    if (nextSpawnIn <= 0) spawnObstacle();
+
+    for (i = 0; i < clouds.length; i++) {
+      clouds[i].x -= speed * 0.22 * dt;
+      if (clouds[i].x < -70) {
+        clouds[i].x = W + 40 + Math.random() * 200;
+        clouds[i].y = 38 + Math.random() * 60;
+      }
+    }
+
+    for (i = 0; i < bumps.length; i++) {
+      bumps[i].x -= speed * dt;
+      if (bumps[i].x + bumps[i].w < 0) {
+        bumps[i].x = W + Math.random() * 60;
+        bumps[i].w = 4 + Math.random() * 18;
+      }
+    }
+
+    var db = dinoBox();
+    for (i = 0; i < obstacles.length; i++) {
+      if (boxesHit(db, hitbox(obstacles[i]))) { die(); return; }
+    }
+  }
+
+  function die() {
+    dino.dead = true;
+    state = "dead";
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem("silenz:dino-best", String(best)); } catch (_) {}
+      bestStat.textContent = padScore(best);
+    }
+    toggleBtn.textContent = "▶ Restart";
+    toggleBtn.classList.remove("on");
+    showOv(score > 0 ? "Extinct at " + score + "." : "Tripped over a pebble.", "Enter or restart goes again");
+    if (score > 0) offerShare(score);
+  }
+
+  function updHud() {
+    scoreStat.textContent = padScore(score);
+    speedStat.textContent = state === "ready" || state === "dead" ? "—" : Math.round(speed) + "px/s";
+  }
+
+  /* ---------- sprites: the real chrome asset, two-tone (halo ring + ink) ----------
+     Dino frames: y = 0 at the feet line, ink top at -47. Ptero: chrome cell,
+     body band covers the same 5..17 band the old hitbox expects. Each tone
+     is filled as ONE nonzero path, so halves can't show hairline seams. */
+
+  var WAIT_A = {
+    ink: [[24,-45,16,2],[22,-43,20,1],[22,-42,4,2],[28,-42,14,2],[22,-40,20,6],[22,-34,10,2],[22,-32,16,2],[20,-30,10,2],[2,-30,2,4],[17,-28,13,2],[2,-26,4,2],[14,-26,20,2],[2,-24,6,2],[12,-24,18,2],[32,-24,2,2],[2,-22,28,4],[4,-18,26,1],[4,-17,24,1],[6,-16,22,2],[8,-14,18,2],[10,-12,14,2],[12,-10,6,2],[20,-10,4,2],[12,-8,4,2],[22,-8,2,4],[12,-6,2,2],[12,-4,4,2],[22,-4,4,2]],
+    halo: [[22,-47,20,2],[20,-45,4,2],[40,-45,2,2],[26,-42,2,2],[42,-43,2,9],[20,-43,2,11],[32,-34,12,2],[2,-32,4,2],[18,-32,4,2],[38,-32,2,2],[15,-30,5,2],[30,-30,10,2],[4,-30,2,4],[12,-28,5,2],[30,-28,6,2],[6,-26,8,2],[34,-26,2,4],[8,-24,4,2],[30,-24,2,2],[30,-22,6,2],[0,-30,2,12],[30,-20,2,3],[2,-18,2,2],[28,-17,2,3],[4,-16,2,2],[6,-14,2,2],[26,-14,4,2],[8,-12,2,2],[24,-12,4,4],[8,-10,4,2],[18,-10,2,2],[16,-8,2,2],[24,-8,2,4],[14,-6,2,2],[10,-8,2,6],[20,-8,2,6],[16,-4,2,2],[26,-4,2,2],[10,-2,8,2],[20,-2,8,2]]
+  };
+  var WAIT_B = {
+    ink: [[24,-45,16,2],[22,-43,20,9],[22,-34,10,2],[22,-32,16,2],[20,-30,10,2],[2,-30,2,4],[17,-28,13,2],[2,-26,4,2],[14,-26,20,2],[2,-24,6,2],[12,-24,18,2],[32,-24,2,2],[2,-22,28,4],[4,-18,26,1],[4,-17,24,1],[6,-16,22,2],[8,-14,18,2],[10,-12,14,2],[12,-10,6,2],[20,-10,4,2],[12,-8,4,2],[22,-8,2,4],[12,-6,2,2],[12,-4,4,2],[22,-4,4,2]],
+    halo: [[22,-47,20,2],[20,-45,4,2],[40,-45,2,2],[42,-43,2,9],[20,-43,2,11],[32,-34,12,2],[2,-32,4,2],[18,-32,4,2],[38,-32,2,2],[15,-30,5,2],[30,-30,10,2],[4,-30,2,4],[12,-28,5,2],[30,-28,6,2],[6,-26,8,2],[34,-26,2,4],[8,-24,4,2],[30,-24,2,2],[30,-22,6,2],[0,-30,2,12],[30,-20,2,3],[2,-18,2,2],[28,-17,2,3],[4,-16,2,2],[6,-14,2,2],[26,-14,4,2],[8,-12,2,2],[24,-12,4,4],[8,-10,4,2],[18,-10,2,2],[16,-8,2,2],[24,-8,2,4],[14,-6,2,2],[10,-8,2,6],[20,-8,2,6],[16,-4,2,2],[26,-4,2,2],[10,-2,8,2],[20,-2,8,2]]
+  };
+  var RUN_A = {
+    ink: [[24,-45,16,2],[22,-43,20,1],[22,-42,4,2],[28,-42,14,2],[22,-40,20,6],[22,-34,10,2],[22,-32,16,2],[20,-30,10,2],[2,-30,2,4],[17,-28,13,2],[2,-26,4,2],[14,-26,20,2],[2,-24,6,2],[12,-24,18,2],[32,-24,2,2],[2,-22,28,4],[4,-18,26,1],[4,-17,24,1],[6,-16,22,2],[8,-14,18,2],[10,-12,14,2],[12,-10,6,2],[22,-10,5,2],[12,-8,4,2],[12,-6,2,2],[12,-4,4,2]],
+    halo: [[22,-47,20,2],[20,-45,4,2],[40,-45,2,2],[26,-42,2,2],[42,-43,2,9],[20,-43,2,11],[32,-34,12,2],[2,-32,4,2],[18,-32,4,2],[38,-32,2,2],[15,-30,5,2],[30,-30,10,2],[4,-30,2,4],[12,-28,5,2],[30,-28,6,2],[6,-26,8,2],[34,-26,2,4],[8,-24,4,2],[30,-24,2,2],[30,-22,6,2],[0,-30,2,12],[30,-20,2,3],[2,-18,2,2],[28,-17,2,3],[4,-16,2,2],[6,-14,2,2],[26,-14,4,2],[8,-12,2,2],[24,-12,4,2],[8,-10,4,2],[18,-10,4,2],[27,-10,4,2],[16,-8,2,2],[20,-8,9,2],[14,-6,2,2],[10,-8,2,6],[16,-4,2,2],[10,-2,8,2]]
+  };
+  var RUN_B = {
+    ink: [[24,-45,16,2],[22,-43,20,1],[22,-42,4,2],[28,-42,14,2],[22,-40,20,6],[22,-34,10,2],[22,-32,16,2],[20,-30,10,2],[2,-30,2,4],[17,-28,13,2],[2,-26,4,2],[14,-26,20,2],[2,-24,6,2],[12,-24,18,2],[32,-24,2,2],[2,-22,28,4],[4,-18,26,1],[4,-17,24,1],[6,-16,22,2],[8,-14,18,2],[10,-12,14,2],[12,-10,4,2],[20,-10,4,2],[14,-8,4,2],[22,-8,2,4],[22,-4,4,2]],
+    halo: [[22,-47,20,2],[20,-45,4,2],[40,-45,2,2],[26,-42,2,2],[42,-43,2,9],[20,-43,2,11],[32,-34,12,2],[2,-32,4,2],[18,-32,4,2],[38,-32,2,2],[15,-30,5,2],[30,-30,10,2],[4,-30,2,4],[12,-28,5,2],[30,-28,6,2],[6,-26,8,2],[34,-26,2,4],[8,-24,4,2],[30,-24,2,2],[30,-22,6,2],[0,-30,2,12],[30,-20,2,3],[2,-18,2,2],[28,-17,2,3],[4,-16,2,2],[6,-14,2,2],[26,-14,4,2],[8,-12,2,2],[24,-12,4,4],[8,-10,4,2],[16,-10,4,2],[10,-8,4,2],[18,-8,4,2],[24,-8,2,4],[12,-6,6,2],[20,-6,2,4],[26,-4,2,2],[20,-2,8,2]]
+  };
+  var JUMP = {
+    ink: [[24,-45,16,2],[22,-43,20,1],[27,-41,2,2],[22,-42,4,4],[30,-42,12,4],[22,-38,20,6],[22,-32,16,2],[20,-30,10,2],[2,-30,2,4],[17,-28,13,2],[2,-26,4,2],[14,-26,20,2],[2,-24,6,2],[12,-24,18,2],[32,-24,2,2],[2,-22,28,4],[4,-18,26,1],[4,-17,24,1],[6,-16,22,2],[8,-14,18,2],[10,-12,14,2],[12,-10,6,2],[20,-10,4,2],[12,-8,4,2],[22,-8,2,4],[12,-6,2,2],[12,-4,4,2],[22,-4,4,2]],
+    halo: [[22,-47,20,2],[20,-45,4,2],[40,-45,2,2],[26,-42,4,1],[26,-41,1,2],[29,-41,1,2],[26,-39,4,1],[20,-43,2,11],[42,-43,2,11],[2,-32,4,2],[18,-32,4,2],[38,-32,2,2],[15,-30,5,2],[30,-30,10,2],[4,-30,2,4],[12,-28,5,2],[30,-28,6,2],[6,-26,8,2],[34,-26,2,4],[8,-24,4,2],[30,-24,2,2],[30,-22,6,2],[0,-30,2,12],[30,-20,2,3],[2,-18,2,2],[28,-17,2,3],[4,-16,2,2],[6,-14,2,2],[26,-14,4,2],[8,-12,2,2],[24,-12,4,4],[8,-10,4,2],[18,-10,2,2],[16,-8,2,2],[24,-8,2,4],[14,-6,2,2],[10,-8,2,6],[20,-8,2,6],[16,-4,2,2],[26,-4,2,2],[10,-2,8,2],[20,-2,8,2]]
+  };
+  var CRASH = {
+    ink: [[22,-43,16,2],[20,-41,20,1],[25,-39,2,2],[20,-40,4,4],[28,-40,12,4],[20,-36,20,6],[20,-30,16,2],[18,-28,10,2],[0,-28,2,4],[15,-26,13,2],[0,-24,4,2],[12,-24,20,2],[0,-22,6,2],[10,-22,18,2],[30,-22,2,2],[0,-20,28,4],[2,-16,26,1],[2,-15,24,1],[4,-14,22,2],[6,-12,18,2],[8,-10,14,2],[10,-8,6,2],[18,-8,4,2],[10,-6,4,2],[20,-6,2,4],[10,-4,2,2],[10,-2,4,2],[20,-2,4,2]],
+    halo: [[24,-40,4,1],[24,-39,1,2],[27,-39,1,2],[24,-37,4,1]]
+  };
+  var DUCK_A = {
+    ink: [[2,-28,2,2],[39,-27,16,2],[2,-26,6,2],[16,-26,17,2],[37,-25,20,1],[2,-24,39,2],[43,-24,14,2],[4,-22,53,2],[6,-20,51,2],[8,-18,49,2],[10,-16,37,2],[12,-14,23,2],[39,-14,14,2],[14,-12,21,1],[14,-11,12,1],[31,-11,2,2],[13,-10,2,2],[19,-10,6,2],[31,-9,4,2],[13,-8,4,2],[19,-8,4,2],[19,-6,2,2],[19,-4,4,2]],
+    halo: [[0,-30,6,2],[37,-29,20,2],[14,-28,21,1],[4,-28,6,2],[14,-27,25,1],[55,-27,4,2],[33,-26,6,1],[8,-26,8,2],[33,-25,4,1],[0,-28,2,6],[41,-24,2,2],[0,-22,4,2],[2,-20,4,2],[57,-25,2,9],[4,-18,4,2],[6,-16,4,2],[47,-16,12,2],[8,-14,4,2],[35,-14,4,2],[53,-14,4,2],[35,-12,2,1],[11,-12,3,2],[39,-12,16,2],[26,-11,5,1],[33,-11,4,2],[11,-10,2,1],[25,-10,6,1],[15,-10,4,2],[25,-9,2,1],[9,-9,4,2],[29,-9,2,2],[35,-9,4,2],[17,-8,2,2],[23,-8,2,2],[11,-7,2,1],[29,-7,8,2],[11,-6,8,2],[21,-6,2,2],[17,-4,2,2],[23,-4,2,2],[17,-2,8,2]]
+  };
+  var DUCK_B = {
+    ink: [[2,-28,2,2],[39,-27,16,2],[2,-26,6,2],[16,-26,17,2],[37,-25,20,1],[2,-24,39,2],[43,-24,14,2],[4,-22,53,2],[6,-20,51,2],[8,-18,49,2],[10,-16,37,2],[12,-14,23,2],[39,-14,14,2],[14,-12,21,1],[14,-11,12,1],[31,-11,2,2],[13,-10,6,2],[23,-10,5,2],[31,-9,4,2],[13,-8,4,2],[13,-6,2,2],[13,-4,4,2]],
+    halo: [[0,-30,6,2],[37,-29,20,2],[14,-28,21,1],[4,-28,6,2],[14,-27,25,1],[55,-27,4,2],[33,-26,6,1],[8,-26,8,2],[33,-25,4,1],[0,-28,2,6],[41,-24,2,2],[0,-22,4,2],[2,-20,4,2],[57,-25,2,9],[4,-18,4,2],[6,-16,4,2],[47,-16,12,2],[8,-14,4,2],[35,-14,4,2],[53,-14,4,2],[35,-12,2,1],[11,-12,3,2],[39,-12,16,2],[26,-11,5,1],[33,-11,4,2],[11,-10,2,1],[19,-10,4,2],[28,-10,3,2],[9,-9,4,2],[35,-9,4,2],[23,-8,8,1],[17,-8,2,2],[23,-7,14,1],[29,-6,8,1],[15,-6,4,2],[11,-7,2,5],[17,-4,2,2],[11,-2,8,2]]
+  };
+  var PTERO_UP = {
+    ink: [[10,-3,4,2],[8,-1,6,2],[6,1,10,2],[4,3,12,2],[2,5,28,2],[14,7,18,2],[16,9,28,2],[18,11,20,2],[18,13,24,2],[18,15,18,2],[18,17,8,2],[18,19,6,2],[18,21,4,4],[18,25,2,2]],
+    halo: [[10,-5,4,2],[8,-3,2,2],[14,-3,2,4],[6,-1,2,2],[4,1,2,2],[16,1,2,2],[2,3,2,2],[16,3,14,2],[0,5,2,2],[30,5,2,2],[0,7,14,2],[32,7,14,2],[14,9,2,2],[44,9,2,2],[38,11,6,2],[42,13,2,2],[36,15,6,2],[26,17,10,2],[24,19,2,2],[22,21,2,4],[16,11,2,16],[20,25,2,2],[18,27,2,2]]
+  };
+  var PTERO_DOWN = {
+    ink: [[16,-9,2,2],[16,-7,4,2],[16,-5,6,2],[10,-3,4,2],[18,-3,6,2],[8,-1,6,2],[18,-1,8,2],[6,1,10,2],[18,1,10,2],[4,3,12,2],[18,3,12,2],[2,5,28,2],[14,7,18,2],[16,9,28,2],[18,11,20,2],[20,13,22,2],[22,15,14,2]],
+    halo: [[16,-11,2,2],[18,-9,2,2],[14,-9,2,4],[20,-7,2,2],[10,-5,6,2],[22,-5,2,2],[8,-3,2,2],[24,-3,2,2],[14,-3,4,4],[6,-1,2,2],[26,-1,2,2],[4,1,2,2],[28,1,2,2],[16,1,2,4],[2,3,2,2],[30,3,2,4],[0,5,2,2],[2,7,12,2],[32,7,12,2],[14,9,2,2],[44,9,2,2],[16,11,2,2],[38,11,6,2],[18,13,2,2],[42,13,2,2],[20,15,2,2],[36,15,6,2],[22,17,16,2]]
+  };
+
+  function drawSprite(spr, sx, sy) {
+    ctx.fillStyle = COL.halo;
+    ctx.beginPath();
+    for (var i = 0; i < spr.halo.length; i++) {
+      var r = spr.halo[i];
+      ctx.rect(sx + r[0], sy + r[1], r[2], r[3]);
+    }
+    ctx.fill();
+    ctx.fillStyle = COL.ink;
+    ctx.beginPath();
+    for (i = 0; i < spr.ink.length; i++) {
+      r = spr.ink[i];
+      ctx.rect(sx + r[0], sy + r[1], r[2], r[3]);
+    }
+    ctx.fill();
+  }
+
+  function dinoSprite() {
+    var frame = Math.floor(runPhase) % 2;
+    if (dino.duck) return frame ? DUCK_B : DUCK_A;
+    if (!dino.grounded) return JUMP;
+    if (state !== "run") return WAIT_A;
+    return frame ? RUN_B : RUN_A;
+  }
+
+  function drawDino(dead) {
+    drawSprite(dead ? CRASH : dinoSprite(), DINO_X - 10, dino.y);
+  }
+
+  function drawCactus(o) {
+    var u = o.big ? 8 : 6;
+    var trunkW = o.big ? 9 : 7;
+    var slot = (o.w - (o.count - 1) * 2) / o.count;
+    for (var c = 0; c < o.count; c++) {
+      var cx = o.x + c * (slot + 2) + (slot - trunkW) / 2;
+      var armH = o.big ? 11 : 8;
+      var leftArmY = o.y + o.h * 0.3;
+      var rightArmY = o.y + o.h * 0.42;
+      ctx.fillStyle = COL.ink;
+      ctx.fillRect(cx, o.y, trunkW, o.h);                       // trunk
+      ctx.fillRect(cx - u, leftArmY, u, 4);                     // left arm elbow
+      ctx.fillRect(cx - u, leftArmY - armH, 5, armH + 4);       // left arm up
+      ctx.fillRect(cx + trunkW, rightArmY, u, 4);               // right arm elbow
+      ctx.fillRect(cx + trunkW + u - 5, rightArmY - armH + 4, 5, armH);
+    }
+  }
+
+  function drawPtero(o) {
+    drawSprite(o.flap < 200 ? PTERO_UP : PTERO_DOWN, Math.round(o.x), Math.round(o.y));
+  }
+
+  function drawCloud(c) {
+    ctx.fillStyle = COL.cloud;
+    var x = c.x, y = c.y;
+    ctx.beginPath();
+    ctx.arc(x + 14, y, 10, 0, Math.PI * 2);
+    ctx.arc(x + 30, y - 5, 13, 0, Math.PI * 2);
+    ctx.arc(x + 48, y, 11, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function draw(now) {
+    ctx.fillStyle = COL.field;
+    ctx.fillRect(0, 0, W, H);
+
+    // Ground line + drifted bumps.
+    ctx.fillStyle = COL.ground;
+    ctx.fillRect(0, GROUND_Y + 2, W, 2);
+    ctx.fillStyle = COL.bump;
+    for (var i = 0; i < bumps.length; i++) {
+      if (bumps[i].x < W) ctx.fillRect(bumps[i].x, GROUND_Y + 6, bumps[i].w, 2);
+    }
+
+    for (i = 0; i < clouds.length; i++) if (clouds[i].x < W + 60) drawCloud(clouds[i]);
+
+    ctx.fillStyle = COL.ink;
+    for (i = 0; i < obstacles.length; i++) {
+      if (obstacles[i].type === "ptero") drawPtero(obstacles[i]); else drawCactus(obstacles[i]);
+    }
+
+    drawDino(state === "dead");
+  }
+
+  function loop(now) {
+    if (state !== "run") { draw(now); return; }
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    step(dt);
+    updHud();
+    if (state !== "run") { draw(now); return; }
+    draw(now);
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- end-of-run share: obfuscated token → SVG high score card ---------- */
+
+  function removeShare() {
+    var ex = document.getElementById("shareBtn");
+    if (ex && ex.parentNode) ex.parentNode.removeChild(ex);
+  }
+
+  function copyTextToClipboard(text, btn, resetLabel) {
+    function done(msg, ms) {
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = resetLabel; }, ms);
+    }
+    function legacy() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (ok) { done("Link copied!", 2000); return; }
+      } catch (e) {}
+      done("Share link: " + text, 4000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done("Link copied!", 2000); }).catch(legacy);
+    } else {
+      legacy();
+    }
+  }
+
+  function offerShare(score) {
+    if (typeof obfuscateShare !== "function") return;
+    setTimeout(function () {
+      var overlayDiv = document.getElementById("overlay");
+      if (!overlayDiv || document.getElementById("shareBtn")) return;
+      var btn = document.createElement("button");
+      btn.id = "shareBtn";
+      btn.className = "ctrl";
+      btn.type = "button";
+      btn.textContent = "Share your highscore";
+      btn.onclick = function (e) {
+        e.stopPropagation();
+        askUsername(function (cleanUser) {
+          if (cleanUser === null) return;
+          var token = obfuscateShare({ n: cleanUser, s: Math.max(0, Math.floor(score || 0)), g: "dino" });
+          var url = window.location.origin + "/highscoresvg/dino.html?t=" + token;
+          if (navigator.share) {
+            // Called from the dialog's Share tap, so user activation is intact.
+            navigator.share({ title: "My T-Rex Runner High Score", text: "Check out my t-rex runner high score — " + score + " points! The connection was lost.", url: url }).catch(function () {});
+            return;
+          }
+          try {
+            window.open(url, "_blank", "noopener,noreferrer");
+            return;
+          } catch (err) {}
+          copyTextToClipboard(url, btn, "Share your highscore");
+        });
+      };
+      var container = overlayDiv.querySelector("div");
+      if (container) container.appendChild(btn);
+    }, 0);
+  }
+
+  reset();
+})();
+</script>
+</body>
+</html>
