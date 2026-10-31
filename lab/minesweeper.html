@@ -180,9 +180,18 @@
   function layoutBoard() {
     var stageEl = cv.closest(".stage");
     var availW = Math.max(220, (stageEl ? stageEl.clientWidth : 620) - 34);
+    // Only cap by height while in fullscreen focus mode (html.fig-fs); the
+    // page normally sizes the stage from the board itself, so sampling
+    // clientHeight there would create a feedback loop.
+    var availH = document.documentElement.classList.contains("fig-fs")
+      ? Math.max(220, (stageEl ? stageEl.clientHeight : 460) - 34)
+      : 1e6;
     var target = cols >= 33 ? 15 : cols >= 17 ? 26 : 44;
     var gap = cols <= 16 ? 3 : cols <= 32 ? 2 : 1;
-    var fitCell = Math.floor((availW - gap * (cols - 1)) / cols);
+    var fitCell = Math.min(
+      Math.floor((availW - gap * (cols - 1)) / cols),
+      Math.floor((availH - gap * (rows - 1)) / rows)
+    );
     if (fitCell >= 10) {
       cellPx = fitCell; gapPx = gap;
       boardW = cols * cellPx + (cols - 1) * gapPx;

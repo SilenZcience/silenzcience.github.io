@@ -56,6 +56,11 @@
 .sdk-over h2{font-family:var(--font-display);font-size:1.6rem;color:var(--accent);margin:0 0 6px}
 .sdk-over p{color:var(--faint);font-size:.88rem;margin:0}
 @media(max-width:599px){.sdk-board-wrap{width:min(100%,360px)}.sdk-board{--bs:360px}}
+/* focus mode: board grows with the viewport height on wider screens */
+@media(min-width:600px){
+  html.fig-fs .sdk-board-wrap{width:min(100%,min(70vh,660px))}
+  html.fig-fs .sdk-board{--bs:min(70vh,660px)}
+}
 </style>
 <script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>

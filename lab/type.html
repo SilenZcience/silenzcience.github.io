@@ -24,7 +24,11 @@
 @media (pointer: coarse){
   .stream{height:8.6em}
 }
-.stream span{white-space:pre-wrap}
+.stream span{white-space:break-spaces}
+.type-stage{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch}
+html.fig-fs .type-stage{justify-content:center}
+/* focus mode: the typed text grows with the screen */
+html.fig-fs .stream{font-size:clamp(1.3rem,calc(2vh + .9vw),2.3rem)}
 .t-cur{color:var(--ink);border-bottom:2px solid var(--accent)}
 .t-ok{color:var(--soft)}
 .t-bad{color:var(--accent);background:var(--accent-soft)}
@@ -67,7 +71,7 @@
 
   <figure class="fig" data-reveal style="--rd:150ms">
     <div class="stage-wrap">
-      <div class="stage" style="display:block;padding-inline:clamp(16px,3vw,38px)">
+      <div class="stage type-stage" style="padding-inline:clamp(16px,3vw,38px)">
         <p class="stream" id="stream"></p>
         <div class="overlay hide" id="overlay" style="padding:0">
           <div>
@@ -238,11 +242,15 @@ var WORDS = [
   // Greedy line fill against the stream's real width. Every word claims one
   // trailing space in the budget (+1), so when a line closes, its trailing
   // space (where the caret sits) is guaranteed to fit inside the content box
-  // instead of reaching the right edge. The probe must run in `pre` mode: it
+  // instead of reaching the right edge. One extra space-width is reserved on
+  // top: some engines (esp. mobile) round/subpixel-shrink the last glyph, and
+  // pre-wrap hangs closing whitespace past the content edge, which would push
+  // the caret underline off-screen. The probe must run in `pre` mode: it
   // preserves trailing spaces, whereas `nowrap` would collapse them to 0px.
   function computeBreaks() {
     var cs = getComputedStyle(streamEl);
     var width = streamEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    width -= measureText(" ");
     var words = target.split(" "), lines = [], cur = [];
     for (var i = 0; i < words.length; i++) {
       var trial = (cur.length ? cur.join(" ") + " " : "") + words[i] + " ";
@@ -461,12 +469,20 @@ var WORDS = [
 
   newBtn.addEventListener("click", function () { reset(true); });
 
-  // Re-flow the fixed line breaks when the window width changes.
+  // Re-flow the fixed line breaks when the window width changes — also when
+  // focus mode toggles, which swaps the stream font/width without a resize
+  // event (the greedy fill must re-budget one trailing space per line).
   var rzTimer = null;
-  addEventListener("resize", function () {
+  function reflow() {
     clearTimeout(rzTimer);
     rzTimer = setTimeout(function () { render(); }, 150);
-  });
+  }
+  addEventListener("resize", reflow);
+  if (typeof MutationObserver !== "undefined") {
+    new MutationObserver(reflow).observe(document.documentElement, {
+      attributes: true, attributeFilter: ["class"]
+    });
+  }
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(function () { render(); });
   }

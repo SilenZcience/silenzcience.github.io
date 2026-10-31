@@ -123,6 +123,18 @@
   .promo button{width:42px;height:42px}
   .movelist{height:min(50vh,460px)}
 }
+/* focus mode: board fits the available height; movelist shares leftover space */
+html.fig-fs .board-wrap{width:min(100%,66vh)}
+html.fig-fs .duo{min-height:0}
+html.fig-fs .duo .side-panel{min-height:0}
+@media (max-width:719px){
+  html.fig-fs .board-wrap{width:min(100%,46vh)}
+  html.fig-fs .duo .stage-wrap{flex:0 0 auto}
+  /* no room next to the field on phones: drop the move history altogether */
+  html.fig-fs .ml-head{display:none}
+  html.fig-fs .movelist{display:none}
+  html.fig-fs .duo .side-panel{flex:0 0 auto}
+}
 
 </style>
 <script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>

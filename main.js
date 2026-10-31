@@ -278,6 +278,62 @@
       .catch(() => {});
   })();
 
+  // Fullscreen focus mode for lab games: a corner button on each game
+  // .fig collapses the page to the board + its control rows so phones
+  // fit everything at once, away from the header/footer scroll fight.
+  (function stageFocus() {
+    const KEEP = ".ctrl-row, .stat-row, .sdk-np, .sdk-ctrl, .sdk-diff";
+    const ICON =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>';
+    let box = null, anchor = null, moved = null, origParent = null;
+
+    function exit() {
+      if (!box) return;
+      document.documentElement.classList.remove("fig-fs");
+      for (const el of moved) {
+        if (anchor) anchor.parentNode.insertBefore(el, anchor);
+        else origParent.appendChild(el);
+      }
+      box.remove();
+      box = null; moved = null; anchor = null; origParent = null;
+    }
+
+    function enter(fig) {
+      const kept = [];
+      let el = fig.nextElementSibling;
+      while (el && el.matches(KEEP)) { kept.push(el); el = el.nextElementSibling; }
+      moved = [fig, ...kept];
+      anchor = moved[moved.length - 1].nextElementSibling;
+      origParent = fig.parentNode;
+      box = document.createElement("div");
+      box.className = "ffs-box";
+      for (const n of moved) box.appendChild(n);
+      document.body.appendChild(box);
+      document.documentElement.classList.add("fig-fs");
+      scrollTo(0, 0);
+    }
+
+    $$(".fig").forEach(fig => {
+      if (!fig.querySelector(".stage")) return;
+      const btn = document.createElement("button");
+      btn.className = "fig-fs-btn";
+      btn.type = "button";
+      btn.title = "Focus mode";
+      btn.setAttribute("aria-label", "Focus mode: show only the game and its controls");
+      btn.innerHTML = ICON;
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        if (box) exit(); else enter(fig);
+        btn.setAttribute("aria-label", box ? "Exit focus mode" : "Focus mode: show only the game and its controls");
+      });
+      fig.appendChild(btn);
+    });
+
+    addEventListener("keydown", e => {
+      if (e.key === "Escape" && box) exit();
+    });
+  })();
+
   // Inject the real totals into the data-lab-total / data-dossier-total /
   // data-blog-post-total placeholders. Lab total comes from the injected
   // panel entries, dossier and blog-post totals from their .files lists

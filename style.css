@@ -459,7 +459,7 @@ main{padding-top:var(--headh)}
   font-family:var(--font-mono);font-style:normal;
   font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);
 }
-.fig{margin:clamp(48px,7vh,64px) 0;border:1px solid var(--line);background:var(--bg-2);padding:clamp(20px,3vw,32px)}
+.fig{position:relative;margin:clamp(48px,7vh,64px) 0;border:1px solid var(--line);background:var(--bg-2);padding:clamp(20px,3vw,32px)}
 .fig svg{width:100%;height:auto}
 .fig-cap{margin-top:20px;color:var(--faint);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;line-height:1.7}
 .trace-a{fill:none;stroke:var(--dim);stroke-width:1.5}
@@ -535,6 +535,8 @@ svg#cv{
   cursor:default;user-select:none;-webkit-user-select:none;
   touch-action:none;
 }
+/* scroll mode: the minefield itself may be oversized, so allow panning on it */
+.stage.scroll #cv{touch-action:pan-x pan-y}
 .stage.scroll{display:block;overflow-x:auto;overscroll-behavior-x:contain}
 .nin{
   width:64px;text-align:center;
@@ -644,4 +646,47 @@ html:not(.js) [data-decode]{opacity:1}
   .tick{animation:none}
   html.js .hero-title .line-in{animation:none;transform:none}
   [data-reveal]{opacity:1;transform:none;transition:none}
+}
+
+
+/* ---------- lab games: fullscreen focus mode (corner button) ---------- */
+.fig-fs-btn{
+  position:absolute;bottom:7px;right:7px;z-index:6;
+  width:30px;height:30px;display:grid;place-items:center;padding:0;
+  background:var(--bg);border:1px solid var(--line-2);color:var(--dim);
+  opacity:.8;cursor:pointer;
+  transition:opacity var(--t),color var(--t),border-color var(--t);
+}
+.fig-fs-btn:hover{opacity:1;color:var(--ink);border-color:var(--ink)}
+.fig-fs-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6;display:block}
+.ffs-box{display:none}
+html.fig-fs body{overflow:hidden}
+/* the chess drag ghost is appended as a body child and must stay visible */
+html.fig-fs body>:not(.drag-ghost){display:none}
+/* same specificity as the hide rule above, placed after it so it wins on order */
+html.fig-fs body>.ffs-box{
+  display:flex;flex-direction:column;gap:2px;
+  height:100vh;height:100dvh;
+  padding:max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  background:var(--bg);overflow:hidden;
+}
+.ffs-box .fig{
+  flex:1 1 auto;min-height:0;display:flex;flex-direction:column;
+  margin:0;padding:clamp(8px,2vw,24px);
+}
+.ffs-box .fig > :first-child{flex:1 1 auto;min-height:0}
+.ffs-box [data-reveal]{opacity:1;transform:none;transition:none}
+.ffs-box .fig-cap{display:none}
+.ffs-box .stage-wrap{flex:1 1 auto;min-height:0;display:flex}
+.ffs-box .stage{flex:1 1 auto;min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:stretch}
+.ffs-box .stage canvas{
+  width:100%;height:100%;max-width:none;object-fit:contain;
+}
+.ffs-box .ctrl-row{margin-top:8px}
+.ffs-box .stat-row{margin-top:8px}
+/* minesweeper: center the svg board; its oversized fields scroll in both axes */
+html.fig-fs .stage>svg{margin-inline:auto}
+html.fig-fs .stage.scroll{display:block;overflow:auto;touch-action:pan-x pan-y}
+@media (max-width:599px){
+  .ffs-box .fig{padding:6px}
 }
