@@ -39,13 +39,49 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-    .card { width: 100%; max-width: 520px; }
+    .card { width: 100%; max-width: 520px; container-type: inline-size; }
+    /* Layer cake: each independently animated element is its own tiny
+       absolutely-positioned SVG root, so every transform/opacity animation
+       is compositor-driven and repaints only its own small area instead of
+       forcing the whole SVG to re-rasterize. One user unit == 1/520 of the
+       card width (the card is always 520x260), so px distances in keyframes
+       are expressed in cqw (user_value / 5.2). */
     .svg-card {
-      width: 100%; height: auto; display: block;
+      position: relative; width: 100%;
+      aspect-ratio: 520 / 260; display: block;
       border: 1px solid var(--line-2);
       background: radial-gradient(120% 120% at 50% 0%, var(--bg-2) 0%, var(--bg) 100%);
       box-shadow: 0 40px 80px -60px rgba(188, 156, 98, 0.4);
+      overflow: hidden;
     }
+    .svg-card > svg, .svg-card > div { position: absolute; display: block; }
+    .svg-card svg:not(.ground-layer) { overflow: visible; }
+
+    .bg-layer, .frame-border, .sheen, .sky-dusk, .sky-night, .night-gate, .texts {
+      left: 0; top: 0; width: 100%; height: 100%;
+    }
+
+    /* geometry (percent of the 520x260 card) */
+    .glow-left   { left: -6.53846%; top: 44.61538%; width: 46.15385%; height: 47.69231%; }
+    .sheen       { opacity: 0; }
+    .night-gate  { left: 60.38462%; top: 6.15385%; width: 36.92308%; height: 49.23077%; }
+    .sun         { left: 78.84615%; top: 3.84615%; width: 15.38462%; height: 30.76923%; }
+    .cloud-a     { left: 80.19231%; top: 10.38462%; width: 10.57692%; height: 12.69231%; }
+    .cloud-b     { left: 60.19231%; top: 20.76923%; width: 13.07692%; height: 14.61538%; }
+    .moon        { left: 80.38462%; top: 6.92308%; width: 12.30769%; height: 24.61538%; }
+    .ptero       { left: 54.61538%; top: 26.15385%; width: 18.46154%; height: 29.23077%; }
+    .cactus-run  { left: 47.30769%; top: 57.69231%; width: 67.30769%; height: 25.38462%; }
+    .dino-shadow { left: 68.84615%; top: 81.73077%; width: 10%; height: 2.69231%; }
+    .dust-layer  { left: 61.92308%; top: 71.53846%; width: 15%; height: 12.69231%; }
+    .glow-scene  { left: 67.30769%; top: 46.92308%; width: 20.76923%; height: 41.53846%; }
+    .ground-layer{ left: 57.69231%; top: 80.76923%; width: 42.30769%; height: 6.92308%; overflow: hidden; }
+
+    .ptero > svg, .dino-jump > .dino > svg { position: absolute; display: block; }
+    .ptero > svg { left: 0; top: 0; width: 100%; height: 100%; }
+    .dino   { position: absolute; inset: 0; }
+    .run-a, .run-b { left: 10.71429%; top: 7.27273%; width: 78.57143%; height: 85.45455%; }
+    .run-eyes { left: 57.14286%; top: 16.36364%; width: 3.57143%; height: 3.63636%; }
+
     .play-btn {
       display: block; width: 100%;
       margin-top: 14px; padding: 14px 17px;
@@ -70,15 +106,15 @@
       50%      { opacity: var(--scoreglow-peak); }
     }
     @keyframes sheen {
-      0%       { transform: translateX(-160px); opacity: 0; }
+      0%       { transform: translateX(-30.76923cqw); opacity: 0; }
       12%      { opacity: var(--sheen-peak); }
       50%      { opacity: var(--sheen-peak); }
       88%      { opacity: 0; }
-      100%     { transform: translateX(560px); opacity: 0; }
+      100%     { transform: translateX(107.69231cqw); opacity: 0; }
     }
     @keyframes bob {
       0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-2px); }
+      50%      { transform: translateY(-0.38462cqw); }
     }
     /* Chrome-run crossfades: two baked sprite frames alternate like the arcade. */
     @keyframes stepA {
@@ -93,8 +129,8 @@
       0%       { transform: translateX(0); opacity: 0; }
       8%       { opacity: .55; }
       78%      { opacity: .55; }
-      90%      { transform: translateX(-360px); opacity: 0; }
-      100%     { transform: translateX(-360px); opacity: 0; }
+      90%      { transform: translateX(-69.23077cqw); opacity: 0; }
+      100%     { transform: translateX(-69.23077cqw); opacity: 0; }
     }
     @keyframes dustKick {
       0%, 6%    { opacity: 0; transform: translate(0, 0) scale(1); }
@@ -111,11 +147,11 @@
       100%    { opacity: 0; transform: translate(var(--dx, -24px), var(--dy, -10px)) scale(.15); }
     }
     @keyframes cactusRun {
-      0%    { transform: translateX(110px); opacity: 0; }
+      0%    { transform: translateX(21.15385cqw); opacity: 0; }
       4%    { opacity: .62; }
-      78%   { transform: translateX(-170px); opacity: .62; }
+      78%   { transform: translateX(-32.69231cqw); opacity: .62; }
       86%   { opacity: 0; }
-      100%  { transform: translateX(-210px); opacity: 0; }
+      100%  { transform: translateX(-40.38462cqw); opacity: 0; }
     }
     @keyframes groundScroll {
       0%   { transform: translateX(0); }
@@ -123,17 +159,17 @@
     }
     @keyframes dinoJump {
       0%, 34%   { transform: translateY(0) rotate(0deg) scale(1, 1); }
-      37%       { transform: translateY(4px) rotate(0deg) scale(1.07, .88);
+      37%       { transform: translateY(0.76923cqw) rotate(0deg) scale(1.07, .88);
                   animation-timing-function: cubic-bezier(.3, 0, .9, .5); }
-      39%       { transform: translateY(-52px) rotate(-3deg) scale(.97, 1.05);
+      39%       { transform: translateY(-10cqw) rotate(-3deg) scale(.97, 1.05);
                   animation-timing-function: cubic-bezier(.15, .6, .35, 1); }
-      44%       { transform: translateY(-70px) rotate(-5deg) scale(1, 1.01); }
-      68%       { transform: translateY(-70px) rotate(-4deg) scale(1, 1);
+      44%       { transform: translateY(-13.46154cqw) rotate(-5deg) scale(1, 1.01); }
+      68%       { transform: translateY(-13.46154cqw) rotate(-4deg) scale(1, 1);
                   animation-timing-function: cubic-bezier(.55, .05, .8, .45); }
-      72%       { transform: translateY(-30px) rotate(-1deg) scale(1, 1.02); }
-      74%       { transform: translateY(-3px) rotate(0deg) scale(1, 1.01); }
-      76%       { transform: translateY(4px) rotate(0deg) scale(1.12, .84); }
-      80%       { transform: translateY(-1px) rotate(0deg) scale(.96, 1.05); }
+      72%       { transform: translateY(-5.76923cqw) rotate(-1deg) scale(1, 1.02); }
+      74%       { transform: translateY(-0.57692cqw) rotate(0deg) scale(1, 1.01); }
+      76%       { transform: translateY(0.76923cqw) rotate(0deg) scale(1.12, .84); }
+      80%       { transform: translateY(-0.19231cqw) rotate(0deg) scale(.96, 1.05); }
       85%, 100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
     }
     @keyframes dinoShadow {
@@ -145,18 +181,18 @@
     }
     @keyframes speedLine {
       0%   { opacity: 0; transform: translateX(0) scaleX(.3); }
-      14%  { opacity: .7; transform: translateX(-16px) scaleX(1); }
-      62%  { opacity: .28; transform: translateX(-104px) scaleX(.85); }
-      100% { opacity: 0; transform: translateX(-150px) scaleX(.4); }
+      14%  { opacity: .7; transform: translateX(-3.07692cqw) scaleX(1); }
+      62%  { opacity: .28; transform: translateX(-20cqw) scaleX(.85); }
+      100% { opacity: 0; transform: translateX(-28.84615cqw) scaleX(.4); }
     }
     @keyframes sunDrift {
-      0%    { transform: translate(70px, 140px); opacity: 0; }
-      9%    { transform: translate(48px, 58px); opacity: .85; }
-      27%   { transform: translate(-16px, 26px); opacity: .95; }
-      48%   { transform: translate(-70px, 40px); opacity: .85; }
-      58%   { transform: translate(-104px, 108px); opacity: .25; }
-      63%   { transform: translate(-118px, 140px); opacity: 0; }
-      100%  { transform: translate(-118px, 140px); opacity: 0; }
+      0%    { transform: translate(13.46154cqw, 26.92308cqw); opacity: 0; }
+      9%    { transform: translate(9.23077cqw, 11.15385cqw); opacity: .85; }
+      27%   { transform: translate(-3.07692cqw, 5cqw); opacity: .95; }
+      48%   { transform: translate(-13.46154cqw, 7.69231cqw); opacity: .85; }
+      58%   { transform: translate(-20cqw, 20.76923cqw); opacity: .25; }
+      63%   { transform: translate(-22.69231cqw, 26.92308cqw); opacity: 0; }
+      100%  { transform: translate(-22.69231cqw, 26.92308cqw); opacity: 0; }
     }
     @keyframes duskWash {
       0%, 48%    { opacity: 0; }
@@ -169,11 +205,11 @@
       99%, 100%  { opacity: 0; }
     }
     @keyframes moonDrift {
-      0%, 58% { transform: translate(70px, 150px); opacity: 0; }
-      70%    { transform: translate(30px, 42px); opacity: .9; }
-      84%    { transform: translate(-24px, 22px); opacity: 1; }
-      94%    { transform: translate(-70px, 66px); opacity: .5; }
-      100%   { transform: translate(-88px, 108px); opacity: 0; }
+      0%, 58% { transform: translate(13.46154cqw, 28.84615cqw); opacity: 0; }
+      70%    { transform: translate(5.76923cqw, 8.07692cqw); opacity: .9; }
+      84%    { transform: translate(-4.61538cqw, 4.23077cqw); opacity: 1; }
+      94%    { transform: translate(-13.46154cqw, 12.69231cqw); opacity: .5; }
+      100%   { transform: translate(-16.92308cqw, 20.76923cqw); opacity: 0; }
     }
     @keyframes nightGate {
       0%, 60%   { opacity: 0; }
@@ -185,109 +221,201 @@
       50%      { opacity: .9; }
     }
     @keyframes pteroFly {
-      0%    { transform: translate(250px, -16px); opacity: 0; }
-      9%    { transform: translate(212px, -6px); opacity: .8; }
-      55%   { transform: translate(92px, 16px); opacity: .8; }
-      86%   { transform: translate(18px, -4px); opacity: .8; }
-      92%   { transform: translate(10px, -6px); opacity: 0; }
-      100%  { transform: translate(10px, -6px); opacity: 0; }
+      0%    { transform: translate(48.07692cqw, -3.07692cqw); opacity: 0; }
+      9%    { transform: translate(40.76923cqw, -1.15385cqw); opacity: .8; }
+      55%   { transform: translate(17.69231cqw, 3.07692cqw); opacity: .8; }
+      86%   { transform: translate(3.46154cqw, -0.76923cqw); opacity: .8; }
+      92%   { transform: translate(1.92308cqw, -1.15385cqw); opacity: 0; }
+      100%  { transform: translate(1.92308cqw, -1.15385cqw); opacity: 0; }
     }
 
-    .dino-jump   { transform-origin: 382px 215px;
+    .dino-jump   { left: 62.69231%; top: 43.46154%; width: 21.53846%; height: 42.30769%;
+                   transform-origin: 50% 92.72727%;
                    animation: dinoJump 2.6s ease-in-out infinite; }
-    .dino        { animation: bob .5s ease-in-out infinite; transform-origin: 382px 215px; }
-    .dino-shadow { transform-box: fill-box; transform-origin: center;
+    .dino        { animation: bob .5s ease-in-out infinite; }
+    .dino-shadow { transform-origin: 50% 50%;
                    animation: dinoShadow 2.6s ease-in-out infinite; }
     .run-a       { animation: stepA .42s linear infinite; }
-    .run-b       { animation: stepB .42s linear infinite; }
-    .eyes        { opacity: 0; animation: blink 6.5s ease-in-out infinite; }
-    .cloud       { animation: drift 9s linear infinite; }
-    .ptero       { animation: pteroFly 12s linear infinite; }
+    .run-b       { opacity: 0; animation: stepB .42s linear infinite; }
+    .run-eyes    { opacity: 0; animation: blink 6.5s ease-in-out infinite; }
+    .cloud       { opacity: .55; animation: drift 9s linear infinite; }
+    .ptero       { opacity: .8; animation: pteroFly 12s linear infinite; }
     .flap-a      { animation: stepA .8s linear infinite; }
-    .flap-b      { animation: stepB .8s linear infinite; }
-    .sun         { animation: sunDrift 24s ease-in-out infinite; }
-    .moon        { animation: moonDrift 24s ease-in-out infinite; }
-    .night-sky   { animation: nightGate 24s ease-in-out infinite; }
-    .star        { animation: twinkle 3.2s ease-in-out infinite; }
-    .sky-dusk    { animation: duskWash 24s ease-in-out infinite; }
-    .sky-night   { animation: nightWash 24s ease-in-out infinite; }
-    .ground-scroll { animation: groundScroll .435s linear infinite; }
-    .cactus-run  { animation: cactusRun 2.6s linear infinite; }
-    .speed-line  { transform-box: fill-box; transform-origin: 100% 50%;
+    .flap-b      { opacity: 0; animation: stepB .8s linear infinite; }
+    .sun         { opacity: .85; animation: sunDrift 24s ease-in-out infinite; }
+    .moon        { opacity: 0; animation: moonDrift 24s ease-in-out infinite; }
+    .night-gate  { opacity: 0; animation: nightGate 24s ease-in-out infinite; }
+    .star        { position: absolute; aspect-ratio: 1; border-radius: 50%;
+                   background: #EDEBE6; transform: translate(-50%, -50%);
+                   opacity: .12; animation: twinkle 3.2s ease-in-out infinite; }
+    .sky-dusk    { opacity: 0; animation: duskWash 24s ease-in-out infinite; }
+    .sky-night   { opacity: 0; animation: nightWash 24s ease-in-out infinite; }
+    .score-glow  { opacity: .15; animation: scoreGlow 6s ease-in-out infinite; }
+    .sheen       { animation: sheen 11s ease-in-out infinite; }
+    .ground-layer .ground-scroll { animation: groundScroll .435s linear infinite; }
+    .cactus-run  { opacity: .62; animation: cactusRun 2.6s linear infinite; }
+    .speed-line  { transform-origin: 100% 50%; opacity: 0;
                    animation: speedLine .8s linear infinite; }
     .dust-kick   { transform-box: fill-box; transform-origin: center;
                    animation: dustKick 2.6s linear infinite; }
     .dust-land   { transform-box: fill-box; transform-origin: center;
                    animation: dustLand 2.6s ease-out infinite; }
-    .score-glow  { animation: scoreGlow 6s ease-in-out infinite; }
-    .sheen       { animation: sheen 11s ease-in-out infinite; }
 
     @media (prefers-reduced-motion: reduce) {
-      .dino, .dino-jump, .dino-shadow, .run-a, .run-b, .flap-a, .flap-b, .eyes,
-      .cloud, .score-glow, .sheen, .ground-scroll, .cactus-run, .speed-line,
-      .sun, .moon, .night-sky, .star, .sky-dusk, .sky-night, .ptero,
-      .dust-kick, .dust-land { animation: none; }
-      .dust-kick, .dust-land, .speed-line, .sky-dusk, .sky-night, .night-sky { opacity: 0; }
-      .flap-b { opacity: 0; }
-      .run-b { opacity: 0; }
+      .dino-jump, .dino, .run-a, .run-b, .flap-a, .flap-b, .run-eyes, .cloud,
+      .score-glow, .sheen, .ground-layer .ground-scroll, .cactus-run, .speed-line,
+      .sun, .moon, .star, .sky-dusk, .sky-night, .ptero, .night-gate,
+      .dino-shadow, .dust-kick, .dust-land { animation: none; }
     }
   </style>
 </head>
 <body>
   <main class="card">
-    <svg id="scoreSvg" class="svg-card" viewBox="0 0 520 260" role="img" aria-label="Dino high score">
-      <defs>
-        <radialGradient id="g" cx="50%" cy="0%" r="120%">
-          <stop offset="0%" stop-color="#1F1F1B" stop-opacity="1" />
-          <stop offset="100%" stop-color="#141413" stop-opacity="1" />
-        </radialGradient>
-        <radialGradient id="accentGlow">
-          <stop offset="0%" stop-color="#BC9C62" stop-opacity="1" />
-          <stop offset="100%" stop-color="#BC9C62" stop-opacity="0" />
-        </radialGradient>
-        <linearGradient id="sheenGrad" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#EDEBE6" stop-opacity="0" />
-          <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
-          <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
-        </linearGradient>
-        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
-        </pattern>
-        <linearGradient id="duskFade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#BC9C62" stop-opacity="0" />
-          <stop offset="45%" stop-color="#BC9C62" stop-opacity="0.4" />
-          <stop offset="100%" stop-color="#BC9C62" stop-opacity="1" />
-        </linearGradient>
-        <linearGradient id="nightFade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#0A1020" stop-opacity="0" />
-          <stop offset="38%" stop-color="#0A1020" stop-opacity="0.35" />
-          <stop offset="60%" stop-color="#0A1020" stop-opacity="1" />
-          <stop offset="100%" stop-color="#0A1020" stop-opacity="1" />
-        </linearGradient>
-        <g id="groundTile">
-          <rect x="0" y="220" width="16" height="2" opacity=".22" />
-          <rect x="24" y="218" width="9" height="2" opacity=".16" />
-          <rect x="42" y="221" width="12" height="2" opacity=".26" />
-        </g>
-        <clipPath id="frame"><rect x="1" y="1" width="518" height="258" /></clipPath>
-        <clipPath id="groundClip"><rect x="300" y="210" width="220" height="18" /></clipPath>
-      </defs>
+    <div class="svg-card" role="img" aria-label="Dino high score">
+      <!-- static backdrop: gradient, grid, ground shadow line -->
+      <svg class="bg-layer" viewBox="0 0 520 260">
+        <defs>
+          <radialGradient id="g" cx="50%" cy="0%" r="120%">
+            <stop offset="0%" stop-color="#1F1F1B" stop-opacity="1" />
+            <stop offset="100%" stop-color="#141413" stop-opacity="1" />
+          </radialGradient>
+          <radialGradient id="accentGlow">
+            <stop offset="0%" stop-color="#BC9C62" stop-opacity="1" />
+            <stop offset="100%" stop-color="#BC9C62" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="sheenGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#EDEBE6" stop-opacity="0" />
+            <stop offset="50%" stop-color="#EDEBE6" stop-opacity="1" />
+            <stop offset="100%" stop-color="#EDEBE6" stop-opacity="0" />
+          </linearGradient>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#EDEBE6" stroke-width="0.5" opacity="0.03" />
+          </pattern>
+          <linearGradient id="duskFade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#BC9C62" stop-opacity="0" />
+            <stop offset="45%" stop-color="#BC9C62" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="#BC9C62" stop-opacity="1" />
+          </linearGradient>
+          <linearGradient id="nightFade" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0A1020" stop-opacity="0" />
+            <stop offset="38%" stop-color="#0A1020" stop-opacity="0.35" />
+            <stop offset="60%" stop-color="#0A1020" stop-opacity="1" />
+            <stop offset="100%" stop-color="#0A1020" stop-opacity="1" />
+          </linearGradient>
+          <g id="groundTile">
+            <rect x="0" y="220" width="16" height="2" opacity=".22" />
+            <rect x="24" y="218" width="9" height="2" opacity=".16" />
+            <rect x="42" y="221" width="12" height="2" opacity=".26" />
+          </g>
+        </defs>
+        <rect width="520" height="260" fill="url(#g)" />
+        <rect width="520" height="260" fill="url(#grid)" opacity="0.08" />
+        <rect x="300" y="214" width="212" height="2" fill="#EDEBE6" opacity=".45" />
+      </svg>
 
-      <rect width="520" height="260" fill="url(#g)" />
-      <rect width="520" height="260" fill="url(#grid)" opacity="0.08" />
+      <svg class="glow-left score-glow" viewBox="-34 116 240 124">
+        <ellipse cx="86" cy="178" rx="120" ry="62" fill="url(#accentGlow)" />
+      </svg>
 
-      <ellipse class="score-glow" cx="86" cy="178" rx="120" ry="62" fill="url(#accentGlow)" />
+      <svg class="sheen" viewBox="0 0 520 260">
+        <rect x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" />
+      </svg>
 
-      <g clip-path="url(#frame)">
-        <rect class="sheen" x="0" y="0" width="90" height="260" fill="url(#sheenGrad)" />
-      </g>
-
-      <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
+      <svg class="frame-border" viewBox="0 0 520 260">
+        <rect x="1" y="1" width="518" height="258" fill="none" stroke="rgba(237,235,230,0.12)" />
+      </svg>
 
       <!-- the scene: scrolling ground, sun/moon day-night cycle, clouds,
-           flapjiro the flyer, a cactus rolling in, and the runner -->
-      <g clip-path="url(#frame)">
-        <rect x="300" y="214" width="212" height="2" fill="#EDEBE6" opacity=".45" />
+           flapjiro the flyer, a cactus rolling in, and the runner.
+           sun/moon/stars are background layers painted behind the flyer
+           and the runner now. -->
+      <svg class="sky-dusk" viewBox="0 0 520 260">
+        <rect width="520" height="260" fill="url(#duskFade)" />
+      </svg>
+      <svg class="sky-night" viewBox="0 0 520 260">
+        <rect width="520" height="260" fill="url(#nightFade)" />
+      </svg>
+
+      <div class="night-gate">
+        <span class="star" style="left:2.08333%;top:15.625%;width:1.35417%;animation-delay:-.4s"></span>
+        <span class="star" style="left:19.79167%;top:56.25%;width:1.04167%;animation-delay:-1.9s"></span>
+        <span class="star" style="left:34.375%;top:9.375%;width:1.5625%;animation-delay:-1.1s"></span>
+        <span class="star" style="left:48.95833%;top:68.75%;width:1.04167%;animation-delay:-2.6s"></span>
+        <span class="star" style="left:63.54167%;top:3.125%;width:1.25%;animation-delay:-.8s"></span>
+        <span class="star" style="left:80.20833%;top:75%;width:1.45833%;animation-delay:-2.2s"></span>
+        <span class="star" style="left:93.75%;top:34.375%;width:1.04167%;animation-delay:-1.5s"></span>
+        <span class="star" style="left:97.91667%;top:90.625%;width:1.25%;animation-delay:-3s"></span>
+        <span class="star" style="left:11.45833%;top:87.5%;width:1.04167%;animation-delay:-2.9s"></span>
+        <span class="star" style="left:42.70833%;top:34.375%;width:1.14583%;animation-delay:-.2s"></span>
+        <span class="star" style="left:57.29167%;top:96.875%;width:1.04167%;animation-delay:-1.7s"></span>
+        <span class="star" style="left:89.58333%;top:6.25%;width:1.35417%;animation-delay:-2.4s"></span>
+      </div>
+
+      <svg class="sun" viewBox="410 10 80 80">
+        <circle cx="450" cy="50" r="34" fill="url(#accentGlow)" opacity=".28" />
+        <circle cx="450" cy="50" r="13" fill="#EDEBE6" />
+        <circle cx="450" cy="50" r="19" fill="none" stroke="#EDEBE6" stroke-width="1" opacity=".2" />
+      </svg>
+
+      <svg class="cloud cloud-a" viewBox="417 27 55 33" style="animation-delay:-3s; animation-duration:13s">
+        <g fill="#EDEBE6" opacity=".22">
+          <circle cx="430" cy="44" r="8" />
+          <circle cx="444" cy="40" r="11" />
+          <circle cx="459" cy="44" r="9" />
+        </g>
+      </svg>
+      <svg class="cloud cloud-b" viewBox="313 54 68 38">
+        <g fill="#EDEBE6" opacity=".28">
+          <circle cx="330" cy="76" r="10" />
+          <circle cx="346" cy="71" r="13" />
+          <circle cx="364" cy="76" r="11" />
+        </g>
+      </svg>
+
+      <svg class="moon" viewBox="418 18 64 64">
+        <circle cx="450" cy="50" r="30" fill="url(#accentGlow)" opacity=".18" />
+        <circle cx="450" cy="50" r="12" fill="#EDEBE6" opacity=".92" />
+        <circle cx="445" cy="46" r="2.6" fill="#141413" opacity=".55" />
+        <circle cx="454" cy="55" r="1.7" fill="#141413" opacity=".45" />
+        <circle cx="447" cy="56" r="1.2" fill="#141413" opacity=".4" />
+      </svg>
+
+      <div class="ptero">
+        <svg class="flap-a" viewBox="284 68 96 76">
+          <path fill="rgba(237,235,230,.35)" d="M306 82h8v4h-8zM302 86h4v4h-4zM314 86h4v8h-4zM298 90h4v4h-4zM294 94h4v4h-4zM318 94h4v4h-4zM290 98h4v4h-4zM318 98h28v4h-28zM286 102h4v4h-4zM346 102h4v4h-4zM286 106h28v4h-28zM350 106h28v4h-28zM314 110h4v4h-4zM374 110h4v4h-4zM362 114h12v4h-12zM370 118h4v4h-4zM358 122h12v4h-12zM338 126h20v4h-20zM334 130h4v4h-4zM330 134h4v8h-4zM318 114h4v32h-4zM326 142h4v4h-4zM322 146h4v4h-4z" />
+          <path fill="#EDEBE6" d="M306 86h8v4h-8zM302 90h12v4h-12zM298 94h20v4h-20zM294 98h24v4h-24zM290 102h56v4h-56zM314 106h36v4h-36zM318 110h56v4h-56zM322 114h40v4h-40zM322 118h48v4h-48zM322 122h36v4h-36zM322 126h16v4h-16zM322 130h12v4h-12zM322 134h8v8h-8zM322 142h4v4h-4z" />
+        </svg>
+        <svg class="flap-b" viewBox="284 68 96 76">
+          <path fill="rgba(237,235,230,.35)" d="M318 70h4v4h-4zM322 74h4v4h-4zM314 74h4v8h-4zM326 78h4v4h-4zM306 82h12v4h-12zM330 82h4v4h-4zM302 86h4v4h-4zM334 86h4v4h-4zM314 86h8v8h-8zM298 90h4v4h-4zM338 90h4v4h-4zM294 94h4v4h-4zM342 94h4v4h-4zM318 94h4v8h-4zM290 98h4v4h-4zM346 98h4v8h-4zM286 102h4v4h-4zM290 106h24v4h-24zM350 106h24v4h-24zM314 110h4v4h-4zM374 110h4v4h-4zM318 114h4v4h-4zM362 114h12v4h-12zM322 118h4v4h-4zM370 118h4v4h-4zM326 122h4v4h-4zM358 122h12v4h-12zM330 126h32v4h-32z" />
+          <path fill="#EDEBE6" d="M318 74h4v4h-4zM318 78h8v4h-8zM318 82h12v4h-12zM306 86h8v4h-8zM322 86h12v4h-12zM302 90h12v4h-12zM322 90h16v4h-16zM298 94h20v4h-20zM322 94h20v4h-20zM294 98h24v4h-24zM322 98h24v4h-24zM290 102h56v4h-56zM314 106h36v4h-36zM318 110h56v4h-56zM322 114h40v4h-40zM326 118h44v4h-44zM330 122h28v4h-28z" />
+        </svg>
+      </div>
+
+      <svg class="speed-line" viewBox="452 98 58 1.5" style="left:86.92308%;top:37.69231%;width:11.15385%;height:0.57692%;animation-delay:-.2s">
+        <rect fill="#EDEBE6" fill-opacity=".26" x="452" y="98" width="58" height="1.5" />
+      </svg>
+      <svg class="speed-line" viewBox="470 132 40 1.5" style="left:90.38462%;top:50.76923%;width:7.69231%;height:0.57692%;animation-delay:-.75s">
+        <rect fill="#EDEBE6" fill-opacity=".26" x="470" y="132" width="40" height="1.5" />
+      </svg>
+      <svg class="speed-line" viewBox="446 166 64 1.5" style="left:85.76923%;top:63.84615%;width:12.30769%;height:0.57692%;animation-delay:-1.1s">
+        <rect fill="#EDEBE6" fill-opacity=".26" x="446" y="166" width="64" height="1.5" />
+      </svg>
+      <svg class="speed-line" viewBox="482 188 28 1.5" style="left:92.69231%;top:72.30769%;width:5.38462%;height:0.57692%;animation-delay:-.5s">
+        <rect fill="#EDEBE6" fill-opacity=".26" x="482" y="188" width="28" height="1.5" />
+      </svg>
+
+      <!-- cactus rolls in from the right; the runner jumps it -->
+      <svg class="cactus-run" viewBox="246 150 350 66">
+        <g fill="#EDEBE6" opacity=".62">
+          <rect x="466" y="152" width="10" height="62" />
+          <rect x="456" y="170" width="10" height="4" />
+          <rect x="456" y="158" width="4" height="16" />
+          <rect x="476" y="178" width="10" height="4" />
+          <rect x="482" y="166" width="4" height="16" />
+        </g>
+      </svg>
+
+      <svg class="ground-layer" viewBox="300 210 220 18">
         <g class="ground-scroll">
           <use href="#groundTile" x="300" />
           <use href="#groundTile" x="360" />
@@ -295,73 +423,31 @@
           <use href="#groundTile" x="480" />
           <use href="#groundTile" x="540" />
         </g>
+      </svg>
 
-        <g class="sun" opacity=".85">
-          <circle cx="450" cy="50" r="34" fill="url(#accentGlow)" opacity=".28" />
-          <circle cx="450" cy="50" r="13" fill="#EDEBE6" />
-          <circle cx="450" cy="50" r="19" fill="none" stroke="#EDEBE6" stroke-width="1" opacity=".2" />
-        </g>
+      <svg class="dino-shadow" viewBox="358 212.5 52 7">
+        <ellipse cx="384" cy="216" rx="26" ry="3.5" fill="#050504" opacity=".55" />
+      </svg>
 
-        <g class="cloud" opacity=".55" style="animation-delay:-3s; animation-duration:13s">
-          <g fill="#EDEBE6" opacity=".22">
-            <circle cx="430" cy="44" r="8" />
-            <circle cx="444" cy="40" r="11" />
-            <circle cx="459" cy="44" r="9" />
-          </g>
-        </g>
-        <g class="cloud" opacity=".55">
-          <g fill="#EDEBE6" opacity=".28">
-            <circle cx="330" cy="76" r="10" />
-            <circle cx="346" cy="71" r="13" />
-            <circle cx="364" cy="76" r="11" />
-          </g>
-        </g>
+      <!-- the dino: two chrome-standard run frames, crossfaded, mid-jump -->
+      <div class="dino-jump">
+        <div class="dino">
+          <svg class="run-a" viewBox="338 121 88 94">
+            <path fill="rgba(237,235,230,.35)" d="M382 121h40v4h-40zM378 125h8v4h-8zM418 125h4v4h-4zM390 131h4v4h-4zM422 129h4v18h-4zM378 129h4v22h-4zM402 147h24v4h-24zM342 151h8v4h-8zM374 151h8v4h-8zM414 151h4v4h-4zM368 155h10v4h-10zM398 155h20v4h-20zM346 155h4v8h-4zM362 159h10v4h-10zM398 159h12v4h-12zM350 163h16v4h-16zM406 163h4v8h-4zM354 167h8v4h-8zM398 167h4v4h-4zM398 171h12v4h-12zM338 155h4v24h-4zM398 175h4v6h-4zM342 179h4v4h-4zM394 181h4v6h-4zM346 183h4v4h-4zM350 187h4v4h-4zM390 187h8v4h-8zM354 191h4v4h-4zM386 191h8v4h-8zM354 195h8v4h-8zM374 195h8v4h-8zM392 195h8v4h-8zM370 199h4v4h-4zM378 199h18v4h-18zM366 203h4v4h-4zM358 199h4v12h-4zM370 207h4v4h-4zM358 211h16v4h-16z" />
+            <path fill="#EDEBE6" d="M386 125h32v4h-32zM382 129h40v2h-40zM382 131h8v4h-8zM394 131h28v4h-28zM382 135h40v12h-40zM382 147h20v4h-20zM382 151h32v4h-32zM378 155h20v4h-20zM342 155h4v8h-4zM372 159h26v4h-26zM342 163h8v4h-8zM366 163h40v4h-40zM342 167h12v4h-12zM362 167h36v4h-36zM402 167h4v4h-4zM342 171h56v8h-56zM346 179h52v2h-52zM346 181h48v2h-48zM350 183h44v4h-44zM354 187h36v4h-36zM358 191h28v4h-28zM362 195h12v4h-12zM382 195h10v4h-10zM362 199h8v4h-8zM362 203h4v4h-4zM362 207h8v4h-8z" />
+          </svg>
+          <svg class="run-b" viewBox="338 121 88 94">
+            <path fill="rgba(237,235,230,.35)" d="M382 121h40v4h-40zM378 125h8v4h-8zM418 125h4v4h-4zM390 131h4v4h-4zM422 129h4v18h-4zM378 129h4v22h-4zM402 147h24v4h-24zM342 151h8v4h-8zM374 151h8v4h-8zM414 151h4v4h-4zM368 155h10v4h-10zM398 155h20v4h-20zM346 155h4v8h-4zM362 159h10v4h-10zM398 159h12v4h-12zM350 163h16v4h-16zM406 163h4v8h-4zM354 167h8v4h-8zM398 167h4v4h-4zM398 171h12v4h-12zM338 155h4v24h-4zM398 175h4v6h-4zM342 179h4v4h-4zM394 181h4v6h-4zM346 183h4v4h-4zM350 187h4v4h-4zM390 187h8v4h-8zM354 191h4v4h-4zM386 191h8v8h-8zM354 195h8v4h-8zM370 195h8v4h-8zM358 199h8v4h-8zM374 199h8v4h-8zM386 199h4v8h-4zM362 203h12v4h-12zM378 203h4v8h-4zM390 207h4v4h-4zM378 211h16v4h-16z" />
+            <path fill="#EDEBE6" d="M386 125h32v4h-32zM382 129h40v2h-40zM382 131h8v4h-8zM394 131h28v4h-28zM382 135h40v12h-40zM382 147h20v4h-20zM382 151h32v4h-32zM378 155h20v4h-20zM342 155h4v8h-4zM372 159h26v4h-26zM342 163h8v4h-8zM366 163h40v4h-40zM342 167h12v4h-12zM362 167h36v4h-36zM402 167h4v4h-4zM342 171h56v8h-56zM346 179h52v2h-52zM346 181h48v2h-48zM350 183h44v4h-44zM354 187h36v4h-36zM358 191h28v4h-28zM362 195h8v4h-8zM378 195h8v4h-8zM366 199h8v4h-8zM382 199h4v8h-4zM382 207h8v4h-8z" />
+          </svg>
+          <svg class="run-eyes" viewBox="390 131 4 4">
+            <rect x="390" y="131" width="4" height="4" fill="#EDEBE6" />
+          </svg>
+        </div>
+      </div>
 
-        <g class="ptero" opacity=".8">
-          <g class="flap-a" fill="rgba(237,235,230,.35)">
-            <path d="M306 82h8v4h-8zM302 86h4v4h-4zM314 86h4v8h-4zM298 90h4v4h-4zM294 94h4v4h-4zM318 94h4v4h-4zM290 98h4v4h-4zM318 98h28v4h-28zM286 102h4v4h-4zM346 102h4v4h-4zM286 106h28v4h-28zM350 106h28v4h-28zM314 110h4v4h-4zM374 110h4v4h-4zM362 114h12v4h-12zM370 118h4v4h-4zM358 122h12v4h-12zM338 126h20v4h-20zM334 130h4v4h-4zM330 134h4v8h-4zM318 114h4v32h-4zM326 142h4v4h-4zM322 146h4v4h-4z" />
-            <path fill="#EDEBE6" d="M306 86h8v4h-8zM302 90h12v4h-12zM298 94h20v4h-20zM294 98h24v4h-24zM290 102h56v4h-56zM314 106h36v4h-36zM318 110h56v4h-56zM322 114h40v4h-40zM322 118h48v4h-48zM322 122h36v4h-36zM322 126h16v4h-16zM322 130h12v4h-12zM322 134h8v8h-8zM322 142h4v4h-4z" />
-          </g>
-          <g class="flap-b" fill="rgba(237,235,230,.35)">
-            <path d="M318 70h4v4h-4zM322 74h4v4h-4zM314 74h4v8h-4zM326 78h4v4h-4zM306 82h12v4h-12zM330 82h4v4h-4zM302 86h4v4h-4zM334 86h4v4h-4zM314 86h8v8h-8zM298 90h4v4h-4zM338 90h4v4h-4zM294 94h4v4h-4zM342 94h4v4h-4zM318 94h4v8h-4zM290 98h4v4h-4zM346 98h4v8h-4zM286 102h4v4h-4zM290 106h24v4h-24zM350 106h24v4h-24zM314 110h4v4h-4zM374 110h4v4h-4zM318 114h4v4h-4zM362 114h12v4h-12zM322 118h4v4h-4zM370 118h4v4h-4zM326 122h4v4h-4zM358 122h12v4h-12zM330 126h32v4h-32z" />
-            <path fill="#EDEBE6" d="M318 74h4v4h-4zM318 78h8v4h-8zM318 82h12v4h-12zM306 86h8v4h-8zM322 86h12v4h-12zM302 90h12v4h-12zM322 90h16v4h-16zM298 94h20v4h-20zM322 94h20v4h-20zM294 98h24v4h-24zM322 98h24v4h-24zM290 102h56v4h-56zM314 106h36v4h-36zM318 110h56v4h-56zM322 114h40v4h-40zM326 118h44v4h-44zM330 122h28v4h-28z" />
-          </g>
-        </g>
-
-        <g fill="#EDEBE6" opacity=".26">
-          <rect class="speed-line" x="452" y="98"  width="58" height="1.5" style="animation-delay:-.2s" />
-          <rect class="speed-line" x="470" y="132" width="40" height="1.5" style="animation-delay:-.75s" />
-          <rect class="speed-line" x="446" y="166" width="64" height="1.5" style="animation-delay:-1.1s" />
-          <rect class="speed-line" x="482" y="188" width="28" height="1.5" style="animation-delay:-.5s" />
-        </g>
-
-        <!-- cactus rolls in from the right; the runner jumps it -->
-        <g class="cactus-run" fill="#EDEBE6" opacity=".62">
-          <rect x="466" y="152" width="10" height="62" />
-          <rect x="456" y="170" width="10" height="4" />
-          <rect x="456" y="158" width="4" height="16" />
-          <rect x="476" y="178" width="10" height="4" />
-          <rect x="482" y="166" width="4" height="16" />
-        </g>
-
-        <ellipse class="dino-shadow" cx="384" cy="216" rx="26" ry="3.5" fill="#050504" opacity=".55" />
-
-        <!-- the dino: two chrome-standard run frames, crossfaded, mid-jump -->
-        <g class="dino-jump">
-          <g class="dino">
-            <g class="run-a" fill="rgba(237,235,230,.35)">
-              <path d="M382 121h40v4h-40zM378 125h8v4h-8zM418 125h4v4h-4zM390 131h4v4h-4zM422 129h4v18h-4zM378 129h4v22h-4zM402 147h24v4h-24zM342 151h8v4h-8zM374 151h8v4h-8zM414 151h4v4h-4zM368 155h10v4h-10zM398 155h20v4h-20zM346 155h4v8h-4zM362 159h10v4h-10zM398 159h12v4h-12zM350 163h16v4h-16zM406 163h4v8h-4zM354 167h8v4h-8zM398 167h4v4h-4zM398 171h12v4h-12zM338 155h4v24h-4zM398 175h4v6h-4zM342 179h4v4h-4zM394 181h4v6h-4zM346 183h4v4h-4zM350 187h4v4h-4zM390 187h8v4h-8zM354 191h4v4h-4zM386 191h8v4h-8zM354 195h8v4h-8zM374 195h8v4h-8zM392 195h8v4h-8zM370 199h4v4h-4zM378 199h18v4h-18zM366 203h4v4h-4zM358 199h4v12h-4zM370 207h4v4h-4zM358 211h16v4h-16z" />
-              <path fill="#EDEBE6" d="M386 125h32v4h-32zM382 129h40v2h-40zM382 131h8v4h-8zM394 131h28v4h-28zM382 135h40v12h-40zM382 147h20v4h-20zM382 151h32v4h-32zM378 155h20v4h-20zM342 155h4v8h-4zM372 159h26v4h-26zM342 163h8v4h-8zM366 163h40v4h-40zM342 167h12v4h-12zM362 167h36v4h-36zM402 167h4v4h-4zM342 171h56v8h-56zM346 179h52v2h-52zM346 181h48v2h-48zM350 183h44v4h-44zM354 187h36v4h-36zM358 191h28v4h-28zM362 195h12v4h-12zM382 195h10v4h-10zM362 199h8v4h-8zM362 203h4v4h-4zM362 207h8v4h-8z" />
-            </g>
-            <g class="run-b" fill="rgba(237,235,230,.35)">
-              <path d="M382 121h40v4h-40zM378 125h8v4h-8zM418 125h4v4h-4zM390 131h4v4h-4zM422 129h4v18h-4zM378 129h4v22h-4zM402 147h24v4h-24zM342 151h8v4h-8zM374 151h8v4h-8zM414 151h4v4h-4zM368 155h10v4h-10zM398 155h20v4h-20zM346 155h4v8h-4zM362 159h10v4h-10zM398 159h12v4h-12zM350 163h16v4h-16zM406 163h4v8h-4zM354 167h8v4h-8zM398 167h4v4h-4zM398 171h12v4h-12zM338 155h4v24h-4zM398 175h4v6h-4zM342 179h4v4h-4zM394 181h4v6h-4zM346 183h4v4h-4zM350 187h4v4h-4zM390 187h8v4h-8zM354 191h4v4h-4zM386 191h8v8h-8zM354 195h8v4h-8zM370 195h8v4h-8zM358 199h8v4h-8zM374 199h8v4h-8zM386 199h4v8h-4zM362 203h12v4h-12zM378 203h4v8h-4zM390 207h4v4h-4zM378 211h16v4h-16z" />
-              <path fill="#EDEBE6" d="M386 125h32v4h-32zM382 129h40v2h-40zM382 131h8v4h-8zM394 131h28v4h-28zM382 135h40v12h-40zM382 147h20v4h-20zM382 151h32v4h-32zM378 155h20v4h-20zM342 155h4v8h-4zM372 159h26v4h-26zM342 163h8v4h-8zM366 163h40v4h-40zM342 167h12v4h-12zM362 167h36v4h-36zM402 167h4v4h-4zM342 171h56v8h-56zM346 179h52v2h-52zM346 181h48v2h-48zM350 183h44v4h-44zM354 187h36v4h-36zM358 191h28v4h-28zM362 195h8v4h-8zM378 195h8v4h-8zM366 199h8v4h-8zM382 199h4v8h-4zM382 207h8v4h-8z" />
-            </g>
-            <rect class="eyes" x="390" y="131" width="4" height="4" fill="#EDEBE6" />
-          </g>
-        </g>
-
-        <!-- copper dust: little heel kicks while grounded, a burst on landing -->
+      <!-- copper dust: little heel kicks while grounded, a burst on landing -->
+      <svg class="dust-layer" viewBox="322 186 78 33">
         <g fill="#BC9C62">
           <circle class="dust-kick" cx="352" cy="212" r="2.2" opacity="0" />
           <circle class="dust-kick" cx="360" cy="209" r="1.5" opacity="0" style="animation-delay:.09s" />
@@ -370,46 +456,22 @@
           <circle class="dust-land" cx="386" cy="213" r="2.2" opacity="0" style="--dx:-46px; --dy:-9px;  animation-delay:.11s" />
           <circle class="dust-land" cx="396" cy="214" r="1.4" opacity="0" style="--dx:-12px; --dy:-24px; animation-delay:.03s" />
         </g>
+      </svg>
 
-        <circle class="score-glow" cx="404" cy="176" r="52" fill="url(#accentGlow)" opacity=".3" />
+      <svg class="glow-scene score-glow" viewBox="350 122 108 108">
+        <circle cx="404" cy="176" r="52" fill="url(#accentGlow)" />
+      </svg>
 
-        <!-- day / night: amber dusk bleeds in, then indigo night, then back -->
-        <rect class="sky-dusk"  x="0" y="0" width="520" height="260" fill="url(#duskFade)"  opacity="0" />
-        <rect class="sky-night" x="0" y="0" width="520" height="260" fill="url(#nightFade)" opacity="0" />
-
-        <g class="night-sky" opacity="0">
-          <g fill="#EDEBE6">
-            <circle class="star" cx="318" cy="36"  r="1.3" style="animation-delay:-.4s" />
-            <circle class="star" cx="352" cy="88"  r="1"   style="animation-delay:-1.9s" />
-            <circle class="star" cx="380" cy="28"  r="1.5" style="animation-delay:-1.1s" />
-            <circle class="star" cx="408" cy="104" r="1"   style="animation-delay:-2.6s" />
-            <circle class="star" cx="436" cy="20"  r="1.2" style="animation-delay:-.8s" />
-            <circle class="star" cx="468" cy="112" r="1.4" style="animation-delay:-2.2s" />
-            <circle class="star" cx="494" cy="60"  r="1"   style="animation-delay:-1.5s" />
-            <circle class="star" cx="502" cy="132" r="1.2" style="animation-delay:-3s" />
-            <circle class="star" cx="336" cy="128" r="1"   style="animation-delay:-2.9s" />
-            <circle class="star" cx="396" cy="60"  r="1.1" style="animation-delay:-.2s" />
-            <circle class="star" cx="424" cy="140" r="1"   style="animation-delay:-1.7s" />
-            <circle class="star" cx="486" cy="24"  r="1.3" style="animation-delay:-2.4s" />
-          </g>
-          <g class="moon">
-            <circle cx="450" cy="50" r="30" fill="url(#accentGlow)" opacity=".18" />
-            <circle cx="450" cy="50" r="12" fill="#EDEBE6" opacity=".92" />
-            <circle cx="445" cy="46" r="2.6" fill="#141413" opacity=".55" />
-            <circle cx="454" cy="55" r="1.7" fill="#141413" opacity=".45" />
-            <circle cx="447" cy="56" r="1.2" fill="#141413" opacity=".4" />
-          </g>
-        </g>
-      </g>
-
-      <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 10</text>
-      <text id="titleText" x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">T-Rex Runner High Score</text>
-      <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Score</text>
-      <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">00000</text>
-      <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
-      <text id="userText" x="32" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
-      <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · t-rex runner</text>
-    </svg>
+      <svg class="texts" viewBox="0 0 520 260">
+        <text x="32" y="48" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#908E86">Laboratory · Lab 10</text>
+        <text id="titleText" x="32" y="78" font-family="var(--font-display)" font-size="24" font-weight="400" fill="#EDEBE6">T-Rex Runner High Score</text>
+        <text x="32" y="152" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Score</text>
+        <text id="scoreText" x="32" y="194" font-family="var(--font-mono)" font-size="52" font-weight="500" letter-spacing="0.08em" fill="#EDEBE6">00000</text>
+        <text x="32" y="106" font-family="var(--font-mono)" font-size="11" letter-spacing="0.16em" text-transform="uppercase" fill="#908E86">Player</text>
+        <text id="userText" x="32" y="124" font-family="var(--font-display)" font-weight="300" fill="#BC9C62" text-anchor="start" dominant-baseline="middle">Anonymous</text>
+        <text x="32" y="222" font-family="var(--font-mono)" font-size="10" letter-spacing="0.18em" text-transform="uppercase" fill="#5F5D57">silenzcience.github.io · t-rex runner</text>
+      </svg>
+    </div>
     <a class="play-btn" href="../lab/dino.html">Try to beat it →</a>
   </main>
 
