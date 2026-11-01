@@ -72,7 +72,14 @@
 .fen-in.bad{border-color:#C34A32}
 .ctrl:disabled{opacity:.35;pointer-events:none}
 .duo{display:flex;align-items:stretch;gap:clamp(12px,1.8vw,18px)}
-.duo .stage-wrap{flex:1 1 auto;min-width:0}
+/* PC row mode: never size the stage off its content. The board is a 1fr grid
+   whose own width is 100% of the stage — an indefinite chain that intrinsic
+   sizing resolves to ~0, collapsing the whole board (mobile is saved by the
+   cross-axis stretch of the column layout there). Hand the stage the leftover
+   width next to the side panel explicitly. */
+@media (min-width:720px){
+  .duo .stage{flex:1 1 0%;min-width:0}
+}
 .duo .stage{padding:0}
 .side-panel{
   flex:0 0 clamp(272px,30%,340px);display:flex;flex-direction:column;
@@ -123,17 +130,26 @@
   .promo button{width:42px;height:42px}
   .movelist{height:min(50vh,460px)}
 }
-/* focus mode: board fits the available height; movelist shares leftover space */
-html.fig-fs .board-wrap{width:min(100%,66vh)}
-html.fig-fs .duo{min-height:0}
+/* focus mode: the square is sized off the stage's own box with container
+   units, so it can never exceed the room the figure grants it (the old
+   66vh/46vh viewport sums did not include the control rows and overflowed) */
+html.fig-fs .duo{flex:1 1 auto;min-width:0;min-height:0}
+html.fig-fs .duo .stage{container-type:size}
+html.fig-fs .board-wrap{width:min(100cqw,100cqh)}
 html.fig-fs .duo .side-panel{min-height:0}
+/* engines without container units fall back to the old viewport caps */
+@supports not (width:1cqw){
+  html.fig-fs .board-wrap{width:min(100%,66vh)}
+}
 @media (max-width:719px){
-  html.fig-fs .board-wrap{width:min(100%,46vh)}
-  html.fig-fs .duo .stage-wrap{flex:0 0 auto}
-  /* no room next to the field on phones: drop the move history altogether */
+  /* no room next to the field on phones: the FEN panel stacks below the
+     board at its natural height; the move history is dropped altogether */
   html.fig-fs .ml-head{display:none}
   html.fig-fs .movelist{display:none}
   html.fig-fs .duo .side-panel{flex:0 0 auto}
+  @supports not (width:1cqw){
+    html.fig-fs .board-wrap{width:min(100%,46vh)}
+  }
 }
 
 </style>
@@ -199,7 +215,8 @@ html.fig-fs .duo .side-panel{min-height:0}
         </aside>
       </div>
       <div class="promo" id="promo"></div>
-      <figcaption class="fig-cap">Fig. 01 — Play the machine, or, more likely, let the machine play you.</figcaption>
+    </div>
+    <figcaption class="fig-cap">Fig. 01 — Play the machine, or, more likely, let the machine play you.</figcaption>
   </figure>
 
   <div class="ctrl-row" data-reveal>
