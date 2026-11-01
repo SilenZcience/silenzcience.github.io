@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·02 — Snake — Silas Kraume</title>
 <meta name="description" content="A classic Snake game.">
 <meta name="theme-color" content="#141413">
@@ -25,7 +26,7 @@
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -62,7 +63,7 @@
     <figcaption class="fig-cap">Fig. 01 — The wall is fatal. So is an ouroboros.</figcaption>
   </figure>
 
-  <div class="ctrl-row" data-reveal>
+  <div class="ctrl-row fs-hide" data-reveal>
     <label class="dim-label">W<input class="nin" id="sw" type="number" min="8" max="128" value="24"></label>
     <span class="mono-label" style="color:var(--faint)">×</span>
     <label class="dim-label">H<input class="nin" id="sh" type="number" min="8" max="128" value="24"></label>

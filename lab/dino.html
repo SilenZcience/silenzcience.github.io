@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·10 — T-Rex Runner — Silas Kraume</title>
 <meta name="description" content="A classic endless runner.">
 <meta name="theme-color" content="#141413">
@@ -11,6 +12,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="../style.css">
+<style>
+/* the overlay is static — control text keeps its nominal size at any text
+   scale (÷--ts is identical at default) and overflow is clipped, never
+   scrolled. At an actually elevated text scale (html.ts-big, set by main.js
+   when --ts >= 1.2) the keyboard-hint line is dropped — it only describes
+   desktop keys — and the column tightens, so the short game canvas always
+   hosts the whole overlay, share button included. */
+#overlay{overflow:hidden}
+#overlay > div{margin:auto}
+#overlay .overlay-msg{font-size:calc(clamp(1.5rem,3.5vw,2.3rem)/var(--ts,1))}
+#overlay .overlay-sub{font-size:calc(11px/var(--ts,1))}
+#overlay .ctrl{font-size:calc(11px/var(--ts,1))}
+@media (max-width:599px){
+  #overlay > div{gap:6px}
+  #overlay .overlay-msg{font-size:calc(1.35rem/var(--ts,1))}
+  #overlay .overlay-sub{font-size:calc(10px/var(--ts,1))}
+  #overlay .ctrl{font-size:calc(10px/var(--ts,1))}
+}
+html.ts-big #overlay .overlay-sub{display:none}
+html.ts-big #overlay > div{gap:6px}
+</style>
 <script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
 <body>
@@ -25,7 +47,7 @@
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>

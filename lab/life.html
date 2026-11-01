@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·03 — Game of Life — Silas Kraume</title>
 <meta name="description" content="A classic Game of Life simulation.">
 <meta name="theme-color" content="#141413">
@@ -25,7 +26,7 @@
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -56,7 +57,7 @@
     <figcaption class="fig-cap">Fig. 01 — Conway's B3/S23 rules on a wrapped grid.</figcaption>
   </figure>
 
-  <div class="ctrl-row" data-reveal>
+  <div class="ctrl-row fs-hide" data-reveal>
     <label class="dim-label">W<input class="nin" id="lc" type="number" min="8" max="512" value="50"></label>
     <span class="mono-label" style="color:var(--faint)">×</span>
     <label class="dim-label">H<input class="nin" id="lr" type="number" min="8" max="512" value="35"></label>
@@ -69,7 +70,7 @@
     <button class="ctrl" type="button" id="clearBtn">Clear</button>
   </div>
 
-  <div class="ctrl-row" data-reveal style="margin-top:10px">
+  <div class="ctrl-row fs-hide" data-reveal style="margin-top:10px">
     <span class="mono-label" style="color:var(--faint)">Stamp:</span>
     <button class="ctrl" type="button" data-stamp="glider">Glider</button>
     <button class="ctrl" type="button" data-stamp="rpent">R-pentomino</button>
@@ -321,8 +322,13 @@
   var painting = false;
   function paintAt(e) {
     var r = cv.getBoundingClientRect();
-    var x = Math.floor((e.clientX - r.left) / r.width * COLS);
-    var y = Math.floor((e.clientY - r.top) / r.height * ROWS);
+    /* focus mode stretches the canvas box while the bitmap keeps its aspect
+       (object-fit:contain) — map through the painted area. Its offsets are
+       zero whenever box and bitmap aspect agree (normal play), so desktop
+       painting lands exactly as before. */
+    var s = Math.min(r.width / cv.width, r.height / cv.height);
+    var x = Math.floor((e.clientX - r.left - (r.width - cv.width * s) / 2) / (cv.width * s / COLS));
+    var y = Math.floor((e.clientY - r.top - (r.height - cv.height * s) / 2) / (cv.height * s / ROWS));
     if (x >= 0 && x < COLS && y >= 0 && y < ROWS) {
       grid[y * COLS + x] = 1;
       draw();

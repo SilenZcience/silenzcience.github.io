@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·06 — Drum Sequencer — Silas Kraume</title>
 <meta name="description" content="A classic drum sequencer.">
 <meta name="theme-color" content="#141413">
@@ -19,7 +20,7 @@
 .seq-label{
   display:flex;align-items:center;justify-content:flex-end;
   padding-right:10px;white-space:nowrap;
-  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;
+  font-family:var(--font-mono);font-size:calc(9.5px/var(--ts,1));letter-spacing:.14em;
   text-transform:uppercase;color:var(--dim);
 }
 .sc{
@@ -34,10 +35,14 @@
 @media (max-width:599px){
   .stage-wrap{overflow-x:auto;overscroll-behavior-x:contain}
   .seq{grid-template-columns:minmax(40px,auto) repeat(32,minmax(11px,1fr));gap:2px;width:max-content;min-width:100%}
-  .seq-label{font-size:8px;padding-right:5px}
+  .seq-label{font-size:calc(8px/var(--ts,1));padding-right:5px}
 }
-/* focus mode: grid grows with the space and centers inside the fig */
+/* focus mode: grid grows with the space and centers inside the fig; if the
+   inflated control text squeezes the stage below the grid height the stage
+   scrolls instead of clipping rows */
 html.fig-fs .seq{max-width:min(100%,1160px)}
+html.fig-fs .ffs-box .stage-wrap,
+html.fig-fs .ffs-box .stage{overflow-y:auto}
 </style>
 <script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
@@ -53,7 +58,7 @@ html.fig-fs .seq{max-width:min(100%,1160px)}
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -90,7 +95,7 @@ html.fig-fs .seq{max-width:min(100%,1160px)}
     <button class="ctrl" type="button" id="clearBtn">↺ Clear</button>
   </div>
 
-  <div class="ctrl-row" data-reveal style="--rd:60ms;margin-top:10px">
+  <div class="ctrl-row fs-hide" data-reveal style="--rd:60ms;margin-top:10px">
     <label class="dim-label" for="bpm">Tempo
       <input type="range" id="bpm" min="60" max="180" value="112"><b id="bpmVal" style="color:var(--ink)">112</b>
     </label>

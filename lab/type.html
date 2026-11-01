@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·05 — Typing Velocity — Silas Kraume</title>
 <meta name="description" content="A classic typing speed test.">
 <meta name="theme-color" content="#141413">
@@ -27,6 +28,11 @@
 .stream span{white-space:break-spaces}
 .type-stage{display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch}
 html.fig-fs .type-stage{justify-content:center}
+/* keyboard open (fig-fs-kb): the words anchor at the figure's TOP while the
+   figure's height shrinks to end at the keyboard — vertical centering would
+   clip at the top instead (the anchor must stay where the user sees it) */
+html.fig-fs-kb .type-stage{justify-content:flex-start}
+html.fig-fs .stream{flex:1 1 auto;min-height:6.45em;height:auto}
 /* focus mode: the typed text grows with the screen */
 html.fig-fs .stream{font-size:clamp(1.3rem,calc(2vh + .9vw),2.3rem)}
 .t-cur{color:var(--ink);border-bottom:2px solid var(--accent)}
@@ -47,7 +53,7 @@ html.fig-fs .stream{font-size:clamp(1.3rem,calc(2vh + .9vw),2.3rem)}
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -80,8 +86,13 @@ html.fig-fs .stream{font-size:clamp(1.3rem,calc(2vh + .9vw),2.3rem)}
           </div>
         </div>
       </div>
+      <!-- the capture input must sit INSIDE the visible clip: a focused
+           input triggers a browser scroll-into-view, and an off-screen
+           (left:-9999px) or keyboard-covered one dragged the whole site
+           up on phones. Anchored at the stage's top edge, 1px, invisible,
+           never tap-blocked (pointer-events none). -->
       <input id="capture" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Typing input"
-             style="position:absolute;opacity:0;pointer-events:none;left:-9999px">
+             style="position:absolute;top:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;outline:0">
     </div>
     <figcaption class="fig-cap">Fig. 01 — Just start typing. The clock runs on your first keystroke.</figcaption>
   </figure>

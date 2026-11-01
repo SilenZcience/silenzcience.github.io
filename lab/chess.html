@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·07 — Chess — Silas Kraume</title>
 <meta name="description" content="A classic Chess game.">
 <meta name="theme-color" content="#141413">
@@ -31,7 +32,7 @@
 .sq img.w{filter:drop-shadow(0 1px 0 rgba(0,0,0,.55)) drop-shadow(0 0 2px rgba(0,0,0,.3))}
 .sq img.b{filter:drop-shadow(0 0 2px rgba(244,239,227,.55))}
 .sq.last{background-color:var(--sq-last)}
-.sq .lbl{position:absolute;font-family:var(--font-mono);font-size:9px;line-height:1;pointer-events:none;opacity:.9;z-index:1}
+.sq .lbl{position:absolute;font-family:var(--font-mono);font-size:calc(9px/var(--ts,1));line-height:1;pointer-events:none;opacity:.9;z-index:1}
 .sq .lbl.r{top:2px;left:3px}
 .sq .lbl.f{bottom:2px;right:3px}
 .sq.lt .lbl{color:var(--sq-dk)}
@@ -63,9 +64,9 @@
 .promo button:hover{border-color:var(--accent)}
 .promo img{width:80%;height:80%}
 .fen-in{
-  flex:1 1 260px;min-width:180px;
-  font-family:var(--font-mono);font-size:.78rem;color:var(--ink);
-  background:none;border:1px solid var(--line-2);padding:11px 12px;
+  flex:1 1 180px;min-width:140px;
+  font-family:var(--font-mono);font-size:calc(.72rem/var(--ts,1));color:var(--ink);
+  background:none;border:1px solid var(--line-2);padding:8px 10px;
   transition:border-color var(--t);
 }
 .fen-in:focus{outline:none;border-color:var(--accent)}
@@ -82,7 +83,7 @@
 }
 .duo .stage{padding:0}
 .side-panel{
-  flex:0 0 clamp(272px,30%,340px);display:flex;flex-direction:column;
+  flex:0 0 clamp(200px,23%,280px);display:flex;flex-direction:column;
   background:var(--bg);border:1px solid var(--line-2);
 }
 .sp-label{padding:10px 12px 0;color:var(--faint)}
@@ -141,12 +142,13 @@ html.fig-fs .duo .side-panel{min-height:0}
 @supports not (width:1cqw){
   html.fig-fs .board-wrap{width:min(100%,66vh)}
 }
-@media (max-width:719px){
-  /* no room next to the field on phones: the FEN panel stacks below the
-     board at its natural height; the move history is dropped altogether */
+@media (max-width:899px){
+  /* no room next to the field on smaller screens / portrait tablets: the
+     FEN panel stacks below the board at its natural height; the move
+     history is dropped altogether so the board gets the whole width */
   html.fig-fs .ml-head{display:none}
   html.fig-fs .movelist{display:none}
-  html.fig-fs .duo .side-panel{flex:0 0 auto}
+  html.fig-fs .duo .side-panel{display:none}
   @supports not (width:1cqw){
     html.fig-fs .board-wrap{width:min(100%,46vh)}
   }
@@ -167,7 +169,7 @@ html.fig-fs .duo .side-panel{min-height:0}
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -219,7 +221,7 @@ html.fig-fs .duo .side-panel{min-height:0}
     <figcaption class="fig-cap">Fig. 01 — Play the machine, or, more likely, let the machine play you.</figcaption>
   </figure>
 
-  <div class="ctrl-row" data-reveal>
+  <div class="ctrl-row fs-hide" data-reveal>
     <input class="fen-in" id="fenIn" type="text" spellcheck="false" autocomplete="off"
            placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" aria-label="FEN string">
     <button class="ctrl" type="button" id="loadBtn">⏎ Load FEN</button>
@@ -229,13 +231,13 @@ html.fig-fs .duo .side-panel{min-height:0}
     <button class="ctrl" type="button" id="resetBtn">↺ Start position</button>
     <button class="ctrl" type="button" id="undoBtn">↶ Undo</button>
     <button class="ctrl" type="button" id="flipBtn">⇅ Flip board</button>
-    <span class="dim-label">Side</span>
-    <button class="ctrl" type="button" id="sideW">&#9812; White</button>
-    <button class="ctrl" type="button" id="sideB">&#9818; Black</button>
-    <label class="dim-label" for="depth">Depth
+    <span class="dim-label fs-hide">Side</span>
+    <button class="ctrl fs-hide" type="button" id="sideW">&#9812; White</button>
+    <button class="ctrl fs-hide" type="button" id="sideB">&#9818; Black</button>
+    <label class="dim-label fs-hide" for="depth">Depth
       <input type="range" id="depth" min="1" max="5" value="3"><b id="depthVal" style="color:var(--ink)">3</b>
     </label>
-    <label class="dim-label" for="weak">Blunder
+    <label class="dim-label fs-hide" for="weak">Blunder
       <input type="range" id="weak" min="0" max="3" value="0"><b id="weakVal" style="color:var(--ink)">Off</b>
     </label>
   </div>

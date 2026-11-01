@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·08 — Sudoku — Silas Kraume</title>
 <meta name="description" content="A classic Sudoku game.">
 <meta name="theme-color" content="#141413">
@@ -12,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="../style.css">
 <style>
-.sdk-board-wrap{position:relative;width:min(100%,420px);aspect-ratio:1;margin-inline:auto;align-self:flex-start}
+.sdk-board-wrap{position:relative;width:min(100%,calc(420px*var(--ts,1)/var(--zu,1)));aspect-ratio:1;margin-inline:auto;align-self:flex-start}
 .sdk-board{--bs:420px;width:100%;height:100%;display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);border:2px solid var(--ink);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 .sdk-c{
   position:relative;display:flex;align-items:center;justify-content:center;
@@ -20,7 +21,7 @@
   border:.5px solid var(--sdk-border,#3a3a38);cursor:pointer;
   transition:background .12s;
 }
-.sdk-c .val{pointer-events:none;font-size:calc(var(--bs)/13.5);line-height:1}
+.sdk-c .val{pointer-events:none;font-size:calc(var(--bs)/13.5/var(--ts,1));line-height:1}
 .sdk-c:hover{filter:brightness(1.1)}
 .sdk-c.rb{border-right:2px solid var(--ink)}
 .sdk-c.bb{border-bottom:2px solid var(--ink)}
@@ -32,12 +33,12 @@
 .sdk-c.hl{background:rgba(188,156,98,.09)}
 .sdk-c.hl-n{background:rgba(188,156,98,.16)}
 .sdk-c .notes{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:100%;height:100%;pointer-events:none;position:absolute;inset:0;padding:1px}
-.sdk-c .notes span{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/40);color:var(--faint);line-height:1}
+.sdk-c .notes span{display:flex;align-items:center;justify-content:center;font-size:calc(var(--bs)/40/var(--ts,1));color:var(--faint);line-height:1}
 .sdk-row{display:flex;justify-content:center;gap:8px;padding:12px 0;flex-wrap:wrap;align-items:stretch}
-.sdk-np{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;width:min(100%,420px);margin-inline:auto;margin-top:clamp(28px,4vh,40px)}
+.sdk-np{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;width:min(100%,calc(420px*var(--ts,1)/var(--zu,1)));margin-inline:auto;margin-top:clamp(28px,4vh,40px)}
 .sdk-nb{
   aspect-ratio:1;border:1px solid var(--line-2);background:var(--bg-3);
-  font-family:var(--font-mono);font-size:1.1rem;color:var(--ink);
+  font-family:var(--font-mono);font-size:calc(1.1rem/var(--ts,1));color:var(--ink);
   cursor:pointer;display:grid;place-items:center;
   transition:border-color .15s,background .15s,opacity .15s;padding:0;
 }
@@ -55,12 +56,19 @@
 .sdk-over-inner{text-align:center}
 .sdk-over h2{font-family:var(--font-display);font-size:1.6rem;color:var(--accent);margin:0 0 6px}
 .sdk-over p{color:var(--faint);font-size:.88rem;margin:0}
-@media(max-width:599px){.sdk-board-wrap{width:min(100%,360px)}.sdk-board{--bs:360px}}
-/* focus mode: board grows with the viewport height on wider screens */
-@media(min-width:600px){
-  html.fig-fs .sdk-board-wrap{width:min(100%,min(70vh,660px))}
-  html.fig-fs .sdk-board{--bs:min(70vh,660px)}
+@media(max-width:599px){.sdk-board-wrap{width:min(100%,calc(360px*var(--ts,1)/var(--zu,1)))}.sdk-board{--bs:360px}}
+/* focus mode: the square board is capped by the smaller stage side, so it
+   can never clip in any orientation and always uses the full height there */
+html.fig-fs .ffs-box .stage-wrap{container-type:size}
+html.fig-fs .sdk-board-wrap{width:min(100cqw,100cqh)}
+html.fig-fs .sdk-board{--bs:min(100cqw,100cqh)}
+@supports not (width:1cqw){
+  html.fig-fs .sdk-board-wrap{width:min(100%,66vh)}
+  html.fig-fs .sdk-board{--bs:min(100%,66vh)}
 }
+/* focus: the numpad uses the whole rail width on phones — edge to edge —
+   and stays a sane cell height on wide landscape rails */
+html.fig-fs .sdk-np{width:min(100%,340px);max-width:none;margin-inline:auto;margin-top:2px}
 </style>
 <script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('silenz:theme');if(t){document.documentElement.dataset.theme=t}}catch(e){}</script>
 </head>
@@ -76,7 +84,7 @@
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -125,7 +133,7 @@
     <button class="ctrl" type="button" id="newBtn">New Game</button>
   </div>
 
-  <div class="sdk-diff" id="diffRow" data-reveal>
+  <div class="sdk-diff fs-hide" id="diffRow" data-reveal>
     <button class="ctrl" type="button" data-diff="easy">Easy</button>
     <button class="ctrl on" type="button" data-diff="medium">Medium</button>
     <button class="ctrl" type="button" data-diff="hard">Hard</button>

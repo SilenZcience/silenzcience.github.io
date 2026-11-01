@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="text-scale" content="scale">
 <title>LAB·01 — Minesweeper — Silas Kraume</title>
 <meta name="description" content="A classic Minesweeper game.">
 <meta name="theme-color" content="#141413">
@@ -25,7 +26,7 @@
     </div>
     <div class="head-right">
       <nav class="mono-label" aria-label="Primary">
-        <a class="close-file" href="../index.html">✕&nbsp;&nbsp;Close file</a>
+        <a class="close-file" href="../index.html">✕&nbsp;Close file</a>
       </nav>
       <button class="theme-btn" type="button" data-theme-btn aria-label="Switch color theme">◐<span data-theme-name>Graphite</span></button>
     </div>
@@ -63,9 +64,9 @@
   </figure>
 
   <div class="ctrl-row" data-reveal>
-    <label class="dim-label">W<input class="nin" id="mw" type="number" min="8" max="128" value="12"></label>
-    <span class="mono-label" style="color:var(--faint)">×</span>
-    <label class="dim-label">H<input class="nin" id="mh" type="number" min="8" max="128" value="12"></label>
+    <label class="dim-label fs-hide">W<input class="nin fs-hide" id="mw" type="number" min="8" max="128" value="12"></label>
+    <span class="mono-label fs-hide" style="color:var(--faint)">×</span>
+    <label class="dim-label fs-hide">H<input class="nin fs-hide" id="mh" type="number" min="8" max="128" value="12"></label>
     <button class="ctrl" type="button" id="flagBtn" aria-pressed="false">⚑ Flag mode</button>
     <button class="ctrl" type="button" id="resetBtn">↺ Reset</button>
   </div>
@@ -521,6 +522,9 @@
     resizeTimer = setTimeout(onResize, 120);
   }
   addEventListener("resize", onResizeThrottled);
+  /* focus mode enter/exit fires stage-refit synchronously (from main.js):
+     refit right away so the grid instantly claims the new stage size */
+  addEventListener("stage-refit", onResize);
   if (typeof ResizeObserver !== "undefined") {
     new ResizeObserver(onResizeThrottled).observe(cv.closest(".stage") || cv.parentElement);
   }
